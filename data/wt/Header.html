@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <title>%TITLE%</title>
+  <link rel='icon' href='data:base64,='>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  %REFRESH%
+  <link rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css'>
+  <link rel='stylesheet' href='https://www.w3schools.com/lib/w3-theme-%THEME_COLOR%.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
+</head>
+
+<body>
+  <nav class='w3-sidebar w3-bar-block w3-card' style='margin-top:88px' id='mySidebar'>
+    <div class='w3-container w3-theme-d2'>
+      <span onclick='closeSidebar()' class='w3-button w3-display-topright w3-large'><i class='fa fa-times'></i></span>
+      <div class='w3-cell w3-left w3-xxxlarge' style='width:60px'><i class='fa fa-cube'></i></div>
+      <div class='w3-padding'>Menu</div>
+    </div>
+    %ADDED_MENU_ITEMS%
+    <a class='w3-bar-item w3-button' href='/config'><i class='fa fa-cog'></i> General Settings</a>
+    <div style='display: %PWR_VSBL%'>
+      <a class='w3-bar-item w3-button' href='/configPwr'><i class='fa fa-battery-full'></i> Power Settings</a>
+    </div>
+    <a class='w3-bar-item w3-button' href='/configLogLevel'><i class='fa fa-bars'></i> Choose Log Level</a>
+    <a class='w3-bar-item w3-button' href='/systemreset' onclick='return confirm(\Do you want to reset to default settings?\)'><i class='fa fa-undo'></i> Reset Settings</a>
+    <a class='w3-bar-item w3-button' href='/forgetwifi' onclick='return confirm(\Do you want to forget to WiFi connection?\)'><i class='fa fa-wifi'></i> Forget WiFi</a>
+    <HR>
+    <a class='w3-bar-item w3-button' href='/'><i class='fa fa-home'></i> Home</a>
+  </nav>
+  <header class='w3-top w3-bar w3-theme'>
+    <button class='w3-bar-item w3-button w3-xxxlarge w3-hover-theme' onclick='openSidebar()'><i class='fa fa-bars'></i></button>
+    <h2 class='w3-bar-item'><a href='/' style='text-decoration:none'>%TITLE%</a></h2>
+  </header>
+  <script>
+  function openSidebar() { document.getElementById('mySidebar').style.display = 'block' }
+
+  function closeSidebar() { document.getElementById('mySidebar').style.display = 'none' } closeSidebar()
+  </script>
+  <br>
+  <div class='w3-container w3-large' style='margin-top:88px'>

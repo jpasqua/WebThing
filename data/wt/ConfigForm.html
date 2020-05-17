@@ -1,0 +1,105 @@
+<script src='https://maps.googleapis.com/maps/api/js?key=%GMAPS_KEY%'></script>
+<script>
+  var geocoder = new google.maps.Geocoder()
+  var elevator = new google.maps.ElevationService
+  function geocodeAddress() {
+    geocoder.geocode({'address': document.getElementById('AddrField').value}, function(results, status) {
+      if (status === 'OK') {
+        document.getElementById('LatField').value = results[0].geometry.location.lat()
+        document.getElementById('LngField').value = results[0].geometry.location.lng()
+        determineElevation()
+      } else {
+        alert('Geocode failed: ' + status)
+      }
+    })
+  }
+  function determineElevation() {
+    var loc = new google.maps.LatLng(parseFloat(document.getElementById('LatField').value), parseFloat(document.getElementById('LngField').value))
+    elevator.getElevationForLocations({'locations': [loc] },
+      function(results, status) {
+        if (status === 'OK' && results[0]) {
+          document.getElementById('ElevationField').value = Math.round(results[0].elevation)
+        } else {
+          alert('Elevation lookup failed')
+        }
+      })
+  }
+</script>
+<form class='w3-container' action='/updateconfig' method='get'>
+  <strong>Location Settings</strong>
+  <p>
+    <label>Address</label><input class='w3-input w3-border w3-margin-bottom' id='AddrField' type='text' name='addr' value='' maxlength='60'>
+    <button type='button' onClick='geocodeAddress()'>Geocode</button>
+  </p>
+  <table>
+    <tr>
+      <td>Latitude</td>
+      <td>Longitude</td>
+      <td>Elevation (m)</td>
+    </tr>
+    <tr>
+      <td><input class='w3-input w3-border w3-margin-bottom' type='text' id='LatField' name='lat' value='%LAT%' maxlength='12'></td>
+      <td><input class='w3-input w3-border w3-margin-bottom' type='text' id='LngField' name='lng' value='%LNG%' maxlength='12'></td>
+      <td><input class='w3-input w3-border w3-margin-bottom' type='text' id='ElevationField' name='elevation' value='%ELEV%' maxlength='12'></td>
+    </tr>
+  </table>
+  <strong>API Keys</strong>
+  <p><label>Google Maps API Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='googleMapsKey' value='%GMAPS_KEY%' maxlength='60'></p>
+  <p><label>TimezoneDB API Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='timeZoneDBKey' value='%TZDB_KEY%' maxlength='60'></p>
+  <strong>Web Server Settings</strong>
+  <p><label>Hostname</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='hostname' value='%HOSTNAME%' maxlength='16'></p>
+  <p><label>Web Server Port:&nbsp</label><input class='w3-input w3-border' style='display: inline-block width: auto' type='text' name='webServerPort' value='%SERVER_PORT%' size='5' onkeypress='return isNumberKey(event)'></p>
+  <p><input name='useBasicAuth' class='w3-check' type='checkbox' %BASIC_AUTH%> Use Security Credentials for Configuration Changes</p>
+  <p><label>Station User</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='webUsername' value='%WEB_UNAME%' maxlength='30'></p>
+  <p><label>Station Password</label><input class='w3-input w3-border w3-margin-bottom' type='password' name='webPassword' value='%WEB_PASS%' maxlength='30'></p>
+  <p>Theme Color:<p>
+      <select class='w3-option w3-padding' name='themeColor'>
+        <option %SLred%>red</option>
+        <option %SLpink%>pink</option>
+        <option %SLpurple%>purple</option>
+        <option %SLdeep-purple%>deep-purple</option>
+        <option %SLindigo%>indigo</option>
+        <option %SLblue%>blue</option>
+        <option %SLlight-blue%>light-blue</option>
+        <option %SLcyan%>cyan</option>
+        <option %SLteal%>teal</option>
+        <option %SLgreen%>green</option>
+        <option %SLlight-green%>light-green</option>
+        <option %SLlime%>lime</option>
+        <option %SLkhaki%>khaki</option>
+        <option %SLyellow%>yellow</option>
+        <option %SLamber%>amber</option>
+        <option %SLorange%>orange</option>
+        <option %SLdeep-orange%>deep-orange</option>
+        <option %SLblue-grey%>blue-grey</option>
+        <option %SLbrown%>brown</option>
+        <option %SLgrey%>grey</option>
+        <option %SLdark-grey%>dark-grey</option>
+        <option %SLblack%>black</option>
+        <option %SLw3schools%>w3schools</option>
+      </select></p>
+    <strong>Indicator LED</strong><br>
+    <input name='indicatorLEDInverted' class='w3-check w3-margin-top' type='checkbox' %LED_INVERTED%> Indicator LED Inverted
+    <p>Pin for Indicator LED: <select class='w3-option w3-padding' name='indicatorLEDPin'>
+        <option value=-1 %SP-1%>No LED</option>
+        <option value=-2 %SP-2%>Use Built-in LED</option>
+        <option value=0 %SP0%>GPIO 0 (D3)</option>
+        <option value=1 %SP1%>GPIO 1 (TX)</option>
+        <option value=2 %SP2%>GPIO 2 (D4)</option>
+        <option value=3 %SP3%>GPIO 3 (RX)</option>
+        <option value=4 %SP4%>GPIO 4 (D2)</option>
+        <option value=5 %SP5%>GPIO 5 (D1)</option>
+        <option value=6 %SP6%>GPIO 6</option>
+        <option value=7 %SP7%>GPIO 7</option>
+        <option value=8 %SP8%>GPIO 8</option>
+        <option value=9 %SP9%>GPIO 9</option>
+        <option value=10 %SP10%>GPIO 10</option>
+        <option value=11 %SP11%>GPIO 11</option>
+        <option value=12 %SP12%>GPIO 12 (D6)</option>
+        <option value=13 %SP13%>GPIO 13 (D7)</option>
+        <option value=14 %SP14%>GPIO 14 (D5)</option>
+        <option value=15 %SP15%>GPIO 15 (D8)</option>
+        <option value=16 %SP16%>GPIO 16 (D0)</option>
+      </select></p>
+    <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
+</form>
