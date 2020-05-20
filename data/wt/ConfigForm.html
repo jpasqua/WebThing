@@ -26,6 +26,15 @@
   }
 </script>
 <form class='w3-container' action='/updateconfig' method='get'>
+  <strong>API Keys</strong>
+  <p><label>Google Maps API Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='googleMapsKey' value='%GMAPS_KEY%' maxlength='60'></p>
+  <p><label>TimezoneDB API Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='timeZoneDBKey' value='%TZDB_KEY%' maxlength='60'></p>
+  <strong>Web Server Settings</strong>
+  <p><label>Hostname</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='hostname' value='%HOSTNAME%' maxlength='16'></p>
+  <p><label>Web Server Port:&nbsp</label><input class='w3-input w3-border' style='display: inline-block width: auto' type='text' name='webServerPort' value='%SERVER_PORT%' size='5' onkeypress='return isNumberKey(event)'></p>
+  <p><input name='useBasicAuth' class='w3-check' type='checkbox' %BASIC_AUTH%> Use Security Credentials for Configuration Changes</p>
+  <p><label>Station User</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='webUsername' value='%WEB_UNAME%' maxlength='30'></p>
+  <p><label>Station Password</label><input class='w3-input w3-border w3-margin-bottom' type='password' name='webPassword' value='%WEB_PASS%' maxlength='30'></p>
   <strong>Location Settings</strong>
   <p>
     <label>Address</label><input class='w3-input w3-border w3-margin-bottom' id='AddrField' type='text' name='addr' value='' maxlength='60'>
@@ -43,15 +52,6 @@
       <td><input class='w3-input w3-border w3-margin-bottom' type='text' id='ElevationField' name='elevation' value='%ELEV%' maxlength='12'></td>
     </tr>
   </table>
-  <strong>API Keys</strong>
-  <p><label>Google Maps API Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='googleMapsKey' value='%GMAPS_KEY%' maxlength='60'></p>
-  <p><label>TimezoneDB API Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='timeZoneDBKey' value='%TZDB_KEY%' maxlength='60'></p>
-  <strong>Web Server Settings</strong>
-  <p><label>Hostname</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='hostname' value='%HOSTNAME%' maxlength='16'></p>
-  <p><label>Web Server Port:&nbsp</label><input class='w3-input w3-border' style='display: inline-block width: auto' type='text' name='webServerPort' value='%SERVER_PORT%' size='5' onkeypress='return isNumberKey(event)'></p>
-  <p><input name='useBasicAuth' class='w3-check' type='checkbox' %BASIC_AUTH%> Use Security Credentials for Configuration Changes</p>
-  <p><label>Station User</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='webUsername' value='%WEB_UNAME%' maxlength='30'></p>
-  <p><label>Station Password</label><input class='w3-input w3-border w3-margin-bottom' type='password' name='webPassword' value='%WEB_PASS%' maxlength='30'></p>
   <p>Theme Color:<p>
       <select class='w3-option w3-padding' name='themeColor'>
         <option %SLred%>red</option>
