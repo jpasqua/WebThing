@@ -372,5 +372,25 @@ namespace WebUI {
     server->send(code, "text/plain", text);
     server->client().stop();
   }
+
+  void sendJSONContent(DynamicJsonDocument *doc) {
+    auto cp = [doc](Stream &s) { serializeJsonPretty(*doc, s); };
+    sendArbitraryContent("application/json", measureJsonPretty(*doc), cp);
+  }
+
+  void sendArbitraryContent(String type, uint32_t length, ContentProvider cp) {
+    auto client = server->client();
+    client.println(F("HTTP/1.0 200 OK"));
+    client.print(F("Content-Type: ")); client.println(type);
+    client.println(F("Connection: close"));
+    if (length > 0) {
+      client.print(F("Content-Length: "));
+      client.println(length);
+    }
+    client.println();
+
+    cp(client);     // Send the arbitrary data
+    client.stop();  // Disconnect
+  }
 }
 // ----- END: WebUI

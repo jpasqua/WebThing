@@ -12,6 +12,7 @@
 //                                  Core Libraries
 #include <ESP8266WebServer.h>
 //                                  Third Party Libraries
+#include <ArduinoJson.h>
 #include <ESPTemplateProcessor.h>
 //                                  Local Includes
 //--------------- End:    Includes ---------------------------------------------
@@ -56,6 +57,11 @@ namespace WebUI {
   void redirectHome();
   void closeConnection(uint16_t code, String text);
   bool authenticationOK();
+
+  // ----- Sending Arbitrary Data
+  typedef std::function<void(Stream&)> ContentProvider;
+  void sendArbitraryContent(String type, uint32_t length, ContentProvider cp);
+  void sendJSONContent(DynamicJsonDocument *doc);
 }
 
 #endif  // WebUI_h
