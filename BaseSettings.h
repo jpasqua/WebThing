@@ -16,9 +16,21 @@ public:
   BaseSettings();
 
   void    init(String _filePath);
+  bool    clear();
   bool    read();
   bool    write();
-  bool    clear();
+
+  /*
+   * Provide a JSON document tht represent the current state of the settings
+   * including the version #.
+   * NOTE: It is the caller's responsibility to clear/delete the returned
+   *       JSON document.
+   *
+   * return   A pointer to a newly allocated DynamicJsonDocument which
+   *          holds the settings as JSON.
+   */
+  DynamicJsonDocument *asJSON();
+  
   virtual void logSettings() { }
 
 protected:

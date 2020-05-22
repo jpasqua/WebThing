@@ -71,6 +71,14 @@ bool BaseSettings::read() {
   return true;
 }
 
+DynamicJsonDocument *BaseSettings::asJSON() {
+  DynamicJsonDocument *doc = new DynamicJsonDocument(maxFileSize);
+
+  (*doc)["version"] = version;
+  toJSON((*doc));
+  return doc;
+}
+
 bool BaseSettings::write() {
   DynamicJsonDocument doc(maxFileSize);
 
