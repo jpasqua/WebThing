@@ -105,7 +105,7 @@ For example, let's say you are implementing a weather station that should wake u
 WebThing uses SPIFFS to store HTML templates and settings, which imposes additional requirements when building:
 
 1. In the Arduino IDE you must ensure that you have reserved SPIFFS space. Do this by selecting `Tools -> Flash Size -> (Pick a SPIFFS size)`
-2. All of the templates must be uploaded to the ESP8266. You can use the [ESP8266 Sketch Data Upload plugin](https://github.com/esp8266/arduino-esp8266fs-plugin) for this. Any time you change a template, you must upload the data to the ESP8266.
+2. All of the templates must be uploaded to the ESP8266. Use the [ESP8266 Sketch Data Upload plugin](https://github.com/esp8266/arduino-esp8266fs-plugin) for this. Any time you change a template, you must upload the data to the ESP8266.
 3. Because you are likely to extend the Web UI, you may have your own templates or other files to place in SPIFFS. Put them all in a directory named `data` within your sketch directory.
 <a name="link-wt"></a>
 4. The uploader must upload all files at once - your files and those from the WebThing library. That means you need to copy or link the WebThing files to your data directory. All of the WebThing files are in a sub-directory of the data directory named `wt`. Your resulting directory structure will look like this:
@@ -113,10 +113,9 @@ WebThing uses SPIFFS to store HTML templates and settings, which imposes additio
 ```
    /Your_Sketch_Dir
 		/data
-       	Template1.html
-          Template2.html
+       	YourTemplate1.html
           ...
-          TemplateN.html
+          YourTemplateN.html
           /wt
           	WebThing_Template1.html
           	...
