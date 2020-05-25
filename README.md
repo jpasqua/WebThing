@@ -50,7 +50,8 @@ Of course a particular *thing* may add menu items that are specific to it. The *
 * Location: Latitude, Longitude, Elevation. The user may enter an address and press the `Geocode` button to have the lat/lng/elevation determined automatically. This requires a Google Maps API Key (see below)
 * API Keys:
 	* [Google Maps](https://developers.google.com/maps/documentation/javascript/get-api-key): Fill in the api key you acquired from for the Google Maps service
-	* [TimeZoneDB](https://timezonedb.com/api): Fill in the api key you acquired from for the TimezoneDB service. **Note**: NTP is perhaps a more natural choice for a time service, but it does not incoporate a mechanism for time zone determination. TimeZoneDB allows WebThing to get the time, time zone, and local time without need for another mechanism.
+	* [TimeZoneDB](https://timezonedb.com/api): Fill in the api key you acquired from for the TimezoneDB service.
+		* NTP is perhaps a more natural choice for a time service, but it does not incoporate a mechanism for time zone determination. TimeZoneDB allows WebThing to get the time, time zone, and local time without need for another mechanism.
 * Web Server Settings: The hostname of your *thing*, the web port to use, credentials, and the color theme for the Web UI.
 
 #### Power Settings
@@ -111,15 +112,15 @@ WebThing uses SPIFFS to store HTML templates and settings, which imposes additio
 4. The uploader must upload all files at once - your files and those from the WebThing library. That means you need to copy or link the WebThing files to your data directory. All of the WebThing files are in a sub-directory of the data directory named `wt`. Your resulting directory structure will look like this:
 
 ```
-   /Your_Sketch_Dir
-		/data
-       	YourTemplate1.html
-          ...
-          YourTemplateN.html
-          /wt
-          	WebThing_Template1.html
-          	...
-          	WebThing_TemplateN.html
+Your_Sketch_Dir
+    /data
+        YourTemplate1.html
+        ...
+        YourTemplateN.html
+        /wt
+            WebThing_Template1.html
+            ...
+            WebThing_TemplateN.html
 ```
 
 ## Examples
@@ -133,12 +134,12 @@ Like any *WebThing*, you must have a `data` directory which includes the `wt` su
 The resulting directory structure will look like this:
 
 ```
-   EmptyThing
-		/data
-          /wt
-          	WebThing_Template1.html
-          	...
-          	WebThing_TemplateN.html
+EmptyThing
+    /data
+        /wt
+            WebThing_Template1.html
+            ...
+            WebThing_TemplateN.html
 ```
 
 
