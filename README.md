@@ -1,8 +1,6 @@
 # WebThing
 A generic ESP8266 framework for building *things* with a web configuration capability. They are called *things* as in Internet of *Things*.
 
-## Introduction
-
 The basic idea here is that you want some network-connected *thing* that performs one or more activities such as:
 
 * Taking sensor readings (e.g. weather conditions)
@@ -14,6 +12,24 @@ In all cases, the *thing* needs a way of getting connected to WiFi and configuri
 From the user perspective, the process begins with powering-on a *thing* for the first time. At this point it doesn't know which WiFi network to join so it will create it's own network named `thing-nnnnnn` (`nnnnnn` will be different for each device). The user should go to WiFi preferences on their computer or phone and they will see a new SSID of this form. They should connect to this network and in a few seconds, they will be placed in a "captive portal" which will allow them to choose their preferred WiFi network and specify credentials to join it. For more details, please see the [WiFiManager](https://github.com/tzapu/WiFiManager) project which is incorporated by `WebThing`.
 
 Once the *thing* is configured it will join the specified network, but how does the user know its address? It depends. If the *thing* you are building has an interface, it can display its hostname or IP address. If not, the user can scan their network looking for a hostname of the form `thing-nnnnnn` (just like the SSID above), or for an ESP device. Most WiFi routers have the ability to show the attached devices.
+
+## Dependencies
+
+### Libraries
+The following third party libraries are used by this library:
+
+* [Arduino-Log](https://github.com/thijse/Arduino-Log)
+* [ArduinoJson (v6)](https://github.com/bblanchon/ArduinoJson)
+* [WiFiManager](https://github.com/tzapu/WiFiManager)
+* [TimeLib](https://github.com/PaulStoffregen/Time.git)
+* [ESPTemplateProcessor](https://github.com/jpasqua/ESPTemplateProcessor)
+
+### Services
+
+The following internet services are used by this library:
+
+* [Google Maps](https://developers.google.com/maps/documentation/javascript/get-api-key) [optional]: Used for geocoding and reverse geocoding. Though not absolutely necessary, it does make using the system a bit more convenient. The user may enter an address rather than Lat/Lng coordinates.
+* [TimeZoneDB](https://timezonedb.com/api): Used to get local time and time zone data. This is used to set the device's internal clock and keep it in sync.
 
 ## Configuration via the Web UI
 Now that the user knows the *thing's* address, they can navigate to it in a web browser where they will be presented with a web page which has a header, main content area, and footer. On the left side of the header they will see a "hamburger" menu icon, which when pressed, will open up a left side bar consisting of *thing*-specific menu items followed by core `WebThing` items. The core menu items are:
@@ -89,9 +105,9 @@ For example, let's say you are implementing a weather station that should wake u
 WebThing uses SPIFFS to store HTML templates and settings, which imposes additional requirements when building:
 
 1. In the Arduino IDE you must ensure that you have reserved SPIFFS space. Do this by selecting `Tools -> Flash Size -> (Pick a SPIFFS size)`
-2. All of the templates must be uploaded to the ESP8266. You can use the [ESP8266 Sketch Data Upload plugin for this](https://github.com/esp8266/arduino-esp8266fs-plugin). Any time you change a template, you must upload the data to the ESP8266.
-3. Because you are likely to extend the Web UI, you may have your own templates or other files to place in SPIFFS. Put them all in a directory
-named `data` within your sketch directory.
+2. All of the templates must be uploaded to the ESP8266. You can use the [ESP8266 Sketch Data Upload plugin](https://github.com/esp8266/arduino-esp8266fs-plugin) for this. Any time you change a template, you must upload the data to the ESP8266.
+3. Because you are likely to extend the Web UI, you may have your own templates or other files to place in SPIFFS. Put them all in a directory named `data` within your sketch directory.
+<a name="link-wt"></a>
 4. The uploader must upload all files at once - your files and those from the WebThing library. That means you need to copy or link the WebThing files to your data directory. All of the WebThing files are in a sub-directory of the data directory named `wt`. Your resulting directory structure will look like this:
 
 ```
@@ -104,28 +120,30 @@ named `data` within your sketch directory.
           /wt
           	WebThing_Template1.html
           	...
-          	WebThing_Template1.html
+          	WebThing_TemplateN.html
 ```
 
-## Dependencies
+## Examples
 
-### Libraries
-The following third party libraries are used by this library:
+### EmptyThing
 
-* [Arduino-Log](https://github.com/thijse/Arduino-Log)
-* [ArduinoJson (v6)](https://github.com/bblanchon/ArduinoJson)
-* [WiFiManager](https://github.com/tzapu/WiFiManager)
-* [TimeLib](https://github.com/PaulStoffregen/Time.git)
-* [ESPTemplateProcessor](https://github.com/jpasqua/ESPTemplateProcessor)
+As of 2020-05-25 there is only one example: EmptyThing. It is basically an empty project (hence the name) which demonstrates the structure and sequence of calls required to use *WebThing*. It also shows how to add an item to the main menu of the Web UI.
 
-### Services
+Like any *WebThing*, you must have a `data` directory which includes the `wt` subdirectory from *WebThing*. EmptyThing requires no files of its own, so the only thing in the `data` directory will be the `wt` subdirectory. Follow the instructions [above](#link-wt).
 
-The following internet services are used by this library:
+The resulting directory structure will look like this:
 
-* [Google Maps](https://developers.google.com/maps/documentation/javascript/get-api-key) [optional]: Used for geocoding and reverse geocoding. Though not absolutely necessary, it does make using the system a bit more convenient. The user may enter an address rather than Lat/Lng coordinates.
-* [TimeZoneDB](https://timezonedb.com/api): Used to get local time and time zone data. This is used to set the device's internal clock and keep it in sync.
+```
+   EmptyThing
+		/data
+          /wt
+          	WebThing_Template1.html
+          	...
+          	WebThing_TemplateN.html
+```
+
 
 ## Acknowledgements
 
-* The [printer-monitor](https://github.com/Qrome/printer-monitor) project by [https://github.com/Qrome](Qrome) provided inspiration, code, and examples. 
+* The [printer-monitor](https://github.com/Qrome/printer-monitor) project by [Qrome](https://github.com/Qrome) provided inspiration, direction, and the model for the Web UI.
 * The [Solar Weather Station](https://github.com/3KUdelta/Solar_WiFi_Weather_Station) project by [3KU_Delta](https://github.com/3KUdelta) also provided valuable insights for the structure of low power mode.
