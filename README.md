@@ -128,7 +128,7 @@ WebThing uses SPIFFS to store HTML templates and settings, which imposes additio
 
 As of 2020-05-25 there is only one example: EmptyThing. It is basically an empty project (hence the name) which demonstrates the structure and sequence of calls required to use *WebThing*. It also shows how to add an item to the main menu of the Web UI.
 
-Like any *WebThing*, you must have a `data` directory which includes the `wt` subdirectory from *WebThing*. EmptyThing requires no files of its own, so the only thing in the `data` directory will be the `wt` subdirectory. Follow the instructions [above](#link-wt).
+Like any *WebThing*, you must have a `data` directory which includes the `wt` subdirectory from *WebThing*. EmptyThing requires no files of its own, so the only thing in the `data` directory will be the `wt` subdirectory. This means you can just copy the whole `data` directory from *WebThing* to your EmptyThing example. See notes [above](#link-wt).
 
 The resulting directory structure will look like this:
 
