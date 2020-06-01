@@ -36,8 +36,8 @@ public:
 protected:
   static const uint32_t InvalidVersion;
   uint16_t maxFileSize;
-  virtual void fromJSON(JsonDocument &doc) { }
-  virtual void toJSON(JsonDocument &doc) { }
+  virtual void fromJSON(JsonDocument &doc) = 0;
+  virtual void toJSON(JsonDocument &doc) = 0;
 
 protected:
   // ----- State
