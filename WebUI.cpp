@@ -54,7 +54,7 @@ namespace WebUI {
       return true; // Authentication not required
     }
 
-    String sendPageHeader(bool refresh = false) {
+    void sendPageHeader(bool refresh = false) {
       auto mapper =[refresh](String &key) -> String {
         if (key == "TITLE")               return title;
         if (key == "THEME_COLOR")         return WebThing::settings.themeColor;
@@ -138,7 +138,8 @@ namespace WebUI {
       // ----- Power Settings
       WebThing::settings.useLowPowerMode = server->hasArg("useLowPowerMode");
       WebThing::settings.hasVoltageSensing = server->hasArg("hasVoltageSensing");
-      WebThing::settings.processingInterval = server->arg("processingInterval").toInt();
+      int interval = server->arg("processingInterval").toInt();
+      WebThing::settings.processingInterval = (interval < 1) ? 1 : interval;
       if (WebThing::settings.processingInterval < 1) WebThing::settings.processingInterval = 1;
       WebThing::settings.sleepOverridePin = server->arg("sleepOverridePin").toInt();
       WebThing::settings.voltageCalibFactor = server->arg("voltageCalibFactor").toFloat();

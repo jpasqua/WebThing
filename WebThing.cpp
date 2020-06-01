@@ -307,7 +307,6 @@ namespace WebThing {
   void setIndicatorLED(bool on) {
     if (settings.indicatorLEDPin == WebThingSettings::NoPinAssigned) return;
     int8_t pin = settings.indicatorLEDPin == WebThingSettings::UseBuiltinLED ? LED_BUILTIN : settings.indicatorLEDPin;
-    bool val = on ^ settings.indicatorLEDInverted;
     digitalWrite(pin, on ^ settings.indicatorLEDInverted);
   }
 
@@ -324,7 +323,7 @@ namespace WebThing {
 
   String encodeAttr(String &src) {
     String buffer = "";
-    int srcLength = src.length();
+    size_t srcLength = src.length();
     buffer.reserve(srcLength + 6);
     for (size_t pos = 0; pos != srcLength; ++pos) {
       char c = src[pos];

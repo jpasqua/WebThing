@@ -127,6 +127,6 @@ bool TimeDB::updateNeeded() {
   if (millis() - _timeOfLastTimeRefresh > ClockSyncInterval) return true;
 
   // If we haven't updated since 2AM, an update may be needed to account for DST
-  uint32_t minuteSinceLastRefresh = (millis() - _timeOfLastTimeRefresh)/(1000*60);
+  int32_t minuteSinceLastRefresh = (millis() - _timeOfLastTimeRefresh)/(1000*60);
   return ((hour() == 2) && (minute() < minuteSinceLastRefresh));
 }

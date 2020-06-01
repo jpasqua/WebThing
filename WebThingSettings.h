@@ -44,13 +44,13 @@ public:
   String lngAsString() { return String(lng, 6); }
 
   // ----- Power
-  bool    useLowPowerMode = false;
-  int     processingInterval = 10;
-  int8_t  sleepOverridePin = -1;        // -1 -> No Pin Assigned, >=0 -> GPIO Pin
-  bool    hasVoltageSensing;            // Voltage sensing on pin A0
-  float   voltageCalibFactor = 5.28;    // Calibrate the battery voltage
-  String  vcfAsString() { return String(voltageCalibFactor, 2); }
-  bool    displayPowerOptions = true;   // Whether or not these options are shown in the UI
+  bool     useLowPowerMode = false;
+  uint32_t processingInterval = 10;
+  int8_t   sleepOverridePin = -1;        // -1 -> No Pin Assigned, >=0 -> GPIO Pin
+  bool     hasVoltageSensing;            // Voltage sensing on pin A0
+  float    voltageCalibFactor = 5.28;    // Calibrate the battery voltage
+  String   vcfAsString() { return String(voltageCalibFactor, 2); }
+  bool     displayPowerOptions = true;   // Whether or not these options are shown in the UI
 
   // ----- API Keys
   String timeZoneDBKey = "";
