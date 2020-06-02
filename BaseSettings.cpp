@@ -30,11 +30,17 @@ void BaseSettings::init(String _filePath) {
 }
 
 bool BaseSettings::clear() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
   return SPIFFS.remove(filePath);
+#pragma GCC diagnostic pop
 }
 
 bool BaseSettings::read() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
   File settingsFile = SPIFFS.open(filePath, "r");
+#pragma GCC diagnostic pop  
   if (!settingsFile) {
     Log.notice("No settings file exists. Creating one with default values.");
     return write();
@@ -85,7 +91,10 @@ bool BaseSettings::write() {
   doc["version"] = version;
   toJSON(doc);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
   File settingsFile = SPIFFS.open(filePath, "w");
+#pragma GCC diagnostic pop
   if (!settingsFile) {
     Log.error("Failed to open settings file for writing: %s", filePath.c_str());
     return false;
