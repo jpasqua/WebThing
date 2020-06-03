@@ -98,6 +98,8 @@ namespace WebThing {
     }
 
     void prepFileSystem() {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
       boolean mounted = SPIFFS.begin();
       if (!mounted) {
         Log.notice("FS not formatted. Formatting now. This can take >= 30 seconds.");
@@ -105,6 +107,7 @@ namespace WebThing {
         SPIFFS.begin();
         Log.trace("Completed FS Formatting");
       }
+#pragma GCC diagnostic pop
     }
 
     void prepNetwork() {
