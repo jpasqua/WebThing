@@ -88,31 +88,31 @@ void WebThingSettings::toJSON(JsonDocument &doc) {
 }
 
 void WebThingSettings::logSettings() {
-  Log.verbose("Location Settings");
-  Log.verbose("  lat = %F", lat);
-  Log.verbose("  lng = %F", lng);
-  Log.verbose("  elevation = %d", elevation);
-  Log.verbose("Power Settings");
-  Log.verbose("  useLowPowerMode = %T", useLowPowerMode);
-  Log.verbose("  hasVoltageSensing = %T", hasVoltageSensing);
-  Log.verbose("  processingInterval = %d", processingInterval);
-  Log.verbose("  voltageCalibFactor = %F", voltageCalibFactor);
-  Log.verbose("  sleepOverridePin = %d", sleepOverridePin);
-  Log.verbose("  displayPowerOptions = %T", displayPowerOptions);
-  Log.verbose("API Keys");
-  Log.verbose("  googleMapsKey = %s", googleMapsKey.c_str());
-  Log.verbose("  timeZoneDBKey = %s", timeZoneDBKey.c_str());
-  Log.verbose("Web Server Settings");
-  Log.verbose("  hostname = %s", hostname.c_str());
-  Log.verbose("  webServerPort = %d", webServerPort);
-  Log.verbose("  useBasicAuth = %T", useBasicAuth);
-  Log.verbose("  webUsername = %s", webUsername.c_str());
-  Log.verbose("  webPassword = %s", webPassword.c_str());
-  Log.verbose("  themeColor = %s", themeColor.c_str());
-  Log.verbose("Indicator LED");
-  Log.verbose("  indicatorLEDPin = %d", indicatorLEDPin);
-  Log.verbose("  indicatorLEDInverted = %T", indicatorLEDInverted);
-  Log.verbose("Other Settings");
-  Log.verbose("  logLevel = %d", logLevel);
+  Log.verbose(F("Location Settings"));
+  Log.verbose(F("  lat = %F"), lat);
+  Log.verbose(F("  lng = %F"), lng);
+  Log.verbose(F("  elevation = %d"), elevation);
+  Log.verbose(F("Power Settings"));
+  Log.verbose(F("  useLowPowerMode = %T"), useLowPowerMode);
+  Log.verbose(F("  hasVoltageSensing = %T"), hasVoltageSensing);
+  Log.verbose(F("  processingInterval = %d"), processingInterval);
+  Log.verbose(F("  voltageCalibFactor = %F"), voltageCalibFactor);
+  Log.verbose(F("  sleepOverridePin = %d"), sleepOverridePin);
+  Log.verbose(F("  displayPowerOptions = %T"), displayPowerOptions);
+  Log.verbose(F("API Keys"));
+  Log.verbose(F("  googleMapsKey = %s"), googleMapsKey.c_str());
+  Log.verbose(F("  timeZoneDBKey = %s"), timeZoneDBKey.c_str());
+  Log.verbose(F("Web Server Settings"));
+  Log.verbose(F("  hostname = %s"), hostname.c_str());
+  Log.verbose(F("  webServerPort = %d"), webServerPort);
+  Log.verbose(F("  useBasicAuth = %T"), useBasicAuth);
+  Log.verbose(F("  webUsername = %s"), webUsername.c_str());
+  Log.verbose(F("  webPassword = %s"), webPassword.c_str());
+  Log.verbose(F("  themeColor = %s"), themeColor.c_str());
+  Log.verbose(F("Indicator LED"));
+  Log.verbose(F("  indicatorLEDPin = %d"), indicatorLEDPin);
+  Log.verbose(F("  indicatorLEDInverted = %T"), indicatorLEDInverted);
+  Log.verbose(F("Other Settings"));
+  Log.verbose(F("  logLevel = %d"), logLevel);
 }
 

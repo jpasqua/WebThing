@@ -42,7 +42,7 @@ void TimeDB::init(String key, String lat, String lon) {
   _valid = !(_apiKey.isEmpty() || _lat.isEmpty() || _lon.isEmpty());
 
   if (!_valid) {
-    Log.verbose("TimeDB::getTime: API Key or lat/lng have not been supplied");
+    Log.verbose(F("TimeDB::getTime: API Key or lat/lng have not been supplied"));
   }
 
   _timeOfLastTimeRefresh = 0;      // OK to refresh sooner than usual
@@ -71,7 +71,7 @@ time_t TimeDB::getTime() {
    if ((theTime = tryGettingTime()) != FailedRead) return theTime;
    delay(2000);
   }
-  Log.warning("Unable to connect to / read from timezonedb");
+  Log.warning(F("Unable to connect to / read from timezonedb"));
   return FailedRead;
 }
 
@@ -99,7 +99,7 @@ time_t TimeDB::tryGettingTime() {
 
   DynamicJsonDocument *root = _service->issueGET(TimeEndpoint, TimeEndpointJSONSize);
   if (!root) {
-    Log.warning("issueGET failed for timezonedb");
+    Log.warning(F("issueGET failed for timezonedb"));
     return FailedRead;
   }
   //serializeJsonPretty(*root, Serial); Serial.println();
@@ -115,7 +115,7 @@ bool TimeDB::throttle() {
   static uint32_t timeOfLastAPICall = UINT32_MAX;
   uint32_t curMillis = millis();
   if ((timeOfLastAPICall != UINT32_MAX) && ((curMillis - timeOfLastAPICall) < ThrottleInterval)) {
-    Log.verbose("Throttling timezonedb gets: last = %d", timeOfLastAPICall);
+    Log.verbose(F("Throttling timezonedb gets: last = %d"), timeOfLastAPICall);
     return true;
   }
   timeOfLastAPICall = curMillis;

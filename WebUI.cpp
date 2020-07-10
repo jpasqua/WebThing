@@ -104,7 +104,7 @@ namespace WebUI {
   namespace Endpoints {
     void handleWifiReset() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.trace("Web Request: Handle WiFi Reset");
+      Log.trace(F("Web Request: Handle WiFi Reset"));
       WebUI::redirectHome();
       WiFiManager wifiManager;
       wifiManager.resetSettings();
@@ -113,7 +113,7 @@ namespace WebUI {
 
     void handleSystemReset() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.notice("Reset System Configuration");
+      Log.notice(F("Reset System Configuration"));
       if (WebThing::settings.clear()) {
         WebUI::redirectHome();
         ESP.restart();
@@ -122,10 +122,10 @@ namespace WebUI {
 
     void setLogLevel() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.trace("Web Request: Set Log Level");
+      Log.trace(F("Web Request: Set Log Level"));
       WebThing::settings.logLevel = server->arg("logLevel").toInt();
       Log.setLevel(WebThing::settings.logLevel);
-      Log.verbose("New Log Level: %d", WebThing::settings.logLevel);
+      Log.verbose(F("New Log Level: %d"), WebThing::settings.logLevel);
       WebThing::settings.write();
       WebThing::Protected::configChanged();
       WebUI::redirectHome();
@@ -133,7 +133,7 @@ namespace WebUI {
 
     void updatePwrConfig() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.trace("Web Request: Handle Update Config");
+      Log.trace(F("Web Request: Handle Update Config"));
 
       // ----- Power Settings
       WebThing::settings.useLowPowerMode = server->hasArg("useLowPowerMode");
@@ -151,7 +151,7 @@ namespace WebUI {
 
     void updateConfig() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.trace("Web Request: Handle Update Config");
+      Log.trace(F("Web Request: Handle Update Config"));
 
       // ----- Location Settings
       WebThing::settings.lat = server->arg("lat").toFloat();
@@ -185,7 +185,7 @@ namespace WebUI {
   namespace Pages {
 
     void displayHomePage() {
-      Log.trace("Web Request: Home Page");
+      Log.trace(F("Web Request: Home Page"));
       if (Internal::homeHandler) { Internal::homeHandler(); return; }
 
       startPage();
@@ -194,7 +194,7 @@ namespace WebUI {
     }
 
     void displayLogLevel() {
-      Log.trace("Web Request: Choose Log Level");
+      Log.trace(F("Web Request: Choose Log Level"));
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
 
       String llTarget = "SL" + String(WebThing::settings.logLevel);
@@ -210,7 +210,7 @@ namespace WebUI {
     }
 
     void displayPowerConfig() {
-      Log.trace("Web Request: Power Config");
+      Log.trace(F("Web Request: Power Config"));
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
 
       String piTarget     = "SI" + String(WebThing::settings.processingInterval);
@@ -231,7 +231,7 @@ namespace WebUI {
     }
 
     void displayConfig() {
-      Log.trace("Web Request: Handle Configure");
+      Log.trace(F("Web Request: Handle Configure"));
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
 
       String themeTarget = "SL" + WebThing::settings.themeColor;

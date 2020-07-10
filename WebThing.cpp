@@ -81,8 +81,8 @@ namespace WebThing {
     void configModeCallback (WiFiManager *myWiFiManager) {
       String ip = WiFi.softAPIP().toString();
       String ssid = myWiFiManager->getConfigPortalSSID();
-      Log.trace("Entered config mode: %s", ip.c_str());
-      Log.notice("Please connect to AP: %s to setup Wifi Configuration", ssid.c_str());
+      Log.trace(F("Entered config mode: %s"), ip.c_str());
+      Log.notice(F("Please connect to AP: %s to setup Wifi Configuration"), ssid.c_str());
       if (configModeCB) configModeCB(ssid, ip);
     }
       
@@ -102,10 +102,10 @@ namespace WebThing {
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
       boolean mounted = SPIFFS.begin();
       if (!mounted) {
-        Log.notice("FS not formatted. Formatting now. This can take >= 30 seconds.");
+        Log.notice(F("FS not formatted. Formatting now. This can take >= 30 seconds."));
         SPIFFS.format();
         SPIFFS.begin();
-        Log.trace("Completed FS Formatting");
+        Log.trace(F("Completed FS Formatting"));
       }
 #pragma GCC diagnostic pop
     }
@@ -119,7 +119,7 @@ namespace WebThing {
         settings.hostname = HostNameBase + String(ESP.getChipId(), HEX);
       }
       if (!wifiManager.autoConnect(settings.hostname.c_str())) {
-        Log.error("Autconnect failed!! Restarting...");
+        Log.error(F("Autconnect failed!! Restarting..."));
         delay(3000);
         WiFi.disconnect(true);
         ESP.reset();
@@ -127,12 +127,12 @@ namespace WebThing {
       }
         
       // print the received signal strength:
-      Log.verbose("Signal Strength (RSSI): %d%%", wifiQualityAsPct());
+      Log.verbose(F("Signal Strength (RSSI): %d%%"), wifiQualityAsPct());
 
       Protected::mDNSStarted = false;
       if (settings.hostname.length() != 0) {
         if (!MDNS.begin(settings.hostname)) {
-          Log.warning("Unable to start mDNS");
+          Log.warning(F("Unable to start mDNS"));
         } else Protected::mDNSStarted = true;
       }
     }
@@ -164,7 +164,7 @@ namespace WebThing {
    *----------------------------------------------------------------------------*/            
 
   void preSetup() {
-    Log.verbose("WebThing:: preSetup()");
+    Log.verbose(F("WebThing:: preSetup()"));
     Internal::prepLogging();    
     Internal::prepFileSystem();       // Get the filesystem ready to go
     settings.init(SettingsFileName);  // Path to the settings file
@@ -175,7 +175,7 @@ namespace WebThing {
   }
 
   void setup() {
-    Log.verbose("WebThing:: setup()");
+    Log.verbose(F("WebThing:: setup()"));
     Internal::prepNetwork();          // Get on the network
     Internal::timeDB.init(            // Initialize the time service... 
         settings.timeZoneDBKey,
@@ -259,7 +259,7 @@ namespace WebThing {
     // voltage divider R1 = 220k+100k+220k =540k and R2=100k
     unsigned long raw = analogRead(A0);
     float measuredVoltage = (raw * settings.voltageCalibFactor)/1024.0; 
-    Log.verbose("measuredVoltage: %FV", measuredVoltage);
+    Log.verbose(F("measuredVoltage: %FV"), measuredVoltage);
     return measuredVoltage;
   }
 
@@ -280,7 +280,7 @@ namespace WebThing {
   }
 
   void enterDeepSleep() {
-    Log.trace("Going to sleep now for %d minute(s)", settings.processingInterval);  
+    Log.trace(F("Going to sleep now for %d minute(s)"), settings.processingInterval);  
     if (Internal::deepSleepCallback != NULL) Internal::deepSleepCallback();
     ESP.deepSleep(settings.processingInterval * 60 * 1000000); // convert to microseconds
   }
@@ -302,9 +302,9 @@ namespace WebThing {
   }
 
   void logHeapStatus() {
-    Log.verbose("Heap Free Space: %d", ESP.getFreeHeap());
-    Log.verbose("Heap Fragmentation: %d", ESP.getHeapFragmentation());
-    Log.verbose("Heap Max Block Size: %d", ESP.getMaxFreeBlockSize());
+    Log.verbose(F("Heap Free Space: %d"), ESP.getFreeHeap());
+    Log.verbose(F("Heap Fragmentation: %d"), ESP.getHeapFragmentation());
+    Log.verbose(F("Heap Max Block Size: %d"), ESP.getMaxFreeBlockSize());
   }
 
   void setIndicatorLED(bool on) {

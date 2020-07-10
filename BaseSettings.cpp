@@ -26,7 +26,7 @@ BaseSettings::BaseSettings() { }
 
 void BaseSettings::init(String _filePath) {
   filePath = _filePath;
-  Log.verbose("settings file path = %s", filePath.c_str());
+  Log.verbose(F("settings file path = %s"), filePath.c_str());
 }
 
 bool BaseSettings::clear() {
@@ -42,13 +42,13 @@ bool BaseSettings::read() {
   File settingsFile = SPIFFS.open(filePath, "r");
 #pragma GCC diagnostic pop  
   if (!settingsFile) {
-    Log.notice("No settings file exists. Creating one with default values.");
+    Log.notice(F("No settings file exists. Creating one with default values."));
     return write();
   }
 
   size_t size = settingsFile.size();
   if (size > maxFileSize) {
-    Log.error("Settings file size is too large (%d), using default values", size);
+    Log.error(F("Settings file size is too large (%d), using default values"), size);
     return false;
   }
 
@@ -59,21 +59,21 @@ bool BaseSettings::read() {
   DynamicJsonDocument doc(maxFileSize);
   auto error = deserializeJson(doc, buf.get());
   if (error) {
-    Log.warning("Failed to parse settings file, using default values: %s", error.c_str());
+    Log.warning(F("Failed to parse settings file, using default values: %s"), error.c_str());
     return false;
   }
 
   uint32_t versionFound = doc["version"];
   if (versionFound != version) {
-    Log.warning("Settings version mismatch. Expected %d, found %d", version, versionFound);
-    Log.warning("Writing default setting values");
+    Log.warning(F("Settings version mismatch. Expected %d, found %d"), version, versionFound);
+    Log.warning(F("Writing default setting values"));
     write();
     return true;
   }
 
   fromJSON(doc);
 
-  Log.trace("Settings successfully read");
+  Log.trace(F("Settings successfully read"));
   return true;
 }
 
@@ -96,16 +96,16 @@ bool BaseSettings::write() {
   File settingsFile = SPIFFS.open(filePath, "w");
 #pragma GCC diagnostic pop
   if (!settingsFile) {
-    Log.error("Failed to open settings file for writing: %s", filePath.c_str());
+    Log.error(F("Failed to open settings file for writing: %s"), filePath.c_str());
     return false;
   }
 
-  // Log.notice("JSON doc to be saved to settings file:");
+  // Log.notice(F("JSON doc to be saved to settings file:"));
   // serializeJsonPretty(doc, Serial);
-  // Log.notice("");
+  // Log.notice(F(""));
 
   int sizeWritten = serializeJson(doc, settingsFile);
   settingsFile.close();
-  Log.trace("Wrote %d bytes to settings file (%s)", sizeWritten, filePath.c_str());
+  Log.trace(F("Wrote %d bytes to settings file (%s)"), sizeWritten, filePath.c_str());
   return true;
 }
