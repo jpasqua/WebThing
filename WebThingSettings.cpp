@@ -31,60 +31,60 @@ WebThingSettings::WebThingSettings() {
 }
 
 void WebThingSettings::fromJSON(JsonDocument &doc) {
-  lat = doc["lat"];
-  lng = doc["lng"];
-  elevation = doc["elevation"];
+  lat = doc[F("lat")];
+  lng = doc[F("lng")];
+  elevation = doc[F("elevation")];
 
-  timeZoneDBKey = doc["timeZoneDBKey"].as<String>();
-  googleMapsKey = doc["googleMapsKey"].as<String>();
+  timeZoneDBKey = doc[F("timeZoneDBKey")].as<String>();
+  googleMapsKey = doc[F("googleMapsKey")].as<String>();
 
-  useLowPowerMode = doc["useLowPowerMode"];
-  hasVoltageSensing = doc["hasVoltageSensing"];
-  voltageCalibFactor = doc["voltageCalibFactor"];
-  processingInterval = doc["processingInterval"];
-  sleepOverridePin = doc["sleepOverridePin"];
-  displayPowerOptions = doc["displayPowerOptions"];
+  useLowPowerMode = doc[F("useLowPowerMode")];
+  hasVoltageSensing = doc[F("hasVoltageSensing")];
+  voltageCalibFactor = doc[F("voltageCalibFactor")];
+  processingInterval = doc[F("processingInterval")];
+  sleepOverridePin = doc[F("sleepOverridePin")];
+  displayPowerOptions = doc[F("displayPowerOptions")];
 
-  hostname = doc["hostname"].as<String>();
-  webServerPort = doc["webServerPort"];
-  useBasicAuth = doc["useBasicAuth"];
-  webUsername = doc["webUsername"].as<String>();
-  webPassword = doc["webPassword"].as<String>();
+  hostname = doc[F("hostname")].as<String>();
+  webServerPort = doc[F("webServerPort")];
+  useBasicAuth = doc[F("useBasicAuth")];
+  webUsername = doc[F("webUsername")].as<String>();
+  webPassword = doc[F("webPassword")].as<String>();
 
-  themeColor = doc["themeColor"].as<String>();
+  themeColor = doc[F("themeColor")].as<String>();
 
-  logLevel = doc["logLevel"];
-  indicatorLEDPin = doc["indicatorLEDPin"];
-  indicatorLEDInverted = doc["indicatorLEDInverted"];
+  logLevel = doc[F("logLevel")];
+  indicatorLEDPin = doc[F("indicatorLEDPin")];
+  indicatorLEDInverted = doc[F("indicatorLEDInverted")];
 
   logSettings();
 }
 
 void WebThingSettings::toJSON(JsonDocument &doc) {
-  doc["lat"] = lat;
-  doc["lng"] = lng;
-  doc["elevation"] = elevation;
+  doc[F("lat")] = lat;
+  doc[F("lng")] = lng;
+  doc[F("elevation")] = elevation;
 
-  doc["googleMapsKey"] = googleMapsKey;
-  doc["timeZoneDBKey"] = timeZoneDBKey;
+  doc[F("googleMapsKey")] = googleMapsKey;
+  doc[F("timeZoneDBKey")] = timeZoneDBKey;
 
-  doc["hostname"] = hostname;
-  doc["webServerPort"] = webServerPort;
-  doc["useBasicAuth"] = useBasicAuth;
-  doc["webUsername"] = webUsername;
-  doc["webPassword"] = webPassword;
-  doc["themeColor"] = themeColor;
+  doc[F("hostname")] = hostname;
+  doc[F("webServerPort")] = webServerPort;
+  doc[F("useBasicAuth")] = useBasicAuth;
+  doc[F("webUsername")] = webUsername;
+  doc[F("webPassword")] = webPassword;
+  doc[F("themeColor")] = themeColor;
 
-  doc["voltageCalibFactor"] = voltageCalibFactor;
-  doc["useLowPowerMode"] = useLowPowerMode;
-  doc["hasVoltageSensing"] = hasVoltageSensing;
-  doc["processingInterval"] = processingInterval;
-  doc["sleepOverridePin"] = sleepOverridePin;
-  doc["displayPowerOptions"] = displayPowerOptions;
+  doc[F("voltageCalibFactor")] = voltageCalibFactor;
+  doc[F("useLowPowerMode")] = useLowPowerMode;
+  doc[F("hasVoltageSensing")] = hasVoltageSensing;
+  doc[F("processingInterval")] = processingInterval;
+  doc[F("sleepOverridePin")] = sleepOverridePin;
+  doc[F("displayPowerOptions")] = displayPowerOptions;
 
-  doc["logLevel"] = logLevel;
-  doc["indicatorLEDPin"] = indicatorLEDPin;
-  doc["indicatorLEDInverted"] = indicatorLEDInverted;
+  doc[F("logLevel")] = logLevel;
+  doc[F("indicatorLEDPin")] = indicatorLEDPin;
+  doc[F("indicatorLEDInverted")] = indicatorLEDInverted;
 }
 
 void WebThingSettings::logSettings() {
