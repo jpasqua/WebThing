@@ -393,5 +393,11 @@ namespace WebUI {
     cp(client);     // Send the arbitrary data
     client.stop();  // Disconnect
   }
+
+  void sendStringContent(String type, String payload) {
+    int length = payload.length();
+    auto cp = [length, payload](Stream &s) { s.write(payload.c_str(), length); };
+    sendArbitraryContent(type, length, cp);
+  }
 }
 // ----- END: WebUI
