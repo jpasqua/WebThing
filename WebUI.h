@@ -60,7 +60,7 @@ namespace WebUI {
 
   // ----- Sending Arbitrary Data
   typedef std::function<void(Stream&)> ContentProvider;
-  void sendArbitraryContent(String type, uint32_t length, ContentProvider cp);
+  void sendArbitraryContent(String type, int32_t length, ContentProvider cp);
   void sendStringContent(String type, String payload);
   void sendJSONContent(DynamicJsonDocument *doc);
 }

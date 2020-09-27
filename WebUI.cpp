@@ -272,17 +272,21 @@ namespace WebUI {
     server = new ESP8266WebServer(WebThing::settings.webServerPort);
     templateHandler = new ESPTemplateProcessor(server);
 
+    server->on("/",               Pages::displayHomePage);
     server->on("/config",         Pages::displayConfig);
     server->on("/configPwr",      Pages::displayPowerConfig);
     server->on("/configLogLevel", Pages::displayLogLevel);
-    server->on("/systemreset",    Endpoints::handleSystemReset);
-    server->on("/",               Pages::displayHomePage);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
+    server->serveStatic("/favicon.ico", SPIFFS, "/wt/favicon.ico");
+#pragma GCC diagnostic pop      
 
     server->on("/updateconfig",   Endpoints::updateConfig);
     server->on("/updatePwrConfig",Endpoints::updatePwrConfig);
     server->on("/setLogLevel",    Endpoints::setLogLevel);
-
+    server->on("/systemreset",    Endpoints::handleSystemReset);
     server->on("/forgetwifi",     Endpoints::handleWifiReset);
+    
     server->onNotFound(redirectHome);
 
     server->begin();
@@ -379,7 +383,7 @@ namespace WebUI {
     sendArbitraryContent("application/json", measureJsonPretty(*doc), cp);
   }
 
-  void sendArbitraryContent(String type, uint32_t length, ContentProvider cp) {
+  void sendArbitraryContent(String type, int32_t length, ContentProvider cp) {
     auto client = server->client();
     client.println(F("HTTP/1.0 200 OK"));
     client.print(F("Content-Type: ")); client.println(type);
