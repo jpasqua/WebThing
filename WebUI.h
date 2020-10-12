@@ -35,6 +35,7 @@ namespace WebUI {
   
   ESPTemplateProcessor *getTemplateHandler();
 
+  // Deprecated as prep for supporitng both ESP8266 and ESP32
   ESP8266WebServer *getUnderlyingServer();
 
   // ----- Periodic functions
@@ -51,9 +52,12 @@ namespace WebUI {
   void sendContent(const String &content);
   void finishPage();
 
-  bool hasArg(String arg);
-  String arg(String arg);
-  
+  int args();                               // get arguments count
+  bool hasArg(const String& arg);           // check if argument exists
+  const String& arg(const String& name);    // get request argument value by name
+  const String& arg(int i);                 // get request argument value by number
+  const String& argName(int i);             // get request argument name by number
+
   void redirectHome();
   void closeConnection(uint16_t code, String text);
   bool authenticationOK();

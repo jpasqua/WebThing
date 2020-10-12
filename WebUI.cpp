@@ -312,6 +312,9 @@ namespace WebUI {
   }
 
   ESPTemplateProcessor *getTemplateHandler() { return templateHandler; }
+
+  // Deprecated as prep for supporitng both ESP8266 and ESP32
+  // Get away from exposing the underlying server object
   ESP8266WebServer *getUnderlyingServer() { return server; }
   
 
@@ -343,8 +346,11 @@ namespace WebUI {
     return true;
   }
 
-  bool hasArg(String arg) { return server->hasArg(arg); }
-  String arg(String arg) { return server->arg(arg); }
+  int args()  { return server->args(); }
+  bool hasArg(const String& arg) { return server->hasArg(arg); }
+  const String& arg(const String& name) { return server->arg(name); }
+  const String& arg(int i)  { return server->arg(i); }
+  const String& argName(int i)  { return server->argName(i); }
 
   void sendContent(const String &content) {
     static const int ChunkSize = 512;
