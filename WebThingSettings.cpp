@@ -45,7 +45,7 @@ void WebThingSettings::fromJSON(JsonDocument &doc) {
   sleepOverridePin = doc[F("sleepOverridePin")];
   displayPowerOptions = doc[F("displayPowerOptions")];
 
-  hostname = doc[F("hostname")].as<String>();
+  hostname = String(doc[F("hostname")]|"");
   webServerPort = doc[F("webServerPort")];
   useBasicAuth = doc[F("useBasicAuth")];
   webUsername = doc[F("webUsername")].as<String>();
