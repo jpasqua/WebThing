@@ -118,6 +118,15 @@ namespace WebThing {
       if (settings.hostname == "") {
         settings.hostname = HostNameBase + String(ESP.getChipId(), HEX);
       }
+
+      // Don't let the config portal sit waiting forever. Timeout after 5 minutes
+      // If your home experienced a power failure and has now recovered, your WebThing
+      // will reboot immediately, but the connection to the internet may not yet have
+      // been re-established. The WebThing would not be able to connect and then wait
+      // forever in the portal. Instead, this will cause the portal to time out so
+      // the device can be rebooted and try again.
+      wifiManager.setConfigPortalTimeout(5*60); 
+
       if (!wifiManager.autoConnect(settings.hostname.c_str())) {
         Log.error(F("Autconnect failed!! Restarting..."));
         delay(3000);
