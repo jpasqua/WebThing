@@ -28,7 +28,6 @@ class WebThingSettings: public BaseSettings {
 public:
   // ----- Constants
   static const int8_t   NoPinAssigned;
-  static const int8_t   UseBuiltinLED;
 
   // ----- Constructors and methods
   WebThingSettings();
@@ -67,9 +66,6 @@ public:
   // ----- Developer Settings
   int logLevel = 6;                     // 6 is LOG_LEVEL_VERBOSE
 
-  // ----- Indicator LED
-  int8_t  indicatorLEDPin = -2;         // -1 -> No LED, -2 -> Built_in, >=0 -> GPIO Pin
-  bool    indicatorLEDInverted = true;
 
 private:
   // ----- Constants

@@ -23,7 +23,6 @@
 
 const uint32_t  WebThingSettings::CurrentVersion = 0x0002;
 const int8_t    WebThingSettings::NoPinAssigned = -1;
-const int8_t    WebThingSettings::UseBuiltinLED = -2;
 
 WebThingSettings::WebThingSettings() {
   version = WebThingSettings::CurrentVersion;
@@ -54,8 +53,6 @@ void WebThingSettings::fromJSON(JsonDocument &doc) {
   themeColor = doc[F("themeColor")].as<String>();
 
   logLevel = doc[F("logLevel")];
-  indicatorLEDPin = doc[F("indicatorLEDPin")];
-  indicatorLEDInverted = doc[F("indicatorLEDInverted")];
 
   logSettings();
 }
@@ -83,8 +80,6 @@ void WebThingSettings::toJSON(JsonDocument &doc) {
   doc[F("displayPowerOptions")] = displayPowerOptions;
 
   doc[F("logLevel")] = logLevel;
-  doc[F("indicatorLEDPin")] = indicatorLEDPin;
-  doc[F("indicatorLEDInverted")] = indicatorLEDInverted;
 }
 
 void WebThingSettings::logSettings() {
@@ -109,9 +104,6 @@ void WebThingSettings::logSettings() {
   Log.verbose(F("  webUsername = %s"), webUsername.c_str());
   Log.verbose(F("  webPassword = %s"), webPassword.c_str());
   Log.verbose(F("  themeColor = %s"), themeColor.c_str());
-  Log.verbose(F("Indicator LED"));
-  Log.verbose(F("  indicatorLEDPin = %d"), indicatorLEDPin);
-  Log.verbose(F("  indicatorLEDInverted = %T"), indicatorLEDInverted);
   Log.verbose(F("Other Settings"));
   Log.verbose(F("  logLevel = %d"), logLevel);
 }

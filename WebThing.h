@@ -97,14 +97,11 @@ namespace WebThing {
   void    notifyOnConfigMode(std::function<void(String&, String&)> callback);
   void    notifyConfigChange(std::function<void()> callback);
 
-  // --- Indicator LED
-  void    setIndicatorLED(bool on);
-  void    flashLED(int nFlashes, uint32_t delayTime);
-
   // --- UI Helpers
   int8_t  wifiQualityAsPct();
   void    setDisplayedVersion(String version);
   String  getDisplayedVersion();
+  String  ipAddrAsString();
 
   // --- Time Helpers
   String formattedTime(bool use24Hour = false, bool includeSeconds = false);
@@ -118,6 +115,7 @@ namespace WebThing {
   String encodeAttr(String &src);
 
   // --- Other
+  bool replaceEmptyHostname(const char* prefix);  // If hostname in settings is empty, generate one
   void logHeapStatus();
 
   namespace Protected {

@@ -63,7 +63,6 @@ Of course a particular *thing* may add menu items that are specific to it. The *
 
 #### Implementer Settings
 * Log Level: Sets the level at which messages will be logged. See [Arduino-Log](https://github.com/thijse/Arduino-Log) for a description of the options.
-* Indicator LED: Configures whether there is an indicator LED on the *thing*, and if so, which pin is used. The user may select a specific pin, no pin, or the built-in LED. A related setting indicates whether the LED state is inverted (i.e. use HIGH to to turn the LED off and LOW to turn it on).
  
 ## Using the Library
 
