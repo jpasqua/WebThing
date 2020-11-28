@@ -8,7 +8,13 @@
 #define BaseSettings_h
 
 #include <ArduinoJson.h>
-
+#if defined(ESP8266)
+#elif defined(ESP32)
+  #include <FS.h>
+  #include <SPIFFS.h>
+#else
+  #error "Must be an ESP8266 or ESP32"
+#endif
 
 class BaseSettings {
 public:

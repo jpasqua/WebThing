@@ -10,7 +10,14 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
-#include <ESP8266WebServer.h>
+#if defined(ESP8266)
+  #include <ESP8266WebServer.h>
+  using WebServer = ESP8266WebServer;
+#elif defined(ESP32)
+  #include <WebServer.h>
+#else
+  #error "Must be an ESP8266 or ESP32"
+#endif
 //                                  Third Party Libraries
 #include <ArduinoJson.h>
 #include <ESPTemplateProcessor.h>
@@ -36,7 +43,7 @@ namespace WebUI {
   ESPTemplateProcessor *getTemplateHandler();
 
   // Deprecated as prep for supporitng both ESP8266 and ESP32
-  ESP8266WebServer *getUnderlyingServer();
+  WebServer* getUnderlyingServer();
 
   // ----- Periodic functions
   void handleClient();
@@ -54,9 +61,9 @@ namespace WebUI {
 
   int args();                               // get arguments count
   bool hasArg(const String& arg);           // check if argument exists
-  const String& arg(const String& name);    // get request argument value by name
-  const String& arg(int i);                 // get request argument value by number
-  const String& argName(int i);             // get request argument name by number
+  const String arg(const String& name);     // get request argument value by name
+  const String arg(int i);                  // get request argument value by number
+  const String argName(int i);              // get request argument name by number
 
   void redirectHome();
   void closeConnection(uint16_t code, String text);

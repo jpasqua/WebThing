@@ -6,7 +6,6 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
-#include <ESP8266WiFi.h>
 //                                  Third Party Libraries
 #include <TimeLib.h>
 #include <ArduinoJson.h>

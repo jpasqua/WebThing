@@ -15,9 +15,19 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
+#if defined(ESP8266)
+  #include <FS.h>                   // Required by ESP8266WiFi.h!
+  #include <ESP8266WiFi.h>
+  #include <ESP8266WebServer.h>
+  using WebServer = ESP8266WebServer;
+  #include <ESP8266mDNS.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+  #include <WebServer.h>
+  #include <ESPmDNS.h>
+#else
+  #error "Must be an ESP8266 or ESP32"
+#endif
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
 #include <WiFiManager.h>
@@ -31,7 +41,7 @@
 
 // ----- BEGIN: WebUI namespacea
 namespace WebUI {
-  ESP8266WebServer      *server;
+  WebServer*            server;
   String                title;
   String                additionalMenuItems = "";
   ESPTemplateProcessor  *templateHandler;
@@ -170,10 +180,6 @@ namespace WebUI {
       WebThing::settings.webPassword = server->arg("webPassword");
       WebThing::settings.themeColor = server->arg("themeColor");
 
-      // ----- Sensor
-      WebThing::settings.indicatorLEDInverted = server->hasArg("indicatorLEDInverted");
-      WebThing::settings.indicatorLEDPin = server->arg("indicatorLEDPin").toInt();
-
       WebThing::settings.write();
       WebThing::Protected::configChanged();
       WebUI::redirectHome();
@@ -235,9 +241,8 @@ namespace WebUI {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
 
       String themeTarget = "SL" + WebThing::settings.themeColor;
-      String ledPinTarget = "SP" + String(WebThing::settings.indicatorLEDPin);
 
-      auto mapper =[themeTarget, ledPinTarget](String &key) -> String {
+      auto mapper =[themeTarget](String &key) -> String {
         if (key.equals(F("LAT")))          return WebThing::settings.latAsString();
         if (key.equals(F("LNG")))          return WebThing::settings.lngAsString();
         if (key.equals(F("ELEV")))         return String(WebThing::settings.elevation);
@@ -248,9 +253,7 @@ namespace WebUI {
         if (key.equals(F("BASIC_AUTH")))   return checkedOrNot[WebThing::settings.useBasicAuth];
         if (key.equals(F("WEB_UNAME")))    return WebThing::settings.webUsername;
         if (key.equals(F("WEB_PASS")))     return WebThing::settings.webPassword;  
-        if (key.equals(F("LED_INVERTED"))) return checkedOrNot[WebThing::settings.indicatorLEDInverted];
         if (key == themeTarget)       return "selected";
-        if (key == ledPinTarget)      return "selected";
         return Internal::EmptyString;
       };
 
@@ -269,7 +272,7 @@ namespace WebUI {
    *----------------------------------------------------------------------------*/
 
   void init() {
-    server = new ESP8266WebServer(WebThing::settings.webServerPort);
+    server = new WebServer(WebThing::settings.webServerPort);
     templateHandler = new ESPTemplateProcessor(server);
 
     server->on("/",               Pages::displayHomePage);
@@ -315,7 +318,7 @@ namespace WebUI {
 
   // Deprecated as prep for supporitng both ESP8266 and ESP32
   // Get away from exposing the underlying server object
-  ESP8266WebServer *getUnderlyingServer() { return server; }
+  WebServer *getUnderlyingServer() { return server; }
   
 
   /*------------------------------------------------------------------------------
@@ -348,9 +351,9 @@ namespace WebUI {
 
   int args()  { return server->args(); }
   bool hasArg(const String& arg) { return server->hasArg(arg); }
-  const String& arg(const String& name) { return server->arg(name); }
-  const String& arg(int i)  { return server->arg(i); }
-  const String& argName(int i)  { return server->argName(i); }
+  const String arg(const String& name) { return server->arg(name); }
+  const String arg(int i)  { return server->arg(i); }
+  const String argName(int i)  { return server->argName(i); }
 
   void sendContent(const String &content) {
     static const int ChunkSize = 512;

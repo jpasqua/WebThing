@@ -15,8 +15,16 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
+#if defined(ESP8266)
+  #include <ESP8266WiFi.h>
+  #include <ESP8266mDNS.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+  #include <WebServer.h>
+  #include <ESPmDNS.h>
+#else
+  #error "Must be an ESP8266 or ESP32"
+#endif
 #include <FS.h>
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
@@ -26,6 +34,7 @@
 #include "WebThing.h"
 #include "WebUI.h"
 #include "TimeDB.h"
+#include "GenericESP.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -67,16 +76,12 @@ namespace WebThing {
      *----------------------------------------------------------------------------*/
 
     void prepPins() {
-      if (settings.indicatorLEDPin != WebThingSettings::NoPinAssigned) {
-        int8_t pin = settings.indicatorLEDPin == WebThingSettings::UseBuiltinLED ? LED_BUILTIN : settings.indicatorLEDPin;
-        pinMode(pin, OUTPUT);
-      }
       if (settings.sleepOverridePin != WebThingSettings::NoPinAssigned) {
         pinMode(settings.sleepOverridePin, INPUT_PULLUP);
       }
     }
 
-    void flushSerial(Print *p) { p->print(CR); p->flush(); }
+    void flushSerial(Print *p) { p->print(CR); Serial.flush(); }
 
     void configModeCallback (WiFiManager *myWiFiManager) {
       String ip = WiFi.softAPIP().toString();
@@ -116,7 +121,7 @@ namespace WebThing {
       wifiManager.setAPCallback(configModeCallback);
       
       if (settings.hostname == "") {
-        settings.hostname = HostNameBase + String(ESP.getChipId(), HEX);
+        settings.hostname = HostNameBase + String(GenericESP::getChipID(), HEX);
       }
 
       // Don't let the config portal sit waiting forever. Timeout after 5 minutes
@@ -131,7 +136,7 @@ namespace WebThing {
         Log.error(F("Autconnect failed!! Restarting..."));
         delay(3000);
         WiFi.disconnect(true);
-        ESP.reset();
+        GenericESP::reset();
         delay(5000);
       }
         
@@ -140,7 +145,7 @@ namespace WebThing {
 
       Protected::mDNSStarted = false;
       if (settings.hostname.length() != 0) {
-        if (!MDNS.begin(settings.hostname)) {
+        if (!MDNS.begin(settings.hostname.c_str())) {
           Log.warning(F("Unable to start mDNS"));
         } else Protected::mDNSStarted = true;
       }
@@ -178,8 +183,7 @@ namespace WebThing {
     Internal::prepFileSystem();       // Get the filesystem ready to go
     settings.init(SettingsFileName);  // Path to the settings file
     settings.read();                  // Read settings from the filesystem
-    Internal::prepPins();             // Set up any pins used by WebThing (e.g. LED)
-    setIndicatorLED(false);           // Turn off the indicator (in case it's on)
+    Internal::prepPins();             // Set up any pins used by WebThing
     Log.setLevel(settings.logLevel);  // Update based on the settings we just read
   }
 
@@ -208,7 +212,9 @@ namespace WebThing {
 
     WebUI::handleClient();
 
+#if defined(ESP8266)
     if (Protected::mDNSStarted) { MDNS.update(); }
+#endif
 
     uint32_t curMillis = millis();
     if (curMillis - lastActionTime > (settings.processingInterval * 60 * 1000L)) {
@@ -301,6 +307,16 @@ namespace WebThing {
     return 2 * (dbm + 100);
   }
 
+  String ipAddrAsString() { return WiFi.localIP().toString(); }
+
+  bool replaceEmptyHostname(const char* prefix) {
+    if (settings.hostname.isEmpty()) {
+      settings.hostname = (String(prefix) + String(GenericESP::getChipID(), HEX));
+      return true;
+    }
+    return false;
+  }
+
   bool isSleepOverrideEnabled() {
     if (settings.sleepOverridePin == WebThingSettings::NoPinAssigned) return false;
     return (digitalRead(settings.sleepOverridePin) == 0);
@@ -311,26 +327,9 @@ namespace WebThing {
   }
 
   void logHeapStatus() {
-    Log.verbose(F("Heap Free Space: %d"), ESP.getFreeHeap());
-    Log.verbose(F("Heap Fragmentation: %d"), ESP.getHeapFragmentation());
-    Log.verbose(F("Heap Max Block Size: %d"), ESP.getMaxFreeBlockSize());
-  }
-
-  void setIndicatorLED(bool on) {
-    if (settings.indicatorLEDPin == WebThingSettings::NoPinAssigned) return;
-    int8_t pin = settings.indicatorLEDPin == WebThingSettings::UseBuiltinLED ? LED_BUILTIN : settings.indicatorLEDPin;
-    digitalWrite(pin, on ^ settings.indicatorLEDInverted);
-  }
-
-  void flashLED(int nFlashes, uint32_t delayTime) {
-    if (settings.indicatorLEDPin == WebThingSettings::NoPinAssigned) return;
-    for (int inx = 0; inx < nFlashes; inx++) {
-      delay(delayTime);
-      setIndicatorLED(true);
-      delay(delayTime);
-      setIndicatorLED(false);
-      delay(delayTime);
-    }
+    Log.verbose(F("Heap Free Space: %d"), GenericESP::getFreeHeap());
+    Log.verbose(F("Heap Fragmentation: %d"), GenericESP::getHeapFragmentation());
+    Log.verbose(F("Heap Max Block Size: %d"), GenericESP::getMaxFreeBlockSize());
   }
 
   String encodeAttr(String &src) {
