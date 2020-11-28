@@ -1,5 +1,7 @@
 # WebThing
-A generic ESP8266 framework for building *things* with a web configuration capability. They are called *things* as in Internet of *Things*.
+A generic ESP8266/ESP32 framework for building *things* with a web configuration capability. They are called *things* as in Internet of *Things*.
+
+*Note*: ESP32 support is new and is likely to have more issues than the ESP8266 version.
 
 The basic idea here is that you want some network-connected *thing* that performs one or more activities such as:
 
@@ -9,7 +11,7 @@ The basic idea here is that you want some network-connected *thing* that perform
 
 In all cases, the *thing* needs a way of getting connected to WiFi and configuring other basic settings. `WebThing` provides this capability and it also provides an extensible framework to add new web content including new pages and new menu items.
 
-From the user perspective, the process begins with powering-on a *thing* for the first time. At this point it doesn't know which WiFi network to join so it will create it's own network named `thing-nnnnnn` (`nnnnnn` will be different for each device). The user should go to WiFi preferences on their computer or phone and they will see a new SSID of this form. They should connect to this network and in a few seconds, they will be placed in a "captive portal" which will allow them to choose their preferred WiFi network and specify credentials to join it. For more details, please see the [WiFiManager](https://github.com/tzapu/WiFiManager) project which is incorporated by `WebThing`.
+From the user perspective, the process begins with powering-on a *thing* for the first time. At this point it doesn't know which WiFi network to join so it will create its own network. Usually the name will be something like `thing-nnnnnn` (`nnnnnn` will be different for each device). This may be customized by the client of the WebThing library. The user should go to WiFi preferences on their computer or phone and they will see a new SSID of this form. They should connect to this network and in a few seconds, they will be placed in a "captive portal" which will allow them to choose their preferred WiFi network and specify credentials to join it. For more details, please see the [WiFiManager](https://github.com/tzapu/WiFiManager) project which is incorporated by `WebThing`.
 
 Once the *thing* is configured it will join the specified network, but how does the user know its address? It depends. If the *thing* you are building has an interface, it can display its hostname or IP address. If not, the user can scan their network looking for a hostname of the form `thing-nnnnnn` (just like the SSID above), or for an ESP device. Most WiFi routers have the ability to show the attached devices.
 
@@ -20,9 +22,10 @@ The following third party libraries are used by this library:
 
 * [Arduino-Log](https://github.com/thijse/Arduino-Log)
 * [ArduinoJson (v6)](https://github.com/bblanchon/ArduinoJson)
-* [WiFiManager](https://github.com/tzapu/WiFiManager)
+* [WiFiManager](https://github.com/tzapu/WiFiManager) *Note*: for ESP32 support, you must use the [development branch of this library](https://github.com/tzapu/WiFiManager/tree/development). 
 * [TimeLib](https://github.com/PaulStoffregen/Time.git)
-* [ESPTemplateProcessor](https://github.com/jpasqua/ESPTemplateProcessor)
+* [ESPTemplateProcessor](https://github.com/jpasqua/ESPTemplateProcessor) *Note*: for ESP32 support, you must use at least version 0.0.2. 
+
 
 ### Services
 
@@ -105,7 +108,7 @@ For example, let's say you are implementing a weather station that should wake u
 WebThing uses SPIFFS to store HTML templates and settings, which imposes additional requirements when building:
 
 1. In the Arduino IDE you must ensure that you have reserved SPIFFS space. Do this by selecting `Tools -> Flash Size -> (Pick a SPIFFS size)`
-2. All of the templates must be uploaded to the ESP8266. Use the [ESP8266 Sketch Data Upload plugin](https://github.com/esp8266/arduino-esp8266fs-plugin) for this. Any time you change a template, you must upload the data to the ESP8266.
+2. All of the templates must be uploaded to the ESP8266/ESP32. Use the [ESP8266 Sketch Data Upload plugin](https://github.com/esp8266/arduino-esp8266fs-plugin) or [ESP32 Sketch Data Upload plugin](https://github.com/me-no-dev/arduino-esp32fs-plugin) for this. Any time you change a template, you must upload the data to the device.
 3. Because you are likely to extend the Web UI, you may have your own templates or other files to place in SPIFFS. Put them all in a directory named `data` within your sketch directory.
 <a name="link-wt"></a>
 4. The uploader must upload all files at once - your files and those from the WebThing library. That means you need to copy or link the WebThing files to your data directory. All of the WebThing files are in a sub-directory of the data directory named `wt`. Your resulting directory structure will look like this:
