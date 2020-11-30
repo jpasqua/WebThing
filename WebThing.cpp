@@ -54,6 +54,7 @@ namespace WebThing {
    *
    *----------------------------------------------------------------------------*/
 
+  bool apMode;
   WebThingSettings  settings;
   String versionToDisplay = Version;
 
@@ -116,39 +117,47 @@ namespace WebThing {
     }
 
     void prepNetwork() {
-      WiFiManager wifiManager;
-      
-      wifiManager.setAPCallback(configModeCallback);
-      
-      if (settings.hostname == "") {
+      Protected::mDNSStarted = false;
+      if (settings.hostname.isEmpty()) {
         settings.hostname = HostNameBase + String(GenericESP::getChipID(), HEX);
       }
 
-      // Don't let the config portal sit waiting forever. Timeout after 5 minutes
-      // If your home experienced a power failure and has now recovered, your WebThing
-      // will reboot immediately, but the connection to the internet may not yet have
-      // been re-established. The WebThing would not be able to connect and then wait
-      // forever in the portal. Instead, this will cause the portal to time out so
-      // the device can be rebooted and try again.
-      wifiManager.setConfigPortalTimeout(5*60); 
-
-      if (!wifiManager.autoConnect(settings.hostname.c_str())) {
-        Log.error(F("Autconnect failed!! Restarting..."));
-        delay(3000);
-        WiFi.disconnect(true);
-        GenericESP::reset();
-        delay(5000);
-      }
+      if (apMode) {
+        bool result = WiFi.softAP(settings.hostname.c_str(), settings.webPassword.c_str());
+        if (result) {
+          Log.trace("Access Point successfully established: %s", settings.hostname.c_str());
+        } else {
+          Log.error("Unable to eastablish access Point: %s", settings.hostname.c_str());
+        }
+      } else {
+        WiFiManager wifiManager;
+        wifiManager.setAPCallback(configModeCallback);
         
-      // print the received signal strength:
-      Log.verbose(F("Signal Strength (RSSI): %d%%"), wifiQualityAsPct());
+        // Don't let the config portal sit waiting forever. Timeout after 5 minutes
+        // If your home experienced a power failure and has now recovered, your WebThing
+        // will reboot immediately, but the connection to the internet may not yet have
+        // been re-established. The WebThing would not be able to connect and then wait
+        // forever in the portal. Instead, this will cause the portal to time out so
+        // the device can be rebooted and try again.
+        wifiManager.setConfigPortalTimeout(5*60); 
 
-      Protected::mDNSStarted = false;
-      if (settings.hostname.length() != 0) {
+        if (!wifiManager.autoConnect(settings.hostname.c_str())) {
+          Log.error(F("Autconnect failed!! Restarting..."));
+          delay(3000);
+          WiFi.disconnect(true);
+          GenericESP::reset();
+          delay(5000);
+        }
+
         if (!MDNS.begin(settings.hostname.c_str())) {
           Log.warning(F("Unable to start mDNS"));
-        } else Protected::mDNSStarted = true;
+        } else {
+          Log.warning(F("mDNS started"));
+          Protected::mDNSStarted = true;
+        }
       }
+      // print the received signal strength:
+      Log.verbose(F("Signal Strength (RSSI): %d%%"), wifiQualityAsPct());
     }
 
     unsigned char h2int(char c) {
@@ -187,8 +196,9 @@ namespace WebThing {
     Log.setLevel(settings.logLevel);  // Update based on the settings we just read
   }
 
-  void setup() {
-    Log.verbose(F("WebThing:: setup()"));
+  void setup(bool enterAPMode) {
+    apMode = enterAPMode;
+    Log.verbose(F("WebThing:: setup(apMode = %T)"), apMode);
     Internal::prepNetwork();          // Get on the network
     Internal::timeDB.init(            // Initialize the time service... 
         settings.timeZoneDBKey,
@@ -196,7 +206,7 @@ namespace WebThing {
         settings.lngAsString());
     WebUI::init();                    // Set up the Web User Interface
     WebUI::setTitle("WebThing");
-    if (!settings.timeZoneDBKey.isEmpty()) {  // ...and sync the time
+    if (!apMode && !settings.timeZoneDBKey.isEmpty()) {  // ...and sync the time
       Internal::timeDB.syncTime(true);
     }
   }
@@ -222,7 +232,7 @@ namespace WebThing {
       lastActionTime = curMillis;
     }
 
-    if (!settings.timeZoneDBKey.isEmpty()) { Internal::timeDB.syncTime(); }
+    if (!apMode && !settings.timeZoneDBKey.isEmpty()) { Internal::timeDB.syncTime(); }
   }
 
   /*------------------------------------------------------------------------------
@@ -264,7 +274,7 @@ namespace WebThing {
     return formattedInterval(h, m, s, zeroPadHours, includeSeconds);
   }
 
-  int32_t getGMTOffset() { return Internal::timeDB.getGMTOffset(); }
+  int32_t getGMTOffset() { return apMode ? 0: Internal::timeDB.getGMTOffset(); }
 
   void setDisplayedVersion(String version) { versionToDisplay = version; }
   String  getDisplayedVersion() { return versionToDisplay; }

@@ -71,13 +71,17 @@ namespace WebThing {
 
   // ----- Public State
   extern WebThingSettings  settings;
+  extern bool apMode;
 
   // ----- setup() and loop() functions
   void preSetup();
     // Called before any setup is done by the actual thing. This does very
     // very basic things like establishing logging support.
-  void setup();
+  void setup(bool apMode = false);
     // Called during setup of the actual thing
+    // If you want this thing to be it's own access point rather than connecting
+    // to an access point, set apMode to true. Obviously in this case there will
+    // be no access to services such as network time.
   void postSetup();
     // Called after setup of the actual thing is complete
   void loop();
