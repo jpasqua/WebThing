@@ -42,9 +42,6 @@ namespace WebUI {
   
   ESPTemplateProcessor *getTemplateHandler();
 
-  // Deprecated as prep for supporitng both ESP8266 and ESP32
-  WebServer* getUnderlyingServer();
-
   // ----- Periodic functions
   void handleClient();
     // Needs to be called from loop() to handle connections
@@ -59,21 +56,35 @@ namespace WebUI {
   void sendContent(const String &content);
   void finishPage();
 
+  void redirectHome();
+  void closeConnection(uint16_t code, String text);
+  bool authenticationOK();
+
+  // ---------- Helper functions that isolate your code from the underlying server object
+  // ----- Request arguments
   int args();                               // get arguments count
   bool hasArg(const String& arg);           // check if argument exists
   const String arg(const String& name);     // get request argument value by name
   const String arg(int i);                  // get request argument value by number
   const String argName(int i);              // get request argument name by number
 
-  void redirectHome();
-  void closeConnection(uint16_t code, String text);
-  bool authenticationOK();
+  // ----- Response Headers
+  void collectHeaders(const char* headerKeys[], const size_t headerKeysCount); // set the request headers to collect
+  String header(const String& name);        // get request header value by name
+  String header(int i);                     // get request header value by number
+  String headerName(int i);                 // get request header name by number
+  int headers();                            // get header count
+  bool hasHeader(const String& name);       // check if header exists
 
   // ----- Sending Arbitrary Data
   typedef std::function<void(Stream&)> ContentProvider;
   void sendArbitraryContent(String type, int32_t length, ContentProvider cp);
   void sendStringContent(String type, String payload);
   void sendJSONContent(DynamicJsonDocument *doc);
+
+  // Deprecated as prep for supporitng both ESP8266 and ESP32
+  WebServer* getUnderlyingServer();
+
 }
 
 #endif  // WebUI_h

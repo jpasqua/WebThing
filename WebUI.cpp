@@ -355,6 +355,15 @@ namespace WebUI {
   const String arg(int i)  { return server->arg(i); }
   const String argName(int i)  { return server->argName(i); }
 
+  void collectHeaders(const char* headerKeys[], const size_t headerKeysCount) {
+    server->collectHeaders(headerKeys, headerKeysCount);
+  }
+  String header(const String& name) { return server-> header(name); }
+  String header(int i) {return server->header(i); }
+  String headerName(int i) { return server->headerName(i); }
+  int headers() { return server->headers(); }
+  bool hasHeader(const String& name) { return server->hasHeader(name); }
+
   void sendContent(const String &content) {
     static const int ChunkSize = 512;
     int length = content.length();
