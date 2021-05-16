@@ -144,7 +144,7 @@ namespace WebThing {
         if (!wifiManager.autoConnect(settings.hostname.c_str())) {
           Log.error(F("Autconnect failed!! Restarting..."));
           delay(3000);
-          WiFi.disconnect(true);
+          // WiFi.disconnect(true); // This removes saved credentials!!
           GenericESP::reset();
           delay(5000);
         }
