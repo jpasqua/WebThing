@@ -25,7 +25,7 @@
 #else
   #error "Must be an ESP8266 or ESP32"
 #endif
-#include <FS.h>
+#include <ESP_FS.h>
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
 #include <WiFiManager.h>
@@ -104,13 +104,11 @@ namespace WebThing {
     }
 
     void prepFileSystem() {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-      boolean mounted = SPIFFS.begin();
+      boolean mounted = ESP_FS::begin();
       if (!mounted) {
         Log.notice(F("FS not formatted. Formatting now. This can take >= 30 seconds."));
-        SPIFFS.format();
-        SPIFFS.begin();
+        ESP_FS::format();
+        ESP_FS::begin();
         Log.trace(F("Completed FS Formatting"));
       }
 #pragma GCC diagnostic pop

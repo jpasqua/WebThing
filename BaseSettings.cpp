@@ -10,7 +10,7 @@
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
 #include <Arduino.h>
-#include <FS.h>
+#include <ESP_FS.h>
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
 #include <ArduinoJson.h>
@@ -30,17 +30,11 @@ void BaseSettings::init(String _filePath) {
 }
 
 bool BaseSettings::clear() {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
-  return SPIFFS.remove(filePath);
-#pragma GCC diagnostic pop
+  ESP_FS::remove(filePath);
 }
 
 bool BaseSettings::read() {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
-  File settingsFile = SPIFFS.open(filePath, "r");
-#pragma GCC diagnostic pop  
+  File settingsFile = ESP_FS::open(filePath, "r");
   if (!settingsFile) {
     Log.notice(F("No settings file exists. Creating one with default values."));
     return write();
@@ -91,18 +85,15 @@ bool BaseSettings::write() {
   doc["version"] = version;
   toJSON(doc);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
-  File settingsFile = SPIFFS.open(filePath, "w");
-#pragma GCC diagnostic pop
+  File settingsFile = ESP_FS::open(filePath, "w");
   if (!settingsFile) {
     Log.error(F("Failed to open settings file for writing: %s"), filePath.c_str());
     return false;
   }
 
-  // Log.notice(F("JSON doc to be saved to settings file:"));
-  // serializeJsonPretty(doc, Serial);
-  // Log.notice(F(""));
+  Log.notice(F("JSON doc to be saved to settings file:"));
+  serializeJsonPretty(doc, Serial);
+  Log.notice(F(""));
 
   int sizeWritten = serializeJson(doc, settingsFile);
   settingsFile.close();

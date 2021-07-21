@@ -35,6 +35,7 @@
 //                                  Local Includes
 #include "WebThing.h"
 #include "WebUI.h"
+#include "ESP_FS.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -281,7 +282,7 @@ namespace WebUI {
     server->on("/configLogLevel", Pages::displayLogLevel);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
-    server->serveStatic("/favicon.ico", SPIFFS, "/wt/favicon.ico");
+    server->serveStatic("/favicon.ico", *ESP_FS::getFS(), "/wt/favicon.ico");
 #pragma GCC diagnostic pop      
 
     server->on("/updateconfig",   Endpoints::updateConfig);
