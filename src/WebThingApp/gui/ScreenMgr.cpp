@@ -153,6 +153,7 @@ namespace ScreenMgr {
       Log.warning("Trying to display screen %s, but none is registered", name.c_str());
       return;
     }
+    display(screen);
   }
 
   void display(Screen* screen) {
