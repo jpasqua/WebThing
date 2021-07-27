@@ -60,7 +60,7 @@ static const uint16_t TimeDisplayWidth = 6*TimeFontWidth + 2*TimeFontColonWidth;
  *
  *----------------------------------------------------------------------------*/
 
-WeatherScreen::WeatherScreen(OWMClient* weatherClient, bool* metric, bool* use24) :
+WeatherScreen::WeatherScreen(OWMClient** weatherClient, bool* metric, bool* use24) :
     owmClient(weatherClient), useMetric(metric), use24Hour(use24)
 {
 
@@ -81,13 +81,12 @@ void WeatherScreen::display(bool activating) {
   
   // We should not get here if owm is disabled or we were unable to contact the
   // OWM service, but just double check...
-  if (!owmClient) return;
+  if (!(*owmClient)) return;
 
   bool metric = *useMetric;
 
   tft.fillScreen(Theme::Color_WeatherBkg);
-
-  if (owmClient->weather.dt == 0) {
+  if ((*owmClient)->weather.dt == 0) {
     Display::Font::setUsingID(Display::Font::FontID::SB18, tft);
     tft.setTextColor(Theme::Color_AlertError);
     tft.setTextDatum(MC_DATUM);
@@ -99,16 +98,16 @@ void WeatherScreen::display(bool activating) {
   Display::Font::setUsingID(Display::Font::FontID::SB12, tft);
   tft.setTextColor(Theme::Color_WeatherTxt);
   tft.setTextDatum(TL_DATUM);
-  tft.drawString(owmClient->weather.location.city, XTopAreaInset, YTopArea);
+  tft.drawString((*owmClient)->weather.location.city, XTopAreaInset, YTopArea);
   showTime();
 
   // ----- Draw the central display area
-  float temp = owmClient->weather.readings.temp;
+  float temp = (*owmClient)->weather.readings.temp;
 
   tft.pushImage(ImageInset, YCentralArea, WI_Width, WI_Height,
-      getWeatherIcon(owmClient->weather.description.icon), WI_Transparent);
+      getWeatherIcon((*owmClient)->weather.description.icon), WI_Transparent);
   tft.pushImage(Display::Width-WI_Width-ImageInset, YCentralArea, WindIcon_Width, WindIcon_Height,
-      getWindIcon(owmClient->weather.readings.windSpeed), WI_Transparent);
+      getWindIcon((*owmClient)->weather.readings.windSpeed), WI_Transparent);
 
   int textOffset = (WindIcon_Height-TempFontHeight)/2;
   Display::Font::setUsingID(TempFont, tft);
@@ -124,30 +123,30 @@ void WeatherScreen::display(bool activating) {
       YCentralArea-textOffset+TempFontHeight-TempUnitsFontHeight);
 
   tft.setTextDatum(TC_DATUM);
-  char firstChar = owmClient->weather.description.longer[0];
+  char firstChar = (*owmClient)->weather.description.longer[0];
   if (isLowerCase(firstChar)) {
-    owmClient->weather.description.longer[0] = toUpperCase(firstChar);
+    (*owmClient)->weather.description.longer[0] = toUpperCase(firstChar);
   }
   tft.setTextColor(Theme::Color_WeatherTxt);
   Display::Font::setUsingID(ReadingsFont, tft);
   tft.drawString(
-      owmClient->weather.description.longer,
+      (*owmClient)->weather.description.longer,
       Display::XCenter,YCentralArea-textOffset+TempFontHeight + 5); // A little spacing in Y
 
   // Readings Area
   tft.setTextColor(Theme::Color_WeatherTxt);
   Display::Font::setUsingID(ReadingsFont, tft);
   tft.setTextDatum(TL_DATUM);
-  String reading = "Humidty: " + String(owmClient->weather.readings.humidity) + "%";
+  String reading = "Humidty: " + String((*owmClient)->weather.readings.humidity) + "%";
   tft.drawString(reading, XTopAreaInset, YReadingsArea);
   tft.setTextDatum(TR_DATUM);
-  float pressure = owmClient->weather.readings.pressure;
+  float pressure = (*owmClient)->weather.readings.pressure;
   if (!metric) pressure = WTBasics::hpa_to_inhg(pressure);
   reading = String(pressure) +  (metric ? "hPa" : "inHG"),
   tft.drawString(reading, Display::Width - XTopAreaInset, YReadingsArea);
 
   // NOTE: For some reason visibility seems to ignore the units setting and always return meters!!
-  uint16_t visibility = (owmClient->weather.readings.visibility);
+  uint16_t visibility = ((*owmClient)->weather.readings.visibility);
   String units = "km";
   if (metric) { visibility /= 1000;  }
   else {
@@ -159,7 +158,7 @@ void WeatherScreen::display(bool activating) {
   tft.drawString(reading, XTopAreaInset, YReadingsArea+ReadingsFontHeight);
 
   tft.setTextDatum(TR_DATUM);
-  float feelsLike = owmClient->weather.readings.feelsLike;
+  float feelsLike = (*owmClient)->weather.readings.feelsLike;
 
   units = metric ? "C" : "F";
   reading = "Feels " + String((int)(feelsLike+0.5)) +  units;
@@ -167,11 +166,11 @@ void WeatherScreen::display(bool activating) {
   Display::Font::setUsingID(Display::Font::FontID::SB12, tft);
   tft.drawString(reading, Display::Width - XTopAreaInset, YReadingsArea+ReadingsFontHeight);
 
-  lastDT = owmClient->weather.dt;
+  lastDT = (*owmClient)->weather.dt;
 }
 
 void WeatherScreen::processPeriodicActivity() {
-  if (lastDT != owmClient->weather.dt) { display(); return; }
+  if (lastDT != (*owmClient)->weather.dt) { display(); return; }
   if (millis() - lastClockUpdate >= 1000L) { showTime(); return; }
 }
 

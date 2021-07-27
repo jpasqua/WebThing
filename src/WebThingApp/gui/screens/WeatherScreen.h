@@ -20,14 +20,14 @@
 
 class WeatherScreen : public Screen {
 public:
-  WeatherScreen(OWMClient* weatherClient, bool* metric, bool* use24);
+  WeatherScreen(OWMClient** weatherClient, bool* metric, bool* use24);
   void display(bool force = false);
   virtual void processPeriodicActivity();
 
 private:
   uint32_t lastDT = UINT32_MAX;
   uint32_t lastClockUpdate = 0;
-  OWMClient* owmClient;
+  OWMClient** owmClient;
   bool* useMetric;
   bool* use24Hour;
 

@@ -45,7 +45,7 @@ static int16_t TinyFont = 2;  // A small 5x7 font
  *
  *----------------------------------------------------------------------------*/
 
-ForecastScreen::ForecastScreen(OWMClient* weatherClient, bool* use24hrTime, bool* metric) {
+ForecastScreen::ForecastScreen(OWMClient** weatherClient, bool* use24hrTime, bool* metric) {
   owmClient = weatherClient;
   use24Hour = use24hrTime;
   useMetric = metric;
@@ -64,21 +64,21 @@ ForecastScreen::ForecastScreen(OWMClient* weatherClient, bool* use24hrTime, bool
 void ForecastScreen::display(bool activating) {
   (void)activating; // We don't use this parameter - avoid a warning...
 
-  if (!owmClient) return; // Make sure we've got an OpenWeatherMap client
+  if (!(*owmClient)) return; // Make sure we've got an OpenWeatherMap client
 
   tft.fillScreen(Theme::Color_WeatherBkg);
   uint16_t x = 0, y = 0;
 
   // The first element of the forecast display is really the current temperature
   Forecast current;
-  current.dt = owmClient->weather.dt + WebThing::getGMTOffset();
-  current.hiTemp = owmClient->weather.readings.temp;
+  current.dt = (*owmClient)->weather.dt + WebThing::getGMTOffset();
+  current.hiTemp = (*owmClient)->weather.readings.temp;
   current.loTemp = Forecast::NoReading;
-  current.icon = owmClient->weather.description.icon;
+  current.icon = (*owmClient)->weather.description.icon;
   displaySingleForecast(&current, x, y);
   y += TileHeight;
 
-  Forecast *f = owmClient->getForecast();
+  Forecast *f = (*owmClient)->getForecast();
   for (int i = 0; i < OWMClient::ForecastElements; i++) {
     // It's possible that the current temperature is higher than what was
     // forecast. If so, update the forecast with the known higher temp

@@ -23,12 +23,12 @@
 
 class ForecastScreen : public Screen {
 public:
-  ForecastScreen(OWMClient* weatherClient, bool* use24hrTime, bool* metric);
+  ForecastScreen(OWMClient** weatherClient, bool* use24hrTime, bool* metric);
   void display(bool force = false);
   virtual void processPeriodicActivity();
 
 private:
-  OWMClient* owmClient;
+  OWMClient** owmClient;
   bool* use24Hour;
   bool* useMetric;
 
