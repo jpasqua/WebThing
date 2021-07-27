@@ -30,7 +30,7 @@ void BaseSettings::init(String _filePath) {
 }
 
 bool BaseSettings::clear() {
-  ESP_FS::remove(filePath);
+  return(ESP_FS::remove(filePath));
 }
 
 bool BaseSettings::read() {
