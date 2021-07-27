@@ -39,7 +39,10 @@ void Button::init(uint16_t x, uint16_t y, uint16_t w, uint16_t h, ButtonCallback
 }
 
 bool Button::processTouch(uint16_t tx, uint16_t ty, PressType type) {
-  if ((tx >= _x) && (tx < _x+_w) && (ty >= _y) && (ty < _y+_h)) { _callback(_id, type); return true; }
+  if ((tx >= _x) && (tx < _x+_w) && (ty >= _y) && (ty < _y+_h)) {
+    _callback(_id, type);
+    return true;
+  }
   return false;
 }
 
