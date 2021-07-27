@@ -40,6 +40,7 @@ public:
 private:
   String title;
   float minVal, maxVal;
+  float _initialValue;
   bool allowDecimals;
   String formattedValue;
   WTBasics::FloatValCB newValueCB;
