@@ -34,18 +34,18 @@ void EnterNumberScreen::init(
   maxVal = maxAllowed;
   allowDecimals = decimalsAllowed;
   newValueCB = cb;
+  _initialValue = constrain(initialValue, minVal, maxVal);
 
-  initialValue = constrain(initialValue, minVal, maxVal);
-  if (allowDecimals) { formattedValue = String(initialValue); }
-  else { formattedValue = String( (long)initialValue ); }
+  if (allowDecimals) { formattedValue = String(_initialValue); }
+  else { formattedValue = String( (long)_initialValue ); }
 
-  auto buttonHandler =[&](int id, Button::PressType type) -> void {
+  auto buttonHandler =[this](int id, Button::PressType type) -> void {
     Log.verbose(F("In EnterNumberScreen Button Handler, id = %d, type = %d"), id, type);
 
     if (type > Button::PressType::NormalPress) {
       // Any long press is interpreted as a cancellation, which is handled the same as
       // no change to the initial value
-      if (newValueCB) newValueCB(initialValue);
+      if (newValueCB) newValueCB(_initialValue);
       return;
     }
 
@@ -101,12 +101,16 @@ void EnterNumberScreen::init(
     buttons[DecimalButton].init(
         x, ValueYOrigin, w, DigitHeight, buttonHandler, DecimalButton);      
     x += w;
+  } else {
+    buttons[DecimalButton].init(0, 0, 0, 0, buttonHandler, DecimalButton);      
   }
 
   if (minVal < 0) {
     w = DigitWidth; 
     buttons[PlusMinusButton].init(
         x, ValueYOrigin, w, DigitHeight, buttonHandler, PlusMinusButton);
+  } else {
+    buttons[PlusMinusButton].init(0, 0, 0, 0, buttonHandler, PlusMinusButton);
   }
 
   for (int i = FirstDigitButton; i <= LastDigitButton; i++) {
