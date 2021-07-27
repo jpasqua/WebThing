@@ -1,7 +1,7 @@
 # WebThing
-A generic ESP8266/ESP32 framework for building *things* with a web configuration capability. They are called *things* as in Internet of *Things*.
+![](doc/images/WebThing_Logo_256.png)  
 
-*Note*: ESP32 support is new and is likely to have more issues than the ESP8266 version.
+A generic ESP8266/ESP32 framework for building *things* with a web configuration capability. They are called *things* as in Internet of *Things*.
 
 The basic idea here is that you want some network-connected *thing* that performs one or more activities such as:
 
@@ -22,7 +22,7 @@ The following third party libraries are used by this library:
 
 * [Arduino-Log](https://github.com/thijse/Arduino-Log)
 * [ArduinoJson (v6)](https://github.com/bblanchon/ArduinoJson)
-* [WiFiManager](https://github.com/tzapu/WiFiManager) *Note*: for ESP32 support, you must use the [development branch of this library](https://github.com/tzapu/WiFiManager/tree/development). 
+* [WiFiManager](https://github.com/tzapu/WiFiManager) *Note*: for ESP32 support, be sure to use a recent version of this library. 
 * [TimeLib](https://github.com/PaulStoffregen/Time.git)
 * [ESPTemplateProcessor](https://github.com/jpasqua/ESPTemplateProcessor) *Note*: for ESP32 support, you must use at least version 0.0.2. 
 
