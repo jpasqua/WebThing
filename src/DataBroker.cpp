@@ -63,7 +63,10 @@ namespace DataBroker {
     if (key.length() < 4 || key[0] != '$' || key[2] != '.') return;
     char prefix = key[1];
     Mapper* m = findMapper(prefix);
-    if (m == NULL) return;
+    if (m == NULL) {
+      Log.warning("DataBroker::map: No mapper found for key %s", key.c_str());
+      return;
+    }
 
     String subkey = key.substring(3);
     m->map(subkey, value);

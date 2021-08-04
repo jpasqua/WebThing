@@ -7,7 +7,7 @@ The basic idea here is that you want some network-connected *thing* that perform
 
 * Taking sensor readings (e.g. weather conditions)
 * Controlling something in the physical world (e.g. a power switch)
-* Providing an interface for data (e.g. an internet-connected clock, stock ticker, sensor status, or status of another service). The interface may be given via an attached display, a web interface, or some other means,
+* Providing an interface for data (e.g. an internet-connected clock, stock ticker, sensor status, or status of another service). The interface may be given via an attached display, a web interface, or some other means.
 
 In all cases, the *thing* needs a way of getting connected to WiFi and configuring other basic settings. `WebThing` provides this capability and it also provides an extensible framework to add new web content including new pages and new menu items.
 
