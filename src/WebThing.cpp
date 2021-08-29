@@ -94,13 +94,15 @@ namespace WebThing {
       
     void prepLogging() {
       Serial.begin(BaudRate);
-      while (!Serial) yield();
-      Serial.println(); // Separate out from the normal garbage that starts the output
 
       // NOTE: Log level will be adjusted when settings are read, right now it is
       // whatever is in the default settings object
       Log.begin(settings.logLevel, &Serial, false);
       Log.setSuffix(flushSerial);
+
+      delay(500);
+      // Separate out from the normal garbage that starts the output
+      Serial.println(); Serial.flush(); Serial.println(); Serial.flush(); 
     }
 
     void prepFileSystem() {
@@ -172,7 +174,7 @@ namespace WebThing {
     
     void configChanged() {
       Internal::timeDB.init(
-          settings.timeZoneDBKey, settings.latAsString(), settings.lngAsString());
+          settings.timeZoneDBKey, settings.lat, settings.lng);
       if (Internal::configChangeCB) Internal::configChangeCB();
     }
   } // ----- END: WebThing::Protected namespace
@@ -185,26 +187,35 @@ namespace WebThing {
    *----------------------------------------------------------------------------*/            
 
   void preSetup() {
+    Internal::prepLogging();
+genHeapStatsRow("before prepFileSystem");
     Log.verbose(F("WebThing:: preSetup()"));
-    Internal::prepLogging();    
     Internal::prepFileSystem();       // Get the filesystem ready to go
+genHeapStatsRow("before settings.init");
     settings.init(SettingsFileName);  // Path to the settings file
+genHeapStatsRow("before settings.read");
     settings.read();                  // Read settings from the filesystem
-    Internal::prepPins();             // Set up any pins used by WebThing
     Log.setLevel(settings.logLevel);  // Update based on the settings we just read
+    Internal::prepPins();             // Set up any pins used by WebThing
+genHeapStatsRow("exiting preSetup");
   }
 
   void setup(bool enterAPMode) {
+    static String DefaultTitle("WebThing");
     apMode = enterAPMode;
     Log.verbose(F("WebThing:: setup(apMode = %T)"), apMode);
+genHeapStatsRow("before prepNetwork");
     Internal::prepNetwork();          // Get on the network
+genHeapStatsRow("before timeDB.init");
     Internal::timeDB.init(            // Initialize the time service... 
         settings.timeZoneDBKey,
-        settings.latAsString(),
-        settings.lngAsString());
+        settings.lat,
+        settings.lng);
+genHeapStatsRow("before WebUI::init");
     WebUI::init();                    // Set up the Web User Interface
-    WebUI::setTitle("WebThing");
+    WebUI::setTitle(DefaultTitle);
     if (!apMode && !settings.timeZoneDBKey.isEmpty()) {  // ...and sync the time
+genHeapStatsRow("before timeDB.syncTime");
       Internal::timeDB.syncTime(true);
     }
   }
@@ -250,15 +261,15 @@ namespace WebThing {
   }
 
   String formattedInterval(int h, int m, int s, bool zeroPadHours, bool includeSeconds) {
-    String result = "";
-    if (zeroPadHours && (h < 10))  result += "0";
-    result += h; result += ':';
-    if (m < 10)  result += "0";
-    result += m; 
+    // Return a result of the form hh:mm:ss (seconds are optional)
+    String result;
+    result.reserve(5 + includeSeconds ? 3 : 0);
+    if (zeroPadHours && (h < 10))  result += "0"; result += h;
+    result += ':';
+    if (m < 10)  result += "0"; result += m; 
     if (includeSeconds) {
       result += ':';
-      if (s < 10)  result += "0";
-      result += s;
+      if (s < 10)  result += "0"; result += s;
     }
     return result;
   }
@@ -274,7 +285,7 @@ namespace WebThing {
 
   int32_t getGMTOffset() { return apMode ? 0: Internal::timeDB.getGMTOffset(); }
 
-  void setDisplayedVersion(String version) { versionToDisplay = version; }
+  void setDisplayedVersion(String& version) { versionToDisplay = version; }
   String  getDisplayedVersion() { return versionToDisplay; }
 
   float measureVoltage() {
@@ -338,6 +349,10 @@ namespace WebThing {
     Log.verbose(F("Heap Free Space: %d"), GenericESP::getFreeHeap());
     Log.verbose(F("Heap Fragmentation: %d"), GenericESP::getHeapFragmentation());
     Log.verbose(F("Heap Max Block Size: %d"), GenericESP::getMaxFreeBlockSize());
+  }
+
+  void genHeapStatsRow(const char* msg) {
+    Log.verbose(F("HEAP,%s,%d,%d"), msg, ESP.getFreeHeap(), GenericESP::getHeapFragmentation());
   }
 
   String encodeAttr(String &src) {

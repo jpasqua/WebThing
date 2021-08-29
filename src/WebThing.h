@@ -103,7 +103,7 @@ namespace WebThing {
 
   // --- UI Helpers
   int8_t  wifiQualityAsPct();
-  void    setDisplayedVersion(String version);
+  void    setDisplayedVersion(String& version);
   String  getDisplayedVersion();
   String  ipAddrAsString();
 
@@ -121,6 +121,7 @@ namespace WebThing {
   // --- Other
   bool replaceEmptyHostname(const char* prefix);  // If hostname in settings is empty, generate one
   void logHeapStatus();
+  void genHeapStatsRow(const char* msg);
 
   namespace Protected {
     extern bool mDNSStarted;
