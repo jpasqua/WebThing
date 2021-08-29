@@ -29,17 +29,20 @@ namespace WebUI {
   // ----- Setup functions
   void init();
     // Call only once to start the web interface
-  void setTitle(String theTitle);
+  void setTitle(String& theTitle);
     // Can be called at any time to update the title used in html pages
     // as well as the header for built-in pages
-  void registerHandler(String path, std::function<void(void)> handler);
+  void registerHandler(const char* path, std::function<void(void)> handler);
     // Add a handler for a new endpoint. This is the equivalent of calling server.on(path, handler)
     // If the path is set to "/", then the default homepage is overriden
   void addMenuItems(String html);
     // NOTES: The html should be a concatenation of items of the form:
     // <a class='w3-bar-item w3-button' href='/ACTION_NAME'><i class='fa fa-cog'></i> Action Description</a>"
     // ACTION_NAME must correspond to an endpoint that was registered using registerHandler
-  
+  void addCoreMenuItems(PGM_P core);
+  void addAppMenuItems(PGM_P app);
+  void addDevMenuItems(PGM_P dev);
+
   ESPTemplateProcessor *getTemplateHandler();
 
   // ----- Periodic functions

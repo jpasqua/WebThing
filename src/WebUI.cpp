@@ -45,6 +45,9 @@ namespace WebUI {
   WebServer*            server;
   String                title;
   String                additionalMenuItems = "";
+  PGM_P                 coreMenuItems = nullptr;
+  PGM_P                 appMenuItems = nullptr;
+  PGM_P                 devMenuItems = nullptr;
   ESPTemplateProcessor  *templateHandler;
   static const String   checkedOrNot[2] = {"", "checked='checked'"};
 
@@ -71,7 +74,12 @@ namespace WebUI {
         if (key.equals(F("THEME_COLOR")))         return WebThing::settings.themeColor;
         if (key.equals(F("REFRESH")) && refresh)  return "<meta http-equiv='refresh' content='90'>";
         if (key.equals(F("PWR_VSBL")))            return WebThing::settings.displayPowerOptions ? "inline" : "none";
-        if (key.equals(F("ADDED_MENU_ITEMS")) && !additionalMenuItems.isEmpty()) return additionalMenuItems + "<hr>";
+        if (key.equals(F("CORE_MENU_ITEMS"))) {
+          if (coreMenuItems) return String(coreMenuItems);
+          else if (!additionalMenuItems.isEmpty()) return (String(additionalMenuItems));
+        }
+        if (key.equals(F("APP_MENU_ITEMS")) && appMenuItems) return String(appMenuItems);
+        if (key.equals(F("DEV_MENU_ITEMS")) && devMenuItems) return String(devMenuItems);
         return EmptyString;
       };
 
@@ -107,6 +115,11 @@ namespace WebUI {
       String target = "'" + String(selectedVal) + "'";  // e.g. '7'
       theOptions.replace(target, target + " selected");
       sendContent(theOptions);
+    }
+
+    void handleNotFound() {
+      Log.verbose("WebUI::handleNotFound: URI = %s", server->uri().c_str());
+      redirectHome();
     }
   }
   // ----- END: WebUI::Internal
@@ -206,7 +219,7 @@ namespace WebUI {
 
       String llTarget = "SL" + String(WebThing::settings.logLevel);
 
-      auto mapper =[llTarget](String &key) -> String {
+      auto mapper =[&llTarget](String &key) -> String {
         if (key == llTarget) return "selected";
         return Internal::EmptyString;
       };
@@ -223,7 +236,7 @@ namespace WebUI {
       String piTarget     = "SI" + String(WebThing::settings.processingInterval);
       String sopPinTarget = "SP" + String(WebThing::settings.sleepOverridePin);
 
-      auto mapper =[piTarget, sopPinTarget](String &key) -> String {
+      auto mapper =[&piTarget, &sopPinTarget](String &key) -> String {
         if (key == sopPinTarget)  return "selected";
         if (key == piTarget)      return "selected";
         if (key.equals(F("ULPM")))        return checkedOrNot[WebThing::settings.useLowPowerMode];
@@ -243,7 +256,7 @@ namespace WebUI {
 
       String themeTarget = "SL" + WebThing::settings.themeColor;
 
-      auto mapper =[themeTarget](String &key) -> String {
+      auto mapper =[&themeTarget](String &key) -> String {
         if (key.equals(F("LAT")))          return WebThing::settings.latAsString();
         if (key.equals(F("LNG")))          return WebThing::settings.lngAsString();
         if (key.equals(F("ELEV")))         return String(WebThing::settings.elevation);
@@ -291,7 +304,7 @@ namespace WebUI {
     server->on("/systemreset",    Endpoints::handleSystemReset);
     server->on("/forgetwifi",     Endpoints::handleWifiReset);
     
-    server->onNotFound(redirectHome);
+    server->onNotFound(Internal::handleNotFound);
 
     server->begin();
     if (WebThing::Protected::mDNSStarted) {
@@ -303,12 +316,24 @@ namespace WebUI {
     }
   }
 
-  void setTitle(String theTitle) { title = WebThing::encodeAttr(theTitle); }
+  void setTitle(String& theTitle) { title = WebThing::encodeAttr(theTitle); }
 
   void addMenuItems(String html) { additionalMenuItems = html; }
+  void addCoreMenuItems(PGM_P core) { 
+    Log.verbose("Called addCoreMenuItems");
+    coreMenuItems = core;
+  }
+  void addAppMenuItems(PGM_P app) {
+    Log.verbose("Called addAppMenuItems");
+    appMenuItems = app;
+  }
+  void addDevMenuItems(PGM_P dev) {
+    Log.verbose("Called addDevMenuItems");
+    devMenuItems = dev;
+  }
 
-  void registerHandler(String path, std::function<void(void)> handler) {
-    if (path.length() == 1 && path.charAt(0) == '/') {
+  void registerHandler(const char* path, std::function<void(void)> handler) {
+    if (path[0] == '/' && path[1] == '\0') {
       Internal::homeHandler = handler;
     } else {
       server->on(path, handler);
@@ -419,7 +444,7 @@ namespace WebUI {
 
   void sendStringContent(String type, String payload) {
     int length = payload.length();
-    auto cp = [length, payload](Stream &s) { s.write(payload.c_str(), length); };
+    auto cp = [length, &payload](Stream &s) { s.write(payload.c_str(), length); };
     sendArbitraryContent(type, length, cp);
   }
 }
