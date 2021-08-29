@@ -26,6 +26,12 @@ namespace WTBasics {
   static const uint32_t  MillisPerHour = (SecondsPerHour * MillisPerSecond);
 
 
+  // String Utilities
+  inline void setStringContent(String& target, const char* newContent) {
+    target.clear();
+    if (newContent) target.concat(newContent);
+  }
+
   // ----- Unit conversions
 
   // Temperature
