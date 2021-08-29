@@ -34,10 +34,10 @@ const uint32_t TimeDB::ThrottleInterval = 60 * 1000L;         // Once an minute
  *
  *----------------------------------------------------------------------------*/
 
-void TimeDB::init(String key, String lat, String lon) {
+void TimeDB::init(String& key, float lat, float lon) {
   _apiKey = key;
-  _lat = lat;
-  _lon = lon;
+  _lat = String(lat, 6);
+  _lon = String(lon, 6);
   _valid = !(_apiKey.isEmpty() || _lat.isEmpty() || _lon.isEmpty());
 
   if (!_valid) {

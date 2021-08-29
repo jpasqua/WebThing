@@ -21,7 +21,7 @@ class TimeDB
      * @param lat   The latitude for which we want the time
      * @param lon   The latitude for which we want the time
      */
-    void init(String key, String lat, String lon);
+    void init(String& key, float lat, float lon);
 
     /*
      * Make a request to the TimeZoneDB service to get the current time.
