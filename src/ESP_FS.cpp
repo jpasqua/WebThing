@@ -20,24 +20,28 @@
     bool exists(const char* path) { return SPIFFS.exists(path); }
     bool exists(const String& path) { return SPIFFS.exists(path); }
 
-    static File enumRoot;
-
-    bool beginFileList(String& path) {
-      enumRoot = SPIFFS.open(path);
-      return (enumRoot.isDirectory());
-    }
-
-    bool getNextFileName(String& name) {
-      File f;
-      do { f = enumRoot.openNextFile(); } while (f && f.isDirectory());
-      if (!f) return false;
-      name = f.name();
-      return true;
-    }
-
     bool remove(const String& path) {
       return SPIFFS.remove(path);
     }
+
+    class ESP32DirEnumerator : public DirEnumerator {
+    public:
+      bool begin(String& path) override {
+        enumRoot = SPIFFS.open(path);
+        return (enumRoot.isDirectory());
+      }
+      bool next(String& name) override {
+        File f;
+        do { f = enumRoot.openNextFile(); } while (f && f.isDirectory());
+        if (!f) return false;
+        name = f.name();
+        return true;
+      }
+    private:
+      File enumRoot;
+    };
+
+    DirEnumerator* newEnumerator() { return new ESP32DirEnumerator(); }
   };
 
 #elif defined(ESP8266)
@@ -67,18 +71,22 @@
       }
     #pragma GCC diagnostic pop
 
-    static Dir enumRoot;
+    class ESP8266DirEnumerator : public DirEnumerator {
+    public:
+      bool begin(String& path) override {
+        ESP_FS::openDir(path);
+        return true;  // Always returns true, even if it is empty
+      }
+      bool next(String& name) override {
+        if (!enumRoot.next()) return false;
+        name = enumRoot.fileName();
+        return true;
+      }
+    private:
+      Dir enumRoot;
+    };
 
-    bool beginFileList(String& path) {
-      enumRoot = ESP_FS::openDir(path);
-      return true;  // Always returns a directory object, even if it is empty
-    }
-    
-    bool getNextFileName(String &name) {
-      if (!enumRoot.next()) return false;
-      name = enumRoot.fileName();
-      return true;
-    }
+    DirEnumerator* newEnumerator() { return new ESP8266DirEnumerator(); }
   };
 
 #endif  

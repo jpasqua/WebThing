@@ -14,10 +14,15 @@ namespace ESP_FS {
   bool exists(const char* path);
   bool exists(const String& path);
 
-  bool beginFileList(String& path);
-  bool getNextFileName(String& name);
-
   bool remove(const String& path);
+
+  class DirEnumerator {
+  public:
+    virtual bool begin(String& path) = 0;
+    virtual bool next(String& name) = 0;
+  };
+
+  DirEnumerator* newEnumerator();
 };
 
 #endif  // ESP_FS_h
