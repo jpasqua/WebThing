@@ -188,34 +188,26 @@ namespace WebThing {
 
   void preSetup() {
     Internal::prepLogging();
-genHeapStatsRow("before prepFileSystem");
     Log.verbose(F("WebThing:: preSetup()"));
     Internal::prepFileSystem();       // Get the filesystem ready to go
-genHeapStatsRow("before settings.init");
     settings.init(SettingsFileName);  // Path to the settings file
-genHeapStatsRow("before settings.read");
     settings.read();                  // Read settings from the filesystem
     Log.setLevel(settings.logLevel);  // Update based on the settings we just read
     Internal::prepPins();             // Set up any pins used by WebThing
-genHeapStatsRow("exiting preSetup");
   }
 
   void setup(bool enterAPMode) {
     static String DefaultTitle("WebThing");
     apMode = enterAPMode;
     Log.verbose(F("WebThing:: setup(apMode = %T)"), apMode);
-genHeapStatsRow("before prepNetwork");
     Internal::prepNetwork();          // Get on the network
-genHeapStatsRow("before timeDB.init");
     Internal::timeDB.init(            // Initialize the time service... 
         settings.timeZoneDBKey,
         settings.lat,
         settings.lng);
-genHeapStatsRow("before WebUI::init");
     WebUI::init();                    // Set up the Web User Interface
     WebUI::setTitle(DefaultTitle);
     if (!apMode && !settings.timeZoneDBKey.isEmpty()) {  // ...and sync the time
-genHeapStatsRow("before timeDB.syncTime");
       Internal::timeDB.syncTime(true);
     }
   }
