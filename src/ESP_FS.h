@@ -18,6 +18,7 @@ namespace ESP_FS {
 
   class DirEnumerator {
   public:
+    virtual ~DirEnumerator() {};  // Must provide body for pure virtual destructor!
     virtual bool begin(String& path) = 0;
     virtual bool next(String& name) = 0;
   };
