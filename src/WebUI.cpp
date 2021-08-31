@@ -319,18 +319,9 @@ namespace WebUI {
   void setTitle(String& theTitle) { title = WebThing::encodeAttr(theTitle); }
 
   void addMenuItems(String html) { additionalMenuItems = html; }
-  void addCoreMenuItems(PGM_P core) { 
-    Log.verbose("Called addCoreMenuItems");
-    coreMenuItems = core;
-  }
-  void addAppMenuItems(PGM_P app) {
-    Log.verbose("Called addAppMenuItems");
-    appMenuItems = app;
-  }
-  void addDevMenuItems(PGM_P dev) {
-    Log.verbose("Called addDevMenuItems");
-    devMenuItems = dev;
-  }
+  void addCoreMenuItems(PGM_P core) {  coreMenuItems = core; }
+  void addAppMenuItems(PGM_P app) { appMenuItems = app; }
+  void addDevMenuItems(PGM_P dev) { devMenuItems = dev; }
 
   void registerHandler(const char* path, std::function<void(void)> handler) {
     if (path[0] == '/' && path[1] == '\0') {
