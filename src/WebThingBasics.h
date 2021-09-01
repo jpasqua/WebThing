@@ -31,6 +31,11 @@ namespace WTBasics {
     target.clear();
     if (newContent) target.concat(newContent);
   }
+  inline void resetString(String& target) {
+    if (target.length()) target.setCharAt(0, 0); // In case c_str() will be used
+    target.clear();
+  }
+
 
   // ----- Unit conversions
 
