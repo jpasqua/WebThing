@@ -31,6 +31,7 @@
 #include <WiFiManager.h>
 #include <TimeLib.h>
 //                                  Local Includes
+#include "WTBasics.h"
 #include "WebThing.h"
 #include "WebUI.h"
 #include "TimeDB.h"
@@ -44,7 +45,7 @@ namespace WebThing {
    * Constants
    *
    *----------------------------------------------------------------------------*/
-  static const long     BaudRate = 115200;
+  constexpr long     BaudRate = 115200;
   static const String   HostNameBase = "thing-";
   static const String   SettingsFileName = "/wt/settings.json";
 
@@ -267,11 +268,9 @@ namespace WebThing {
   }
 
   String formattedInterval(uint32_t seconds, bool zeroPadHours, bool includeSeconds) {
-    static const long secondsPerHour = 3600;
-    static const long secondsPerMinute = 60;
-    int h = seconds / secondsPerHour;
-    int m = (seconds / secondsPerMinute) % secondsPerMinute;
-    int s = (seconds % secondsPerMinute);       
+    int h = seconds / WTBasics::SecondsPerHour;
+    int m = (seconds / WTBasics::SecondsPerMinute) % WTBasics::SecondsPerMinute;
+    int s = (seconds % WTBasics::SecondsPerMinute);       
     return formattedInterval(h, m, s, zeroPadHours, includeSeconds);
   }
 

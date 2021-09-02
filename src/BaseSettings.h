@@ -33,7 +33,7 @@ public:
   virtual void logSettings() { }
 
 protected:
-  static const uint32_t InvalidVersion;
+  static const uint32_t InvalidVersion = 0x0000;
   uint16_t maxFileSize;
   virtual void fromJSON(JsonDocument &doc) = 0;
   virtual void toJSON(JsonDocument &doc) = 0;

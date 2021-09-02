@@ -19,11 +19,11 @@ namespace WTBasics {
   typedef std::function<void(float)> FloatValCB;
 
   // ----- Time Related Constants
-  static const uint32_t  MillisPerSecond = 1000L;
-  static const uint32_t  SecondsPerMinute = 60;
-  static const uint32_t  MinutesPerHour = 60;
-  static const uint32_t  SecondsPerHour = (SecondsPerMinute * MinutesPerHour);
-  static const uint32_t  MillisPerHour = (SecondsPerHour * MillisPerSecond);
+  constexpr uint32_t  MillisPerSecond = 1000L;
+  constexpr uint32_t  SecondsPerMinute = 60;
+  constexpr uint32_t  MinutesPerHour = 60;
+  constexpr uint32_t  SecondsPerHour = (SecondsPerMinute * MinutesPerHour);
+  constexpr uint32_t  MillisPerHour = (SecondsPerHour * MillisPerSecond);
 
 
   // String Utilities

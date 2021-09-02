@@ -21,9 +21,6 @@
 //--------------- End:    Includes ---------------------------------------------
 
 
-const uint32_t  WebThingSettings::CurrentVersion = 0x0002;
-const int8_t    WebThingSettings::NoPinAssigned = -1;
-
 WebThingSettings::WebThingSettings() {
   version = WebThingSettings::CurrentVersion;
   maxFileSize = 1024;

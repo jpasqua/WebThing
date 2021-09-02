@@ -27,7 +27,7 @@
 class WebThingSettings: public BaseSettings {
 public:
   // ----- Constants
-  static const int8_t   NoPinAssigned;
+  static constexpr int8_t   NoPinAssigned = -1;
 
   // ----- Constructors and methods
   WebThingSettings();
@@ -69,7 +69,7 @@ public:
 
 private:
   // ----- Constants
-  static const uint32_t CurrentVersion;
+  static constexpr uint32_t CurrentVersion = 0x0002;
 };
 
 #endif // WebThingSettings_h

@@ -22,10 +22,8 @@
  *
  *----------------------------------------------------------------------------*/
 
-const time_t   TimeDB::FailedRead = 0;
-const uint32_t TimeDB::ClockSyncInterval = 60 * 60 * 1000L;   // Once an hour
-const char     *TimeDB::servername = "api.timezonedb.com";
-const uint32_t TimeDB::ThrottleInterval = 60 * 1000L;         // Once an minute
+static constexpr uint32_t ClockSyncInterval = 60 * 60 * 1000L;   // Once an hour
+static constexpr uint32_t ThrottleInterval = 60 * 1000L;         // Once an minute
 
 
 /*------------------------------------------------------------------------------
@@ -94,7 +92,7 @@ time_t TimeDB::tryGettingTime() {
   static const String TimeEndpoint =
       "/v2.1/get-time-zone?key=" + _apiKey +
       "&format=json&by=position&lat=" + _lat + "&lng=" + _lon;
-  static const uint32_t TimeEndpointJSONSize = JSON_OBJECT_SIZE(13) + 512;
+  constexpr uint32_t TimeEndpointJSONSize = JSON_OBJECT_SIZE(13) + 512;
 
   DynamicJsonDocument *root = _service->issueGET(TimeEndpoint, TimeEndpointJSONSize);
   if (!root) {

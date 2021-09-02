@@ -11,7 +11,7 @@
 #include <ArduinoLog.h>
 #include <TimeLib.h>
 #include <GenericESP.h>
-#include <WebThingBasics.h>
+#include <WTBasics.h>
 //                                  Local Includes
 #include "DataBroker.h"
 //--------------- End:    Includes ---------------------------------------------
@@ -24,12 +24,12 @@ namespace DataBroker {
     WTBasics::ReferenceMapper map;
   } Mapper;
 
-  static const uint8_t MaxMappers = 8;
+  constexpr uint8_t MaxMappers = 8;
   uint8_t nMappers = 0;
   Mapper mappers[MaxMappers];
 
   namespace System {
-    static const char NamespacePrefix = 'S';
+    constexpr char NamespacePrefix = 'S';
 
     void map(const String& key, String& value) {
       if (key.equalsIgnoreCase("time")) {

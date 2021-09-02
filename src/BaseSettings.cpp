@@ -20,8 +20,6 @@
 //--------------- End:    Includes ---------------------------------------------
 
 
-const uint32_t BaseSettings::InvalidVersion = 0x0000;
-
 BaseSettings::BaseSettings() { }
 
 void BaseSettings::init(String _filePath) {

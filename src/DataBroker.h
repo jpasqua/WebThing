@@ -12,7 +12,7 @@
 //                                  Core Libraries
 #include <Arduino.h>
 //                                  Third Party Libraries
-#include <WebThingBasics.h>
+#include <WTBasics.h>
 //                                  Local Includes
 //--------------- End:    Includes ---------------------------------------------
 

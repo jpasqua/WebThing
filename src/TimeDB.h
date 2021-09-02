@@ -12,7 +12,7 @@
 class TimeDB
 {
   public:
-    static const time_t FailedRead;
+    static constexpr time_t FailedRead = 0;
     
     /*
      * Initialize (or re-initialize) the TimeDB object.
@@ -55,10 +55,6 @@ class TimeDB
     inline int32_t getGMTOffset() {return _gmtOffset; }
 
   private:
-    static const uint32_t ClockSyncInterval;
-    static const uint32_t ThrottleInterval;
-    static const char* servername;
-
     bool        _valid = false;
     int32_t     _gmtOffset = 0;
     String      _apiKey;
