@@ -14,6 +14,8 @@ class TimeDB
   public:
     static constexpr time_t FailedRead = 0;
     
+    TimeDB() = default;
+    
     /*
      * Initialize (or re-initialize) the TimeDB object.
      *
@@ -21,7 +23,7 @@ class TimeDB
      * @param lat   The latitude for which we want the time
      * @param lon   The latitude for which we want the time
      */
-    void init(String& key, float lat, float lon);
+    void init(const String& key, float lat, float lon);
 
     /*
      * Make a request to the TimeZoneDB service to get the current time.
@@ -55,11 +57,11 @@ class TimeDB
     inline int32_t getGMTOffset() {return _gmtOffset; }
 
   private:
-    bool        _valid = false;
-    int32_t     _gmtOffset = 0;
     String      _apiKey;
     String      _lat;
     String      _lon;
+    bool        _valid = false;
+    int32_t     _gmtOffset = 0;
     uint32_t    _timeOfLastTimeRefresh;
     JSONService *_service = NULL;
 

@@ -14,7 +14,7 @@ public:
   // ----- Constructors and methods -----
   BaseSettings();
 
-  void    init(String _filePath);
+  void    init(const String& _filePath);
   bool    clear();
   bool    read();
   bool    write();
@@ -35,8 +35,10 @@ public:
 protected:
   static const uint32_t InvalidVersion = 0x0000;
   uint16_t maxFileSize;
-  virtual void fromJSON(JsonDocument &doc) = 0;
+  virtual void fromJSON(const JsonDocument &doc) = 0;
   virtual void toJSON(JsonDocument &doc) = 0;
+      // NOTE: The document is modified in this function. That's the whole
+      // point. The settings are serialied into the document.
 
 protected:
   // ----- State

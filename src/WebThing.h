@@ -98,12 +98,12 @@ namespace WebThing {
   // --- Notification Callbacks
   void    notifyBeforeDeepSleep(std::function<void()> callback);
   void    notifyAfterSleepMinutes(std::function<void()> callback);
-  void    notifyOnConfigMode(std::function<void(String&, String&)> callback);
+  void    notifyOnConfigMode(std::function<void(const String&, const String&)> callback);
   void    notifyConfigChange(std::function<void()> callback);
 
   // --- UI Helpers
   int8_t  wifiQualityAsPct();
-  void    setDisplayedVersion(String& version);
+  void    setDisplayedVersion(const String& version);
   String  getDisplayedVersion();
   String  ipAddrAsString();
 
@@ -114,9 +114,9 @@ namespace WebThing {
   int32_t getGMTOffset();
 
   // --- HTTP/HTML Helpers
-  String urldecode(String &str);
-  String urlencode(String &str);
-  String encodeAttr(String &src);
+  String urldecode(const String &str);
+  String urlencode(const String &str);
+  String encodeAttr(const String &src);
 
   // --- Other
   bool replaceEmptyHostname(const char* prefix);  // If hostname in settings is empty, generate one

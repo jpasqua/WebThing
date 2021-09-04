@@ -276,7 +276,7 @@ namespace WebThing {
 
   int32_t getGMTOffset() { return apMode ? 0: Internal::timeDB.getGMTOffset(); }
 
-  void setDisplayedVersion(String& version) { versionToDisplay = version; }
+  void setDisplayedVersion(const String& version) { versionToDisplay = version; }
   String  getDisplayedVersion() { return versionToDisplay; }
 
   float measureVoltage() {
@@ -296,7 +296,7 @@ namespace WebThing {
     Internal::afterSleepMinutesCB = callback;
   }
 
-  void notifyOnConfigMode(std::function<void(String&, String&)> callback) {
+  void notifyOnConfigMode(std::function<void(const String&, const String&)> callback) {
     Internal::configModeCB = callback;
   }
 
@@ -346,7 +346,7 @@ namespace WebThing {
     Log.verbose(F("HEAP,%s,%d,%d"), msg, ESP.getFreeHeap(), GenericESP::getHeapFragmentation());
   }
 
-  String encodeAttr(String &src) {
+  String encodeAttr(const String &src) {
     String buffer = "";
     size_t srcLength = src.length();
     buffer.reserve(srcLength + 6);
@@ -364,7 +364,7 @@ namespace WebThing {
     return buffer;
   }
 
-  String urldecode(String &str) { 
+  String urldecode(const String &str) { 
     String encodedString="";
     char c, code0, code1;
     int len = str.length();
@@ -384,7 +384,7 @@ namespace WebThing {
    return encodedString;
   }
 
-  String urlencode(String &str) {
+  String urlencode(const String &str) {
     String encodedString = "";
     char c, code0, code1;
     int len = str.length();

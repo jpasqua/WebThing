@@ -29,7 +29,7 @@ namespace WebUI {
   // ----- Setup functions
   void init();
     // Call only once to start the web interface
-  void setTitle(String& theTitle);
+  void setTitle(const String& theTitle);
     // Can be called at any time to update the title used in html pages
     // as well as the header for built-in pages
   void registerHandler(const char* path, std::function<void(void)> handler);

@@ -27,7 +27,7 @@
     class ESP32DirEnumerator : public DirEnumerator {
     public:
       ~ESP32DirEnumerator() { }
-      bool begin(String& path) override {
+      bool begin(const String& path) override {
         enumRoot = SPIFFS.open(path);
         return (enumRoot.isDirectory());
       }
@@ -75,7 +75,7 @@
     class ESP8266DirEnumerator : public DirEnumerator {
     public:
       ~ESP8266DirEnumerator() { }
-      bool begin(String& path) override {
+      bool begin(const String& path) override {
         enumRoot = ESP_FS::openDir(path);
         return true;  // Always returns true, even if it is empty
       }

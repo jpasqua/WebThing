@@ -31,7 +31,7 @@ public:
 
   // ----- Constructors and methods
   WebThingSettings();
-  void fromJSON(JsonDocument &doc);
+  void fromJSON(const JsonDocument &doc);
   void toJSON(JsonDocument &doc);
   void logSettings();
 

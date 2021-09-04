@@ -22,7 +22,7 @@
 
 BaseSettings::BaseSettings() { }
 
-void BaseSettings::init(String _filePath) {
+void BaseSettings::init(const String& _filePath) {
   filePath = _filePath;
   Log.verbose(F("settings file path = %s"), filePath.c_str());
 }

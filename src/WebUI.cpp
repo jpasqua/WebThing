@@ -316,7 +316,7 @@ namespace WebUI {
     }
   }
 
-  void setTitle(String& theTitle) { title = WebThing::encodeAttr(theTitle); }
+  void setTitle(const String& theTitle) { title = WebThing::encodeAttr(theTitle); }
 
   void addMenuItems(String html) { additionalMenuItems = html; }
   void addCoreMenuItems(PGM_P core) {  coreMenuItems = core; }

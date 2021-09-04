@@ -26,7 +26,7 @@ WebThingSettings::WebThingSettings() {
   maxFileSize = 1024;
 }
 
-void WebThingSettings::fromJSON(JsonDocument &doc) {
+void WebThingSettings::fromJSON(const JsonDocument &doc) {
   lat = doc[F("lat")];
   lng = doc[F("lng")];
   elevation = doc[F("elevation")];

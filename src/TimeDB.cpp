@@ -32,7 +32,7 @@ static constexpr uint32_t ThrottleInterval = 60 * 1000L;         // Once an minu
  *
  *----------------------------------------------------------------------------*/
 
-void TimeDB::init(String& key, float lat, float lon) {
+void TimeDB::init(const String& key, float lat, float lon) {
   _apiKey = key;
   _lat = String(lat, 6);
   _lon = String(lon, 6);
