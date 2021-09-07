@@ -35,15 +35,29 @@ namespace WebUI {
   void registerHandler(const char* path, std::function<void(void)> handler);
     // Add a handler for a new endpoint. This is the equivalent of calling server.on(path, handler)
     // If the path is set to "/", then the default homepage is overriden
-  void addMenuItems(String html);
-    // NOTES: The html should be a concatenation of items of the form:
-    // <a class='w3-bar-item w3-button' href='/ACTION_NAME'><i class='fa fa-cog'></i> Action Description</a>"
-    // ACTION_NAME must correspond to an endpoint that was registered using registerHandler
-  void addCoreMenuItems(PGM_P core);
-  void addAppMenuItems(PGM_P app);
-  void addDevMenuItems(PGM_P dev);
+  void registerBusyCallback(std::function<void(bool)> handler);
+    // If you'd like to know when WebThing starts and finishes processing a web request,
+    // registera function here. When called, the parameter will be true when the
+    // processing begins, and false when it ends.
 
-  ESPTemplateProcessor *getTemplateHandler();
+  // ----- Registering Menu Items
+  // The overall "hamburger" menu is composed of three sets of menu items:
+  // 1. Core: These items correspond to functionality that tends to be common across use cases
+  // 2. App:  These items are app-specific
+  // 3. Dev:  These are developer-specific menu items and aren't usually displayed by default
+  // These three sets of items can be registered independently using the functions below.
+  // To support legacy use cases, they can also be pre-concatenated into a single string and
+  // passed to addMenuItems().
+  // In either case,  The html should be a concatenation of items of the form:
+  // <a class='w3-bar-item w3-button' href='/ACTION_NAME'><i class='fa fa-cog'></i> Action Description</a>"
+  // ACTION_NAME must correspond to an endpoint that was registered using registerHandler
+
+  void addCoreMenuItems(const __FlashStringHelper* core);
+  void addAppMenuItems(const __FlashStringHelper* app);
+  void addDevMenuItems(const __FlashStringHelper* dev);
+
+  void addMenuItems(String html);
+
 
   // ----- Periodic functions
   void handleClient();
@@ -62,6 +76,9 @@ namespace WebUI {
   void redirectHome();
   void closeConnection(uint16_t code, String text);
   bool authenticationOK();
+
+  ESPTemplateProcessor *getTemplateHandler();
+
 
   // ---------- Helper functions that isolate your code from the underlying server object
   // ----- Request arguments

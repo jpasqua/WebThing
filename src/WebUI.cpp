@@ -45,9 +45,9 @@ namespace WebUI {
   WebServer*            server;
   String                title;
   String                additionalMenuItems = "";
-  PGM_P                 coreMenuItems = nullptr;
-  PGM_P                 appMenuItems = nullptr;
-  PGM_P                 devMenuItems = nullptr;
+  const __FlashStringHelper*  coreMenuItems = nullptr;
+  const __FlashStringHelper*  appMenuItems = nullptr;
+  const __FlashStringHelper*  devMenuItems = nullptr;
   ESPTemplateProcessor  *templateHandler;
   static const String   checkedOrNot[2] = {"", "checked='checked'"};
 
@@ -56,6 +56,7 @@ namespace WebUI {
     String EmptyString = "";
 
     std::function<void(void)> homeHandler = NULL;
+    std::function<void(bool)> busyCallback = nullptr; 
 
     bool authentication() {
       if (WebThing::settings.useBasicAuth              &&
@@ -144,18 +145,22 @@ namespace WebUI {
     void setLogLevel() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
       Log.trace(F("Web Request: Set Log Level"));
+
+      if (Internal::busyCallback) Internal::busyCallback(true);
       WebThing::settings.logLevel = server->arg("logLevel").toInt();
       Log.setLevel(WebThing::settings.logLevel);
       Log.verbose(F("New Log Level: %d"), WebThing::settings.logLevel);
       WebThing::settings.write();
       WebThing::Protected::configChanged();
       WebUI::redirectHome();
+      if (Internal::busyCallback) Internal::busyCallback(false);
     }
 
     void updatePwrConfig() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
       Log.trace(F("Web Request: Handle Update Config"));
 
+      if (Internal::busyCallback) Internal::busyCallback(true);
       // ----- Power Settings
       WebThing::settings.useLowPowerMode = server->hasArg("useLowPowerMode");
       WebThing::settings.hasVoltageSensing = server->hasArg("hasVoltageSensing");
@@ -168,12 +173,14 @@ namespace WebUI {
       WebThing::settings.write();
       WebThing::Protected::configChanged();
       WebUI::redirectHome();
+      if (Internal::busyCallback) Internal::busyCallback(false);
     }
 
     void updateConfig() {
       if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
       Log.trace(F("Web Request: Handle Update Config"));
 
+      if (Internal::busyCallback) Internal::busyCallback(true);
       // ----- Location Settings
       WebThing::settings.lat = server->arg("lat").toFloat();
       WebThing::settings.lng = server->arg("lng").toFloat();
@@ -194,6 +201,7 @@ namespace WebUI {
       WebThing::settings.write();
       WebThing::Protected::configChanged();
       WebUI::redirectHome();
+      if (Internal::busyCallback) Internal::busyCallback(false);
     }
 
   }
@@ -205,9 +213,11 @@ namespace WebUI {
       Log.trace(F("Web Request: Home Page"));
       if (Internal::homeHandler) { Internal::homeHandler(); return; }
 
+      if (Internal::busyCallback) Internal::busyCallback(true);
       startPage();
       server->sendContent("<h1>WebThing Home</h1>");
       finishPage();
+      if (Internal::busyCallback) Internal::busyCallback(false);
     }
 
     void displayLogLevel() {
@@ -220,9 +230,11 @@ namespace WebUI {
         if (key == llTarget) val = "selected";
       };
 
+      if (Internal::busyCallback) Internal::busyCallback(true);
       startPage();
       templateHandler->send("/wt/LogLevel.html", mapper);
       finishPage();
+      if (Internal::busyCallback) Internal::busyCallback(false);
     }
 
     void displayPowerConfig() {
@@ -240,9 +252,11 @@ namespace WebUI {
         else if (key.equals(F("VCF"))) val = WebThing::settings.vcfAsString();
       };
 
+      if (Internal::busyCallback) Internal::busyCallback(true);
       startPage();
       templateHandler->send("/wt/PowerForm.html", mapper);
       finishPage();
+      if (Internal::busyCallback) Internal::busyCallback(false);
     }
 
     void displayConfig() {
@@ -265,9 +279,11 @@ namespace WebUI {
         else if (key == themeTarget)            val = "selected";
       };
 
+      if (Internal::busyCallback) Internal::busyCallback(true);
       startPage();
       templateHandler->send("/wt/ConfigForm.html", mapper);
       finishPage();
+      if (Internal::busyCallback) Internal::busyCallback(false);
     }
   } 
   // ----- END: WebUI::Pages
@@ -313,9 +329,9 @@ namespace WebUI {
   void setTitle(const String& theTitle) { title = WebThing::encodeAttr(theTitle); }
 
   void addMenuItems(String html) { additionalMenuItems = html; }
-  void addCoreMenuItems(PGM_P core) {  coreMenuItems = core; }
-  void addAppMenuItems(PGM_P app) { appMenuItems = app; }
-  void addDevMenuItems(PGM_P dev) { devMenuItems = dev; }
+  void addCoreMenuItems(const __FlashStringHelper* core) { coreMenuItems = core; }
+  void addAppMenuItems(const __FlashStringHelper* app) { appMenuItems = app; }
+  void addDevMenuItems(const __FlashStringHelper* dev) { devMenuItems = dev; }
 
   void registerHandler(const char* path, std::function<void(void)> handler) {
     if (path[0] == '/' && path[1] == '\0') {
@@ -323,6 +339,10 @@ namespace WebUI {
     } else {
       server->on(path, handler);
     }
+  }
+
+  void registerBusyCallback(std::function<void(bool)> bc) {
+    Internal::busyCallback = bc;
   }
 
   ESPTemplateProcessor *getTemplateHandler() { return templateHandler; }
