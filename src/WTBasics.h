@@ -24,6 +24,7 @@ namespace WTBasics {
   constexpr uint32_t  MinutesPerHour = 60;
   constexpr uint32_t  SecondsPerHour = (SecondsPerMinute * MinutesPerHour);
   constexpr uint32_t  MillisPerHour = (SecondsPerHour * MillisPerSecond);
+  constexpr uint32_t  MillisPerMinute = (SecondsPerMinute * MillisPerSecond);
 
 
   // String Utilities

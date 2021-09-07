@@ -69,36 +69,33 @@ namespace WebUI {
     }
 
     void sendPageHeader(bool refresh = false) {
-      auto mapper =[refresh](String &key) -> String {
-        if (key.equals(F("TITLE")))               return title;
-        if (key.equals(F("THEME_COLOR")))         return WebThing::settings.themeColor;
-        if (key.equals(F("REFRESH")) && refresh)  return "<meta http-equiv='refresh' content='90'>";
-        if (key.equals(F("PWR_VSBL")))            return WebThing::settings.displayPowerOptions ? "inline" : "none";
-        if (key.equals(F("CORE_MENU_ITEMS"))) {
-          if (coreMenuItems) return String(coreMenuItems);
-          else if (!additionalMenuItems.isEmpty()) return (String(additionalMenuItems));
+      auto mapper =[refresh](const String &key, String& val) -> void {
+        if (key.equals(F("TITLE"))) val = title;
+        else if (key.equals(F("THEME_COLOR"))) val = WebThing::settings.themeColor;
+        else if (key.equals(F("REFRESH")) && refresh) val = "<meta http-equiv='refresh' content='90'>";
+        else if (key.equals(F("PWR_VSBL"))) val = WebThing::settings.displayPowerOptions ? "inline" : "none";
+        else if (key.equals(F("CORE_MENU_ITEMS"))) {
+          if (coreMenuItems) val = coreMenuItems;
+          else if (!additionalMenuItems.isEmpty()) val = additionalMenuItems;
         }
-        if (key.equals(F("APP_MENU_ITEMS")) && appMenuItems) return String(appMenuItems);
-        if (key.equals(F("DEV_MENU_ITEMS")) && devMenuItems) return String(devMenuItems);
-        return EmptyString;
+        else if (key.equals(F("APP_MENU_ITEMS")) && appMenuItems) val = appMenuItems;
+        else if (key.equals(F("DEV_MENU_ITEMS")) && devMenuItems) val = devMenuItems;
       };
 
       templateHandler->send("/wt/Header.html", mapper);
     }
 
     void sendFooter() {
-      auto mapper =[](String &key) -> String {
-        if (key.equals(F("VERSION"))) return WebThing::getDisplayedVersion();
-        if (key.equals(F("RSSI")))  return (String(WebThing::wifiQualityAsPct()) + "%");
-        if (key.equals(F("SLEEP_OVERRIDE")) && WebThing::settings.useLowPowerMode) {
-          String val = "<span style='float:right;'><i class='fa fa-bed' aria-hidden='true'></i> Sleep Mode Override: ";
+      auto mapper =[](const String &key, String& val) -> void {
+        if (key.equals(F("VERSION"))) val = WebThing::getDisplayedVersion();
+        else if (key.equals(F("RSSI"))) { val.concat(WebThing::wifiQualityAsPct()); val.concat('%'); }
+        else if (key.equals(F("SLEEP_OVERRIDE")) && WebThing::settings.useLowPowerMode) {
+          val = "<span style='float:right;'><i class='fa fa-bed' aria-hidden='true'></i> Sleep Mode Override: ";
           if (WebThing::isSleepOverrideEnabled()) val.concat("On");
           else val.concat("Off");
           val.concat("</span>");
-          return val;
         }
-        return EmptyString;
-        };
+      };
 
       templateHandler->send("/wt/Footer.html", mapper);
     }
@@ -219,9 +216,8 @@ namespace WebUI {
 
       String llTarget = "SL" + String(WebThing::settings.logLevel);
 
-      auto mapper =[&llTarget](String &key) -> String {
-        if (key == llTarget) return "selected";
-        return Internal::EmptyString;
+      auto mapper =[&llTarget](const String &key, String& val) -> void {
+        if (key == llTarget) val = "selected";
       };
 
       startPage();
@@ -236,13 +232,12 @@ namespace WebUI {
       String piTarget     = "SI" + String(WebThing::settings.processingInterval);
       String sopPinTarget = "SP" + String(WebThing::settings.sleepOverridePin);
 
-      auto mapper =[&piTarget, &sopPinTarget](String &key) -> String {
-        if (key == sopPinTarget)  return "selected";
-        if (key == piTarget)      return "selected";
-        if (key.equals(F("ULPM")))        return checkedOrNot[WebThing::settings.useLowPowerMode];
-        if (key.equals(F("VSENSE")))      return checkedOrNot[WebThing::settings.hasVoltageSensing];
-        if (key.equals(F("VCF")))         return WebThing::settings.vcfAsString();
-        return                    Internal::EmptyString;
+      auto mapper =[&piTarget, &sopPinTarget](const String &key, String& val) -> void {
+        if (key == sopPinTarget) val = "selected";
+        else if (key == piTarget) val = "selected";
+        else if (key.equals(F("ULPM"))) val = checkedOrNot[WebThing::settings.useLowPowerMode];
+        else if (key.equals(F("VSENSE"))) val = checkedOrNot[WebThing::settings.hasVoltageSensing];
+        else if (key.equals(F("VCF"))) val = WebThing::settings.vcfAsString();
       };
 
       startPage();
@@ -256,19 +251,18 @@ namespace WebUI {
 
       String themeTarget = "SL" + WebThing::settings.themeColor;
 
-      auto mapper =[&themeTarget](String &key) -> String {
-        if (key.equals(F("LAT")))          return WebThing::settings.latAsString();
-        if (key.equals(F("LNG")))          return WebThing::settings.lngAsString();
-        if (key.equals(F("ELEV")))         return String(WebThing::settings.elevation);
-        if (key.equals(F("GMAPS_KEY")))    return WebThing::settings.googleMapsKey;
-        if (key.equals(F("TZDB_KEY")))     return WebThing::settings.timeZoneDBKey;
-        if (key.equals(F("HOSTNAME")))     return WebThing::settings.hostname;
-        if (key.equals(F("SERVER_PORT")))  return String(WebThing::settings.webServerPort);
-        if (key.equals(F("BASIC_AUTH")))   return checkedOrNot[WebThing::settings.useBasicAuth];
-        if (key.equals(F("WEB_UNAME")))    return WebThing::settings.webUsername;
-        if (key.equals(F("WEB_PASS")))     return WebThing::settings.webPassword;  
-        if (key == themeTarget)       return "selected";
-        return Internal::EmptyString;
+      auto mapper =[&themeTarget](const String &key, String& val) -> void {
+        if (key.equals(F("LAT")))               val = WebThing::settings.latAsString();
+        else if (key.equals(F("LNG")))          val = WebThing::settings.lngAsString();
+        else if (key.equals(F("ELEV")))         val.concat(WebThing::settings.elevation);
+        else if (key.equals(F("GMAPS_KEY")))    val = WebThing::settings.googleMapsKey;
+        else if (key.equals(F("TZDB_KEY")))     val = WebThing::settings.timeZoneDBKey;
+        else if (key.equals(F("HOSTNAME")))     val = WebThing::settings.hostname;
+        else if (key.equals(F("SERVER_PORT")))  val.concat(WebThing::settings.webServerPort);
+        else if (key.equals(F("BASIC_AUTH")))   val = checkedOrNot[WebThing::settings.useBasicAuth];
+        else if (key.equals(F("WEB_UNAME")))    val = WebThing::settings.webUsername;
+        else if (key.equals(F("WEB_PASS")))     val = WebThing::settings.webPassword;  
+        else if (key == themeTarget)            val = "selected";
       };
 
       startPage();
