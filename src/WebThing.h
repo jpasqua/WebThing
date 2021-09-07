@@ -67,7 +67,7 @@
 
 namespace WebThing {
   // ----- Constants
-  static const String Version  = "0.2.1";
+  static const String Version  = "0.5.0";
 
   // ----- Public State
   extern WebThingSettings  settings;
