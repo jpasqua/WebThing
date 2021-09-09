@@ -14,9 +14,10 @@
 
 namespace WTBasics {
   // ----- Basic Types
-  typedef std::function<String(String&)> StringMapper;
-  typedef std::function<void(const String&, String&)> ReferenceMapper;
-  typedef std::function<void(float)> FloatValCB;
+  using StringMapper = std::function<String(const String&)>;
+  using ReferenceMapper = std::function<void(const String&, String&)> ;
+  using FloatValCB = std::function<void(float)>;
+
 
   // ----- Time Related Constants
   constexpr uint32_t  MillisPerSecond = 1000L;
@@ -28,10 +29,6 @@ namespace WTBasics {
 
 
   // String Utilities
-  inline void setStringContent(String& target, const char* newContent) {
-    target.clear();
-    if (newContent) target.concat(newContent);
-  }
   inline void resetString(String& target) {
     if (target.length()) target.setCharAt(0, 0); // In case c_str() will be used
     target.clear();
