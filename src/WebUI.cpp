@@ -42,6 +42,8 @@
 
 // ----- BEGIN: WebUI namespacea
 namespace WebUI {
+  constexpr const char* checkedOrNot[2] = {"", "checked='checked'"};
+
   WebServer*            server;
   String                title;
   String                additionalMenuItems = "";
@@ -49,7 +51,6 @@ namespace WebUI {
   const __FlashStringHelper*  appMenuItems = nullptr;
   const __FlashStringHelper*  devMenuItems = nullptr;
   ESPTemplateProcessor  *templateHandler;
-  static const String   checkedOrNot[2] = {"", "checked='checked'"};
 
   // ----- BEGIN: WebUI::Internal
   namespace Internal {
