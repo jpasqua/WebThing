@@ -46,8 +46,8 @@ namespace WebThing {
    *
    *----------------------------------------------------------------------------*/
   constexpr long     BaudRate = 115200;
-  static const String   HostNameBase = "thing-";
-  static const String   SettingsFileName = "/wt/settings.json";
+  static constexpr const char* HostNameBase = "thing-";
+  static constexpr const char* SettingsFileName = "/wt/settings.json";
 
   /*------------------------------------------------------------------------------
    *
@@ -68,7 +68,7 @@ namespace WebThing {
     TimeDB timeDB;
     std::function<void()> deepSleepCallback = NULL;
     std::function<void()> afterSleepMinutesCB = NULL;
-    std::function<void(String&, String&)> configModeCB = NULL;
+    std::function<void(const String&, const String&)> configModeCB = NULL;
     std::function<void()> configChangeCB = NULL;
 
     /*------------------------------------------------------------------------------
@@ -277,6 +277,7 @@ namespace WebThing {
   int32_t getGMTOffset() { return apMode ? 0: Internal::timeDB.getGMTOffset(); }
 
   void setDisplayedVersion(const String& version) { versionToDisplay = version; }
+  void setDisplayedVersion(const char* version) { versionToDisplay = version; }
   String  getDisplayedVersion() { return versionToDisplay; }
 
   float measureVoltage() {

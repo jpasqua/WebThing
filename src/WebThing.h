@@ -67,7 +67,7 @@
 
 namespace WebThing {
   // ----- Constants
-  static const String Version  = "0.5.0";
+  static constexpr const char* Version = "0.5.0";
 
   // ----- Public State
   extern WebThingSettings  settings;
@@ -104,6 +104,7 @@ namespace WebThing {
   // --- UI Helpers
   int8_t  wifiQualityAsPct();
   void    setDisplayedVersion(const String& version);
+  void    setDisplayedVersion(const char* version);
   String  getDisplayedVersion();
   String  ipAddrAsString();
 
