@@ -64,6 +64,7 @@ class TimeDB
     int32_t     _gmtOffset = 0;
     uint32_t    _timeOfLastTimeRefresh;
     JSONService *_service = NULL;
+    String      _endpoint;
 
     time_t tryGettingTime();
     bool   throttle();

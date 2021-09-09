@@ -46,10 +46,18 @@ void TimeDB::init(const String& key, float lat, float lon) {
 
   if (_service == NULL) {
     ServiceDetails details;
-    details.server = "api.timezonedb.com";
+    details.server = F("api.timezonedb.com");
     details.port = 80;
     _service = new JSONService(details);
   }
+
+  _endpoint.reserve(132);
+  _endpoint = F("/v2.1/get-time-zone?key=");
+  _endpoint += _apiKey;
+  _endpoint += F("&format=json&by=position&lat=");
+  _endpoint += _lat;
+  _endpoint += F("&lng=");
+  _endpoint += _lon;
 }
 
 /*------------------------------------------------------------------------------
@@ -89,12 +97,9 @@ time_t TimeDB::syncTime(bool force) {
  *----------------------------------------------------------------------------*/
 
 time_t TimeDB::tryGettingTime() {
-  static const String TimeEndpoint =
-      "/v2.1/get-time-zone?key=" + _apiKey +
-      "&format=json&by=position&lat=" + _lat + "&lng=" + _lon;
   constexpr uint32_t TimeEndpointJSONSize = JSON_OBJECT_SIZE(13) + 512;
 
-  DynamicJsonDocument *root = _service->issueGET(TimeEndpoint, TimeEndpointJSONSize);
+  DynamicJsonDocument* root = _service->issueGET(_endpoint, TimeEndpointJSONSize);
   if (!root) {
     Log.warning(F("issueGET failed for timezonedb"));
     return FailedRead;
