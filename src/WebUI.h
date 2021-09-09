@@ -97,7 +97,7 @@ namespace WebUI {
   bool hasHeader(const String& name);       // check if header exists
 
   // ----- Sending Arbitrary Data
-  typedef std::function<void(Stream&)> ContentProvider;
+  using ContentProvider = std::function<void(Stream&)>;
   void sendArbitraryContent(String type, int32_t length, ContentProvider cp);
   void sendStringContent(String type, String payload);
   void sendJSONContent(DynamicJsonDocument *doc);
