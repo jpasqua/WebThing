@@ -19,14 +19,49 @@
 
 namespace DataBroker {
 
-  typedef struct Mapper {
-    char prefix;
-    WTBasics::ReferenceMapper map;
-  } Mapper;
+  namespace Mappings {
+    using Mapper = struct {
+      char prefix;
+      WTBasics::ReferenceMapper map;
+    };
 
-  constexpr uint8_t MaxMappers = 8;
-  uint8_t nMappers = 0;
-  Mapper mappers[MaxMappers];
+    constexpr uint8_t MaxMappers = 8;
+    uint8_t nMappers = 0;
+    std::array<Mapper, MaxMappers> mappers;
+
+    Mapper* findMapper(char prefix) {
+      for (auto& mapper: mappers) {
+        if (mapper.prefix == prefix) return &mapper;
+      }
+      return NULL;
+    }
+
+    bool addMapper(WTBasics::ReferenceMapper map, char prefix) {
+      if (nMappers == MaxMappers) {
+        Log.warning("DataBroker::registerMapper: No space remains for more mappers");
+        return false;
+      }
+
+      Mapper* m = findMapper(prefix);
+      if (m != NULL) {
+        Log.warning("DataBroker::registerMapper: mapper for prefix %c was already registered", prefix);
+        return false;
+      }
+      mappers[nMappers++] = {prefix, map};
+
+      return true;
+    }
+
+    void performMapping(char prefix, const String& key, String& value) {
+      Mapper* m = findMapper(prefix);
+      if (m == NULL) {
+        Log.warning("DataBroker::map: No mapper found for key %s", key.c_str());
+        return;
+      }
+      m->map(key, value);
+    }
+  } // ----- END: Databroker::Mappings namespace
+
 
   namespace System {
     constexpr char NamespacePrefix = 'S';
@@ -50,42 +85,18 @@ namespace DataBroker {
   } // ----- END: Databroker::System namespace
 
 
-  Mapper* findMapper(char prefix) {
-    for (int i = 0; i < nMappers; i++) {
-      if (mappers[i].prefix == prefix) return &mappers[i];
-    }
-    return NULL;
-  }
 
   // Upon entering this function, value is an empty String
   void map(const String& key, String& value) {
     // Keys are of the form: $P.subkey, where P is a prefix character indicating the namespace
     if (key.length() < 4 || key[0] != '$' || key[2] != '.') return;
     char prefix = key[1];
-    Mapper* m = findMapper(prefix);
-    if (m == NULL) {
-      Log.warning("DataBroker::map: No mapper found for key %s", key.c_str());
-      return;
-    }
-
-    String subkey = key.substring(3);
-    m->map(subkey, value);
+    const String subkey(&(key.c_str()[3]));
+    Mappings::performMapping(prefix, subkey, value);
   }
 
   bool registerMapper(WTBasics::ReferenceMapper map, char prefix) {
-    if (nMappers == MaxMappers) {
-      Log.warning("DataBroker::registerMapper: No space remains for more mappers");
-      return false;
-    }
-    Mapper* m = findMapper(prefix);
-    if (m != NULL) {
-      Log.warning("DataBroker::registerMapper: mapper for prefix %c was already registered", prefix);
-      return false;
-    }
-    mappers[nMappers].prefix = prefix;
-    mappers[nMappers].map = map;
-    nMappers++;
-    return true;
+    return Mappings::addMapper(map, prefix);
   }
 
   void begin() {
