@@ -79,6 +79,13 @@ namespace WebUI {
 
   ESPTemplateProcessor *getTemplateHandler();
 
+  void wrapWebAction(
+      const char* actionName, std::function<void(void)> action,
+      bool showStatus = true);
+  void wrapWebPage(
+      const char* pageName, const char* htmlTemplate,
+      ESPTemplateProcessor::Mapper mapper, bool showStatus = true);
+
 
   // ---------- Helper functions that isolate your code from the underlying server object
   // ----- Request arguments

@@ -44,9 +44,9 @@
 namespace WebUI {
   constexpr const char* checkedOrNot[2] = {"", "checked='checked'"};
 
-  WebServer*            server;
-  String                title;
-  String                additionalMenuItems = "";
+  WebServer* server;
+  String     title;
+  String     additionalMenuItems = "";
   const __FlashStringHelper*  coreMenuItems = nullptr;
   const __FlashStringHelper*  appMenuItems = nullptr;
   const __FlashStringHelper*  devMenuItems = nullptr;
@@ -144,65 +144,62 @@ namespace WebUI {
     }
 
     void setLogLevel() {
-      if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.trace(F("Web Request: Set Log Level"));
+      auto action = []() {
+        WebThing::settings.logLevel = server->arg("logLevel").toInt();
+        Log.setLevel(WebThing::settings.logLevel);
+        Log.verbose(F("New Log Level: %d"), WebThing::settings.logLevel);
+        WebThing::settings.write();
+        WebThing::Protected::configChanged();
+        WebUI::redirectHome();
+      };
 
-      if (Internal::busyCallback) Internal::busyCallback(true);
-      WebThing::settings.logLevel = server->arg("logLevel").toInt();
-      Log.setLevel(WebThing::settings.logLevel);
-      Log.verbose(F("New Log Level: %d"), WebThing::settings.logLevel);
-      WebThing::settings.write();
-      WebThing::Protected::configChanged();
-      WebUI::redirectHome();
-      if (Internal::busyCallback) Internal::busyCallback(false);
+      wrapWebAction("Set Log Level", action, true);
     }
 
     void updatePwrConfig() {
-      if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.trace(F("Web Request: Handle Update Config"));
+      auto action = []() {
+        // ----- Power Settings
+        WebThing::settings.useLowPowerMode = server->hasArg("useLowPowerMode");
+        WebThing::settings.hasVoltageSensing = server->hasArg("hasVoltageSensing");
+        int interval = server->arg("processingInterval").toInt();
+        WebThing::settings.processingInterval = (interval < 1) ? 1 : interval;
+        if (WebThing::settings.processingInterval < 1) WebThing::settings.processingInterval = 1;
+        WebThing::settings.sleepOverridePin = server->arg("sleepOverridePin").toInt();
+        WebThing::settings.voltageCalibFactor = server->arg("voltageCalibFactor").toFloat();
 
-      if (Internal::busyCallback) Internal::busyCallback(true);
-      // ----- Power Settings
-      WebThing::settings.useLowPowerMode = server->hasArg("useLowPowerMode");
-      WebThing::settings.hasVoltageSensing = server->hasArg("hasVoltageSensing");
-      int interval = server->arg("processingInterval").toInt();
-      WebThing::settings.processingInterval = (interval < 1) ? 1 : interval;
-      if (WebThing::settings.processingInterval < 1) WebThing::settings.processingInterval = 1;
-      WebThing::settings.sleepOverridePin = server->arg("sleepOverridePin").toInt();
-      WebThing::settings.voltageCalibFactor = server->arg("voltageCalibFactor").toFloat();
+        WebThing::settings.write();
+        WebThing::Protected::configChanged();
+        WebUI::redirectHome();
+      };
 
-      WebThing::settings.write();
-      WebThing::Protected::configChanged();
-      WebUI::redirectHome();
-      if (Internal::busyCallback) Internal::busyCallback(false);
+      wrapWebAction("updatePwrConfig", action, true);
     }
 
     void updateConfig() {
-      if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-      Log.trace(F("Web Request: Handle Update Config"));
+      auto action = []() {
+        // ----- Location Settings
+        WebThing::settings.lat = server->arg("lat").toFloat();
+        WebThing::settings.lng = server->arg("lng").toFloat();
+        WebThing::settings.elevation = server->arg("elevation").toInt();
 
-      if (Internal::busyCallback) Internal::busyCallback(true);
-      // ----- Location Settings
-      WebThing::settings.lat = server->arg("lat").toFloat();
-      WebThing::settings.lng = server->arg("lng").toFloat();
-      WebThing::settings.elevation = server->arg("elevation").toInt();
+        // ----- API Keys
+        WebThing::settings.googleMapsKey = server->arg("googleMapsKey");
+        WebThing::settings.timeZoneDBKey = server->arg("timeZoneDBKey");
 
-      // ----- API Keys
-      WebThing::settings.googleMapsKey = server->arg("googleMapsKey");
-      WebThing::settings.timeZoneDBKey = server->arg("timeZoneDBKey");
+        // ----- Webserver Settings
+        WebThing::settings.hostname = server->arg("hostname");
+        WebThing::settings.webServerPort = server->arg("webServerPort").toInt();
+        WebThing::settings.useBasicAuth = server->hasArg("useBasicAuth");
+        WebThing::settings.webUsername = server->arg("webUsername");
+        WebThing::settings.webPassword = server->arg("webPassword");
+        WebThing::settings.themeColor = server->arg("themeColor");
 
-      // ----- Webserver Settings
-      WebThing::settings.hostname = server->arg("hostname");
-      WebThing::settings.webServerPort = server->arg("webServerPort").toInt();
-      WebThing::settings.useBasicAuth = server->hasArg("useBasicAuth");
-      WebThing::settings.webUsername = server->arg("webUsername");
-      WebThing::settings.webPassword = server->arg("webPassword");
-      WebThing::settings.themeColor = server->arg("themeColor");
+        WebThing::settings.write();
+        WebThing::Protected::configChanged();
+        WebUI::redirectHome();
+      };
 
-      WebThing::settings.write();
-      WebThing::Protected::configChanged();
-      WebUI::redirectHome();
-      if (Internal::busyCallback) Internal::busyCallback(false);
+      wrapWebAction("updateConfig", action, true);
     }
 
   }
@@ -211,37 +208,26 @@ namespace WebUI {
   namespace Pages {
 
     void displayHomePage() {
-      Log.trace(F("Web Request: Home Page"));
-      if (Internal::homeHandler) { Internal::homeHandler(); return; }
+      auto action = []() {
+        startPage();
+        server->sendContent("<h1>WebThing Home</h1>");
+        finishPage();
+      };
 
-      if (Internal::busyCallback) Internal::busyCallback(true);
-      startPage();
-      server->sendContent("<h1>WebThing Home</h1>");
-      finishPage();
-      if (Internal::busyCallback) Internal::busyCallback(false);
+      if (Internal::homeHandler) { Internal::homeHandler(); return; }
+      wrapWebAction("/", action, true);
     }
 
     void displayLogLevel() {
-      Log.trace(F("Web Request: Choose Log Level"));
-      if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-
       String llTarget = "SL" + String(WebThing::settings.logLevel);
-
       auto mapper =[&llTarget](const String &key, String& val) -> void {
         if (key == llTarget) val = "selected";
       };
 
-      if (Internal::busyCallback) Internal::busyCallback(true);
-      startPage();
-      templateHandler->send("/wt/LogLevel.html", mapper);
-      finishPage();
-      if (Internal::busyCallback) Internal::busyCallback(false);
+      wrapWebPage("/displayLogLevel", "/wt/LogLevel.html", mapper);
     }
 
     void displayPowerConfig() {
-      Log.trace(F("Web Request: Power Config"));
-      if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-
       String piTarget     = "SI" + String(WebThing::settings.processingInterval);
       String sopPinTarget = "SP" + String(WebThing::settings.sleepOverridePin);
 
@@ -253,17 +239,11 @@ namespace WebUI {
         else if (key.equals(F("VCF"))) val = WebThing::settings.vcfAsString();
       };
 
-      if (Internal::busyCallback) Internal::busyCallback(true);
-      startPage();
-      templateHandler->send("/wt/PowerForm.html", mapper);
-      finishPage();
       if (Internal::busyCallback) Internal::busyCallback(false);
+      wrapWebPage("/displayPowerConfig", "/wt/PowerForm.html", mapper);
     }
 
     void displayConfig() {
-      Log.trace(F("Web Request: Handle Configure"));
-      if (!WebUI::Internal::authentication()) { return server->requestAuthentication(); }
-
       String themeTarget = "SL" + WebThing::settings.themeColor;
 
       auto mapper =[&themeTarget](const String &key, String& val) -> void {
@@ -280,11 +260,7 @@ namespace WebUI {
         else if (key == themeTarget)            val = "selected";
       };
 
-      if (Internal::busyCallback) Internal::busyCallback(true);
-      startPage();
-      templateHandler->send("/wt/ConfigForm.html", mapper);
-      finishPage();
-      if (Internal::busyCallback) Internal::busyCallback(false);
+      wrapWebPage("/displayConfig", "/wt/ConfigForm.html", mapper);
     }
   } 
   // ----- END: WebUI::Pages
@@ -304,10 +280,7 @@ namespace WebUI {
     server->on("/config",         Pages::displayConfig);
     server->on("/configPwr",      Pages::displayPowerConfig);
     server->on("/configLogLevel", Pages::displayLogLevel);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" 
     server->serveStatic("/favicon.ico", *ESP_FS::getFS(), "/wt/favicon.ico");
-#pragma GCC diagnostic pop      
 
     server->on("/updateconfig",   Endpoints::updateConfig);
     server->on("/updatePwrConfig",Endpoints::updatePwrConfig);
@@ -366,6 +339,30 @@ namespace WebUI {
    * Functions used to compose and send pages
    *
    *----------------------------------------------------------------------------*/
+
+  void wrapWebAction(const char* actionName, std::function<void(void)> action, bool showStatus) {
+    Log.trace(F("Handling %s"), actionName);
+    if (!WebUI::authenticationOK()) { return; }
+
+    if (showStatus && Internal::busyCallback) Internal::busyCallback(true);
+    action();
+    if (showStatus && Internal::busyCallback) Internal::busyCallback(false);
+  }
+
+  void wrapWebPage(
+      const char* pageName, const char* htmlTemplate,
+      ESPTemplateProcessor::Mapper mapper,
+      bool showStatus)
+  {
+    Log.trace(F("Handling %s"), pageName);
+    if (!WebUI::authenticationOK()) { return; }
+
+    if (showStatus && Internal::busyCallback) Internal::busyCallback(true);
+    WebUI::startPage();
+    templateHandler->send(htmlTemplate, mapper);
+    WebUI::finishPage();
+    if (showStatus && Internal::busyCallback) Internal::busyCallback(false);
+  }
 
   void startPage(bool refresh) {
     server->sendHeader("Cache-Control", "no-cache, no-store");
