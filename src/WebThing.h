@@ -109,6 +109,7 @@ namespace WebThing {
   String  ipAddrAsString();
 
   // --- Time Helpers
+  String formattedTime(time_t theTime, bool use24Hour = false, bool includeSeconds = false);
   String formattedTime(bool use24Hour = false, bool includeSeconds = false);
   String formattedInterval(int h, int m, int s, bool zeroPadHours = false, bool includeSeconds = true);
   String formattedInterval(uint32_t seconds, bool zeroPadHours = true, bool includeSeconds = true);

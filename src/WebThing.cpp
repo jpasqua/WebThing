@@ -114,7 +114,6 @@ namespace WebThing {
         ESP_FS::begin();
         Log.trace(F("Completed FS Formatting"));
       }
-#pragma GCC diagnostic pop
     }
 
     void prepNetwork() {
@@ -249,8 +248,14 @@ namespace WebThing {
     settings.write();
   }
 
+  String formattedTime(time_t theTime, bool use24Hour, bool includeSeconds) {
+    return formattedInterval(
+        use24Hour ? hour(theTime) : hourFormat12(theTime),
+        minute(theTime), second(theTime), includeSeconds);
+  }
+
   String formattedTime(bool use24Hour, bool includeSeconds) {
-    return formattedInterval(use24Hour ? hour() : hourFormat12(), minute(), second(), includeSeconds);
+    return formattedTime(now(), use24Hour, includeSeconds);
   }
 
   String formattedInterval(int h, int m, int s, bool zeroPadHours, bool includeSeconds) {
