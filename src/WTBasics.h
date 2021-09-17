@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <functional>
+#include <TimeLib.h>
 
 // ----- Low-level Macros
 #define ALLOC(t,n) (t *) malloc((n)*sizeof(t))
@@ -19,7 +20,8 @@ namespace WTBasics {
   using FloatValCB = std::function<void(float)>;
 
 
-  // ----- Time Related Constants
+  // ----- Time Related
+  // --- Constants
   constexpr uint32_t  MillisPerSecond = 1000L;
   constexpr uint32_t  SecondsPerMinute = 60;
   constexpr uint32_t  MinutesPerHour = 60;
@@ -27,6 +29,10 @@ namespace WTBasics {
   constexpr uint32_t  MillisPerHour = (SecondsPerHour * MillisPerSecond);
   constexpr uint32_t  MillisPerMinute = (SecondsPerMinute * MillisPerSecond);
 
+  // Functions
+  inline time_t wallClockFromMillis(uint32_t milliTime) {
+    return (now() - (millis() - milliTime)/1000L);
+  }
 
   // String Utilities
   inline void resetString(String& target) {
@@ -42,6 +48,8 @@ namespace WTBasics {
   inline float f_to_c(float f) { return (f - 32.0f) * 9.0f/5.0f; }
   inline float k_to_c(float k) { return k - 273.15f; }
   inline float c_to_k(float c) { return c + 273.15f; }
+  inline float delta_c_to_f(float c) { return (c * 9.0f/5.0f);  }
+  inline float delta_f_to_c(float f) { return (f * 5.0f/9.0f);  }
 
   // Barometric pressure
   inline float hpa_to_inhg(float hpa) { return hpa * 0.02953f; }
