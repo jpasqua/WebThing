@@ -12,14 +12,14 @@
 //                                  Core Libraries
 #include <Arduino.h>
 //                                  Third Party Libraries
-#include <WTBasics.h>
+#include <BPABasics.h>
 //                                  Local Includes
 //--------------- End:    Includes ---------------------------------------------
 
 namespace DataBroker {
   void begin();
   void map(const String& key, String& value);
-  bool registerMapper(WTBasics::ReferenceMapper map, char prefix);
+  bool registerMapper(Basics::ReferenceMapper map, char prefix);
 };
 
 #endif  // DataBroker_h

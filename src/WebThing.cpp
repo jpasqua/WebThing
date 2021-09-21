@@ -30,8 +30,8 @@
 #include <ArduinoLog.h>
 #include <WiFiManager.h>
 #include <TimeLib.h>
+#include <BPABasics.h>
 //                                  Local Includes
-#include "WTBasics.h"
 #include "WebThing.h"
 #include "WebUI.h"
 #include "TimeDB.h"
@@ -273,9 +273,9 @@ namespace WebThing {
   }
 
   String formattedInterval(uint32_t seconds, bool zeroPadHours, bool includeSeconds) {
-    int h = seconds / WTBasics::SecondsPerHour;
-    int m = (seconds / WTBasics::SecondsPerMinute) % WTBasics::SecondsPerMinute;
-    int s = (seconds % WTBasics::SecondsPerMinute);       
+    int h = seconds / Basics::SecondsPerHour;
+    int m = (seconds / Basics::SecondsPerMinute) % Basics::SecondsPerMinute;
+    int s = (seconds % Basics::SecondsPerMinute);       
     return formattedInterval(h, m, s, zeroPadHours, includeSeconds);
   }
 

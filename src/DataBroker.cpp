@@ -11,7 +11,7 @@
 #include <ArduinoLog.h>
 #include <TimeLib.h>
 #include <GenericESP.h>
-#include <WTBasics.h>
+#include <BPABasics.h>
 //                                  Local Includes
 #include "DataBroker.h"
 //--------------- End:    Includes ---------------------------------------------
@@ -22,7 +22,7 @@ namespace DataBroker {
   namespace Mappings {
     using Mapper = struct {
       char prefix;
-      WTBasics::ReferenceMapper map;
+      Basics::ReferenceMapper map;
     };
 
     constexpr uint8_t MaxMappers = 8;
@@ -36,7 +36,7 @@ namespace DataBroker {
       return NULL;
     }
 
-    bool addMapper(WTBasics::ReferenceMapper map, char prefix) {
+    bool addMapper(Basics::ReferenceMapper map, char prefix) {
       if (nMappers == MaxMappers) {
         Log.warning("DataBroker::registerMapper: No space remains for more mappers");
         return false;
@@ -95,7 +95,7 @@ namespace DataBroker {
     Mappings::performMapping(prefix, subkey, value);
   }
 
-  bool registerMapper(WTBasics::ReferenceMapper map, char prefix) {
+  bool registerMapper(Basics::ReferenceMapper map, char prefix) {
     return Mappings::addMapper(map, prefix);
   }
 
