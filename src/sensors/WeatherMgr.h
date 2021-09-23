@@ -35,7 +35,7 @@ public:
 
   // ----- Constants -----
   static constexpr uint32_t HistoryWriteInterval = minutesToTime_t(10) * 1000L;
-  static constexpr const char* HistoryFilePath = "/wthrHist.json";
+  static constexpr const char* HistoryFilePath = "/wthrhist.json";
 
   // ----- Constructors & Destructor -----
   WeatherMgr() = default;
@@ -128,14 +128,14 @@ private:
 
     virtual void externalize(Stream& writeStream) const {
       StaticJsonDocument<32> doc; // Size provided by https://arduinojson.org/v6/assistant
-      doc["timestamp"] = timestamp;
-      doc["temp"] = temp;
+      doc["ts"] = timestamp;
+      doc["t"] = ((float)((int)(temp * 10))) / 10;  // Limit to 1 decimal place
       serializeJson(doc, writeStream);
     }
 
     void internalize(const JsonObjectConst &obj) {
-      timestamp = obj["timestamp"];
-      temp = obj["temp"];
+      timestamp = obj["ts"];
+      temp = obj["t"];
     }
 
     float temp;
