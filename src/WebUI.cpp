@@ -265,10 +265,67 @@ namespace WebUI {
   } 
   // ----- END: WebUI::Pages
 
+  namespace Dev {
+    const __FlashStringHelper* _devMenu = nullptr;
+    bool* _showDevMenu;
+    BaseSettings* _deviceSpecificSettings;
+
+    void reboot() {
+      if (!authenticationOK()) { return; }
+      redirectHome();
+      ESP.restart();
+    }
+
+    void updateSettings() {
+      auto action = []() {
+        *_showDevMenu = hasArg("showDevMenu");
+        addDevMenuItems(*_showDevMenu ? _devMenu : nullptr);
+        _deviceSpecificSettings->write();
+        redirectHome();
+      };
+      wrapWebAction("/updateSettings", action, false);
+    }
+
+    void yieldSettings() {
+      auto action = []() {
+        DynamicJsonDocument *doc = (hasArg("wt")) ?
+            WebThing::settings.asJSON() : _deviceSpecificSettings->asJSON();
+
+        sendJSONContent(doc);
+        doc->clear();   // TO DO: Is this needed?
+        delete doc;
+      };
+      wrapWebAction("/updateSettings", action, false);
+    }
+
+    void displayDevPage() {
+      auto mapper =[](const String &key, String& val) -> void {
+        if (key == "SHOW_DEV_MENU") val = checkedOrNot[*_showDevMenu];
+      };
+
+      WebUI::wrapWebPage("/displayDevPage", "/wt/DevPage.html", mapper);
+    }
+
+    void init(
+        bool* showDevMenu, std::function<void(void)> pageDisplayer,
+        BaseSettings* deviceSpecificSettings, const __FlashStringHelper* devMenu)
+    {
+      _showDevMenu = showDevMenu;
+      _devMenu = devMenu;
+      _deviceSpecificSettings = deviceSpecificSettings;
+
+      if (*showDevMenu) addDevMenuItems(_devMenu);
+
+      registerHandler("/dev", pageDisplayer ? pageDisplayer : displayDevPage);
+      registerHandler("/dev/reboot",          reboot);
+      registerHandler("/dev/settings",        yieldSettings);
+      registerHandler("/dev/updateSettings",  updateSettings);
+    }
+  }
 
   /*------------------------------------------------------------------------------
    *
-   * Functions typically clled at setup() time
+   * Functions typically called at setup() time
    *
    *----------------------------------------------------------------------------*/
 

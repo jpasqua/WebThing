@@ -22,6 +22,7 @@
 #include <ArduinoJson.h>
 #include <ESPTemplateProcessor.h>
 //                                  Local Includes
+#include "BaseSettings.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -112,6 +113,28 @@ namespace WebUI {
   // Deprecated as prep for supporitng both ESP8266 and ESP32
   WebServer* getUnderlyingServer();
 
+  namespace Dev {
+    // Provide default support for a developer page. The associated HTML template is:
+    //    /data/wt/DevPage.html
+    // The page allows the user (a developer in this case) to:
+    // * Reboot the device
+    // * Request the JSON corresponding to the device specific settings
+    // * Request the JSON corresponding to the WebThing settings
+    // * Enable or disable the developer menu
+    //
+    // @param showDevMenu   A pointer to a bool that always contains an indication of
+    //                      whether the dev menu should be displayed.
+    // @param pageDisplayer If not nullptr, then this is a function which is responsible
+    //                      for displaying a custom HTML page for the dev menu
+    // @param devSettings   A pointer to the settings object of the underlying device.
+    //                      Only used so the settings can be externalized upon request
+    // @param devMenu       A pointer to the HTML text to be used to display the developer
+    //                      menu item in the hamburger menu. This will only be used when
+    //                      *showDevMenu is true;
+    void init(
+        bool* showDevMenu, std::function<void(void)> pageDisplayer,
+        BaseSettings* devSettings, const __FlashStringHelper* devMenu);
+  }
 }
 
 #endif  // WebUI_h
