@@ -32,6 +32,7 @@
 #include <ArduinoLog.h>
 #include <WiFiManager.h>
 #include <ESP_FS.h>
+#include <BPABasics.h>
 #include <ESPTemplateProcessor.h>
 //                                  Local Includes
 #include "WebThing.h"
@@ -40,9 +41,8 @@
 
 
 
-// ----- BEGIN: WebUI namespacea
+// ----- BEGIN: WebUI namespace
 namespace WebUI {
-  constexpr const char* checkedOrNot[2] = {"", "checked='checked'"};
 
   WebServer* server;
   String     title;
@@ -56,7 +56,6 @@ namespace WebUI {
   namespace Internal {
     String EmptyString = "";
 
-    std::function<void(void)> homeHandler = NULL;
     std::function<void(bool)> busyCallback = nullptr; 
 
     bool authentication() {
@@ -214,7 +213,6 @@ namespace WebUI {
         finishPage();
       };
 
-      if (Internal::homeHandler) { Internal::homeHandler(); return; }
       wrapWebAction("/", action, true);
     }
 
@@ -265,63 +263,6 @@ namespace WebUI {
   } 
   // ----- END: WebUI::Pages
 
-  namespace Dev {
-    const __FlashStringHelper* _devMenu = nullptr;
-    bool* _showDevMenu;
-    BaseSettings* _deviceSpecificSettings;
-
-    void reboot() {
-      if (!authenticationOK()) { return; }
-      redirectHome();
-      ESP.restart();
-    }
-
-    void updateSettings() {
-      auto action = []() {
-        *_showDevMenu = hasArg("showDevMenu");
-        addDevMenuItems(*_showDevMenu ? _devMenu : nullptr);
-        _deviceSpecificSettings->write();
-        redirectHome();
-      };
-      wrapWebAction("/updateSettings", action, false);
-    }
-
-    void yieldSettings() {
-      auto action = []() {
-        DynamicJsonDocument *doc = (hasArg("wt")) ?
-            WebThing::settings.asJSON() : _deviceSpecificSettings->asJSON();
-
-        sendJSONContent(doc);
-        doc->clear();   // TO DO: Is this needed?
-        delete doc;
-      };
-      wrapWebAction("/updateSettings", action, false);
-    }
-
-    void displayDevPage() {
-      auto mapper =[](const String &key, String& val) -> void {
-        if (key == "SHOW_DEV_MENU") val = checkedOrNot[*_showDevMenu];
-      };
-
-      WebUI::wrapWebPage("/displayDevPage", "/wt/DevPage.html", mapper);
-    }
-
-    void init(
-        bool* showDevMenu, std::function<void(void)> pageDisplayer,
-        BaseSettings* deviceSpecificSettings, const __FlashStringHelper* devMenu)
-    {
-      _showDevMenu = showDevMenu;
-      _devMenu = devMenu;
-      _deviceSpecificSettings = deviceSpecificSettings;
-
-      if (*showDevMenu) addDevMenuItems(_devMenu);
-
-      registerHandler("/dev", pageDisplayer ? pageDisplayer : displayDevPage);
-      registerHandler("/dev/reboot",          reboot);
-      registerHandler("/dev/settings",        yieldSettings);
-      registerHandler("/dev/updateSettings",  updateSettings);
-    }
-  }
 
   /*------------------------------------------------------------------------------
    *
@@ -333,17 +274,17 @@ namespace WebUI {
     server = new WebServer(WebThing::settings.webServerPort);
     templateHandler = new ESPTemplateProcessor(server);
 
-    server->on("/",               Pages::displayHomePage);
-    server->on("/config",         Pages::displayConfig);
-    server->on("/configPwr",      Pages::displayPowerConfig);
-    server->on("/configLogLevel", Pages::displayLogLevel);
+    registerHandler("/",               Pages::displayHomePage);
+    registerHandler("/config",         Pages::displayConfig);
+    registerHandler("/configPwr",      Pages::displayPowerConfig);
+    registerHandler("/configLogLevel", Pages::displayLogLevel);
     server->serveStatic("/favicon.ico", *ESP_FS::getFS(), "/wt/favicon.ico");
 
-    server->on("/updateconfig",   Endpoints::updateConfig);
-    server->on("/updatePwrConfig",Endpoints::updatePwrConfig);
-    server->on("/setLogLevel",    Endpoints::setLogLevel);
-    server->on("/systemreset",    Endpoints::handleSystemReset);
-    server->on("/forgetwifi",     Endpoints::handleWifiReset);
+    registerHandler("/updateconfig",   Endpoints::updateConfig);
+    registerHandler("/updatePwrConfig",Endpoints::updatePwrConfig);
+    registerHandler("/setLogLevel",    Endpoints::setLogLevel);
+    registerHandler("/systemreset",    Endpoints::handleSystemReset);
+    registerHandler("/forgetwifi",     Endpoints::handleWifiReset);
     
     server->onNotFound(Internal::handleNotFound);
 
@@ -364,12 +305,28 @@ namespace WebUI {
   void addAppMenuItems(const __FlashStringHelper* app) { appMenuItems = app; }
   void addDevMenuItems(const __FlashStringHelper* dev) { devMenuItems = dev; }
 
-  void registerHandler(const char* path, std::function<void(void)> handler) {
-    if (path[0] == '/' && path[1] == '\0') {
-      Internal::homeHandler = handler;
-    } else {
-      server->on(path, handler);
+
+  std::map<String, std::function<void(void)>> handlers;
+
+  using Handler = std::function<void(void)>;
+
+  void indirectHandler() {
+    auto handler = handlers.find(server->uri());
+    if (handler == handlers.end()) {
+      Internal::handleNotFound();
+      return;
     }
+    handler->second();
+  }
+
+  void registerHandler(const String& path, Handler handler) {
+    if (handlers.find(path) == handlers.end()) {
+      Log.verbose("Registering URL handler for %s", path.c_str());
+      server->on(path, indirectHandler);
+    } else {
+      Log.verbose("Replacing URL handler for %s", path.c_str());
+    }
+    handlers[path] = handler;
   }
 
   void registerBusyCallback(std::function<void(bool)> bc) {

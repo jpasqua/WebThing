@@ -27,13 +27,15 @@
 
 
 namespace WebUI {
+  constexpr const char* checkedOrNot[2] = {"", "checked='checked'"};
+
   // ----- Setup functions
   void init();
     // Call only once to start the web interface
   void setTitle(const String& theTitle);
     // Can be called at any time to update the title used in html pages
     // as well as the header for built-in pages
-  void registerHandler(const char* path, std::function<void(void)> handler);
+  void registerHandler(const String& path, std::function<void(void)> handler);
     // Add a handler for a new endpoint. This is the equivalent of calling server.on(path, handler)
     // If the path is set to "/", then the default homepage is overriden
   void registerBusyCallback(std::function<void(bool)> handler);
@@ -114,6 +116,13 @@ namespace WebUI {
   WebServer* getUnderlyingServer();
 
   namespace Dev {
+    typedef struct {
+      const char* label;
+      const char* endpoint;
+      const char* color;
+      const char* confirm;
+    } Action;
+
     // Provide default support for a developer page. The associated HTML template is:
     //    /data/wt/DevPage.html
     // The page allows the user (a developer in this case) to:
@@ -124,16 +133,12 @@ namespace WebUI {
     //
     // @param showDevMenu   A pointer to a bool that always contains an indication of
     //                      whether the dev menu should be displayed.
-    // @param pageDisplayer If not nullptr, then this is a function which is responsible
-    //                      for displaying a custom HTML page for the dev menu
     // @param devSettings   A pointer to the settings object of the underlying device.
     //                      Only used so the settings can be externalized upon request
-    // @param devMenu       A pointer to the HTML text to be used to display the developer
-    //                      menu item in the hamburger menu. This will only be used when
-    //                      *showDevMenu is true;
     void init(
-        bool* showDevMenu, std::function<void(void)> pageDisplayer,
-        BaseSettings* devSettings, const __FlashStringHelper* devMenu);
+        bool* showDevMenu, BaseSettings* devSettings);
+    
+    void addButtons(const Action* extraDevButtons, uint8_t nExtraDevButtons);
   }
 }
 
