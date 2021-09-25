@@ -9,18 +9,37 @@
     </form>
   </div>
 </div>
-<div class='w3-container'>
-  <button class='w3-button w3-quarter w3-block w3-round-large w3-pale-green w3-padding' type='button' onclick='window.location.href = "/dev/settings"'>View Settings</button>
+<div id='extraButtons'></div>
+<div class='w3-container w3-margin-top'>
+  %HEAP%
 </div>
-<div class='w3-container'>
-  <button class='w3-button w3-quarter w3-block w3-round-large w3-pale-green w3-padding w3-margin-top' type='button' onclick='window.location.href = "/dev/settings?wt=on"'>View WebThing Settings</button>
-</div>
-<div class='w3-container'>
-  <button class='w3-button w3-quarter w3-block w3-round-large w3-pale-green w3-padding w3-margin-top' type='button' onclick='window.location.href = "/getHistory?range=combined"'>View History</button>
-</div>
-<div class='w3-container'>
-  <script>
-    function requestReboot() { if (confirm("Perform immediate reboot?")) { window.location.href = "/dev/reboot"; } }
-  </script>
-  <button class='w3-button w3-quarter w3-block w3-round-large w3-pale-red w3-padding w3-margin-top' type='button' onclick='requestReboot()'>Request Reboot</button>
-</div>
+
+<script type="text/javascript">
+  const buttons = [%BUTTONS%];
+
+  function handleClick(bd) {
+    if (bd.confirm !== undefined) {
+      const confirmed = confirm(bd.confirm);
+      if (!confirmed) return;
+    }
+    window.location.href = bd.endpoint;
+  }
+
+  function makeButton(bd) {
+    let buttonContainer = document.createElement("div");
+    buttonContainer.className +='w3-container'
+    let btn = document.createElement("button");
+    btn.innerHTML = bd.label;
+    btn.className += 'w3-button w3-quarter w3-block w3-round-large w3-padding w3-margin-top ';
+    if (bd.color === undefined) btn.className += 'w3-pale-green';
+    else btn.className += bd.color;
+    btn.onclick = function() { handleClick(bd); }
+    buttonContainer.appendChild(btn);
+    return buttonContainer;
+  }
+
+  const buttonArea = document.getElementById('extraButtons');
+  for (const bd of buttons) {
+    buttonArea.appendChild(makeButton(bd));
+  }
+</script>
