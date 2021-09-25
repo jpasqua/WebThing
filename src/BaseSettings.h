@@ -38,7 +38,7 @@ protected:
   virtual void fromJSON(const JsonDocument &doc) = 0;
   virtual void toJSON(JsonDocument &doc) = 0;
       // NOTE: The document is modified in this function. That's the whole
-      // point. The settings are serialied into the document.
+      // point. The settings are serialized into the document.
 
 protected:
   // ----- State
