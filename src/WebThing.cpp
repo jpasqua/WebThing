@@ -33,6 +33,7 @@
 #include <BPABasics.h>
 //                                  Local Includes
 #include "WebThing.h"
+#include "DataBroker.h"
 #include "WebUI.h"
 #include "TimeDB.h"
 #include "GenericESP.h"
@@ -194,6 +195,7 @@ namespace WebThing {
     settings.read();                  // Read settings from the filesystem
     Log.setLevel(settings.logLevel);  // Update based on the settings we just read
     Internal::prepPins();             // Set up any pins used by WebThing
+    DataBroker::begin();              // Get the data exchange mechanism running
   }
 
   void setup(bool enterAPMode) {
