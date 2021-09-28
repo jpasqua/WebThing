@@ -9,10 +9,8 @@
 #include <ArduinoLog.h>
 //                                  Third Party Libraries
 #if defined(ESP8266)
-  #include <ESP8266WiFi.h>          // Required to remove redefinitions in BlynkSimple
   #include <BlynkSimpleEsp8266.h>
 #elif defined(ESP32)
-  #include <WiFi.h>                 // Required to remove redefinitions in BlynkSimple
   #include <BlynkSimpleEsp32.h>
 #endif
 //                                  Local Includes
@@ -79,10 +77,4 @@ namespace BlynkMgr {
       Blynk.disconnect();
     }
   }
-
-  void writeUnsigned(int pin, uint32_t value) { Blynk.virtualWrite(pin, value); }
-  void writeSigned(int pin, int32_t value) { Blynk.virtualWrite(pin, value); }
-  void writeFloat(int pin, float value) { Blynk.virtualWrite(pin, value); }
-  void writeString(int pin, String value) { Blynk.virtualWrite(pin, value); }
-  void writeBool(int pin, bool value) { Blynk.virtualWrite(pin, value); }
 }

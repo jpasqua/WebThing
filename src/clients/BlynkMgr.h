@@ -52,11 +52,6 @@ namespace BlynkMgr {
   // be called before a sesnor device goes to sleep.
   extern void disconnect();
 
-  extern void writeUnsigned(int pin, uint32_t value);
-  extern void writeSigned(int pin, int32_t value);
-  extern void writeFloat(int pin, float value);
-  extern void writeString(int pin, String value);
-  extern void writeBool(int pin, bool value);
 }
 
 #endif // BlynkMgr_h
