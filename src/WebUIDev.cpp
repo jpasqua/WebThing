@@ -27,12 +27,12 @@ namespace WebUI {
   namespace Dev {
     const __FlashStringHelper* DEV_MENU_ITEMS = FPSTR(
       "<a class='w3-bar-item w3-button' href='/dev'>"
-      "<i class='fa fa-gears'></i> Dev Settings</a>");
+      "<i class='fa fa-gears'></i> Developer</a>");
 
     constexpr Action DefaultActions[] {
       {"View Settings", "/dev/settings", nullptr, nullptr},
       {"View WebThing Settings", "/dev/settings?wt=on", nullptr, nullptr},
-      {"Request Reboot", "/dev/reboot", "w3-pale-red", "Perform immediate reboot?"}
+      {"Request Reboot", "/dev/reboot", "w3-pale-red", "Request reboot?"}
     };
     uint8_t NumDefaultActions = ARRAY_SIZE(DefaultActions);
 
