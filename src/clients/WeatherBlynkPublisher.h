@@ -10,7 +10,7 @@
 #include <sensors/WeatherReadings.h>
 #include <sensors/WeatherMgr.h>
 //                                  Local Includes
-#include "BlynkMgr.h"
+#include "BlynkClient.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -25,25 +25,26 @@ public:
     if (readings.timestamp == _timestampOfLastData) return false;
 
     if (!isnan(readings.temp)) {
-      BlynkMgr::writeFloat(TempPin, Output::temp(readings.temp));
-      BlynkMgr::writeFloat(HeatIndexPin, Output::temp(readings.heatIndex));
-      BlynkMgr::writeFloat(DewPointPin, Output::temp(readings.dewPointTemp));
-      BlynkMgr::writeFloat(DewSpreadPin, Output::tempSpread(readings.dewPointSpread));
+      Log.verbose("Temp: %F, converted: %F", readings.temp, Output::temp(readings.temp));
+      Blynk.virtualWrite(TempPin, Output::temp(readings.temp));
+      Blynk.virtualWrite(HeatIndexPin, Output::temp(readings.heatIndex));
+      Blynk.virtualWrite(DewPointPin, Output::temp(readings.dewPointTemp));
+      Blynk.virtualWrite(DewSpreadPin, Output::tempSpread(readings.dewPointSpread));
     }
 
     if (!isnan(readings.humidity)) {
-      BlynkMgr::writeFloat(HumidityPin, readings.humidity);
+      Blynk.virtualWrite(HumidityPin, readings.humidity);
     }
 
     if (!isnan(readings.pressure)) {
-      BlynkMgr::writeFloat(PressurePin,    Output::baro(readings.pressure));
-      BlynkMgr::writeSigned(RelPressurePin, Output::baro(readings.relPressure));
+      Blynk.virtualWrite(PressurePin,    Output::baro(readings.pressure));
+      Blynk.virtualWrite(RelPressurePin, Output::baro(readings.relPressure));
     }
 
     if (timeStatus() == timeSet) {
       String dateTime = Output::formattedTime(Basics::wallClockFromMillis(readings.timestamp));
       Log.verbose("Timestamp sent to Blynk: %s", dateTime.c_str());
-      BlynkMgr::writeString(TimestampPin, dateTime);
+      Blynk.virtualWrite(TimestampPin, dateTime);
     }
 
     _timestampOfLastData = readings.timestamp;
