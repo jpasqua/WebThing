@@ -146,7 +146,7 @@ private:
   std::vector<WeatherSensor*> _sensors;
   float _tempCorrection;
   float _humiCorrection;
-  int32 _elevation;
+  int32_t _elevation;
   WeatherReadings lastReadings;
 
   uint32_t _readingInterval = 60 * 1000L;               // How often do we take a reading
