@@ -30,18 +30,29 @@ namespace WebUI {
   constexpr const char* checkedOrNot[2] = {"", "checked='checked'"};
 
   // ----- Setup functions
+
+  // Call only once to initialize the web interface
   void init();
-    // Call only once to start the web interface
+
+  // Call at any time to update the title used in html pages as well as the
+  // header for built-in pages
+  // @param theTitle  The title to be displayed
   void setTitle(const String& theTitle);
-    // Can be called at any time to update the title used in html pages
-    // as well as the header for built-in pages
+
+  // Add a handler for a new endpoint. Unlike a call to server.on(), WebUI
+  // keeps track of the mapping between paths and handlers. If you call
+  // registerHandler twice for the same path, it will override the old
+  // handler with the new one.
+  // @param path      The URL path to look for
+  // @param handler   The function to be called when the path is requested
   void registerHandler(const String& path, std::function<void(void)> handler);
-    // Add a handler for a new endpoint. This is the equivalent of calling server.on(path, handler)
-    // If the path is set to "/", then the default homepage is overriden
+
+  // If you'd like to know when WebThing starts and finishes processing a web request,
+  // register a function here.
+  // @param handler   The function to call when a web request starts/ends. When called,
+  //                  the parameter will be true when the processing begins, and false
+  //                  when it ends.
   void registerBusyCallback(std::function<void(bool)> handler);
-    // If you'd like to know when WebThing starts and finishes processing a web request,
-    // registera function here. When called, the parameter will be true when the
-    // processing begins, and false when it ends.
 
   // ----- Registering Menu Items
   // The overall "hamburger" menu is composed of three sets of menu items:
@@ -59,12 +70,13 @@ namespace WebUI {
   void addAppMenuItems(const __FlashStringHelper* app);
   void addDevMenuItems(const __FlashStringHelper* dev);
 
+  // Legacy version of menu handling where all of the menu item types are concatenated 
   void addMenuItems(String html);
 
 
   // ----- Periodic functions
+  // Needs to be called from loop() to handle connections
   void handleClient();
-    // Needs to be called from loop() to handle connections
 
   // ----- Page rendering functions
   // To generate a response to a request, call:
@@ -117,10 +129,12 @@ namespace WebUI {
 
   namespace Dev {
     typedef struct {
-      const char* label;
-      const char* endpoint;
-      const char* color;
-      const char* confirm;
+      const char* label;    // The textual label that should appear in the associated button
+      const char* endpoint; // The web path to invoke when the button is pressed
+      const char* color;    // The color of the button. nullptr -> default
+      const char* confirm;  // A confirmation string. If not nullptr, then the dev page
+                            // will display a confirmation dialog with this message
+                            // before invoking the endpoint
     } Action;
 
     // Provide default support for a developer page. The associated HTML template is:
@@ -138,6 +152,10 @@ namespace WebUI {
     void init(
         bool* showDevMenu, BaseSettings* devSettings);
     
+    // You made add buttons with associated web actions to the developer page
+    // by providing an array of Action objects
+    // @param   The Actions that describe the buttons to be added to the Dev page
+    // @param   The number of elements in the array
     void addButtons(const Action* extraDevButtons, uint8_t nExtraDevButtons);
   }
 }
