@@ -22,6 +22,7 @@
   using WebServer = ESP8266WebServer;
   #include <ESP8266mDNS.h>
 #elif defined(ESP32)
+  #include <map>
   #include <WiFi.h>
   #include <WebServer.h>
   #include <ESPmDNS.h>
@@ -321,7 +322,6 @@ namespace WebUI {
 
   void registerHandler(const String& path, Handler handler) {
     if (handlers.find(path) == handlers.end()) {
-      Log.verbose("Registering URL handler for %s", path.c_str());
       server->on(path, indirectHandler);
     } else {
       Log.verbose("Replacing URL handler for %s", path.c_str());
