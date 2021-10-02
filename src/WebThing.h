@@ -60,8 +60,9 @@
 #include <Arduino.h>
 //                                  Third Party Libraries
 //                                  Local Includes
-#include "TimeDB.h"
+#include "clients/TimeDB.h"
 #include "WebThingSettings.h"
+#include "WTButton.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -70,22 +71,26 @@ namespace WebThing {
   static constexpr const char* Version = "0.5.0";
 
   // ----- Public State
+  extern WTButtonMgr buttonMgr;
   extern WebThingSettings  settings;
   extern bool apMode;
 
   // ----- setup() and loop() functions
+  // Called before any setup is done by the actual thing. This does very
+  // very basic things like establishing logging support.
   void preSetup();
-    // Called before any setup is done by the actual thing. This does very
-    // very basic things like establishing logging support.
+
+  // Called during setup of the actual thing
+  // If you want this thing to be it's own access point rather than connecting
+  // to an access point, set apMode to true. Obviously in this case there will
+  // be no access to services such as network time.
   void setup(bool apMode = false);
-    // Called during setup of the actual thing
-    // If you want this thing to be it's own access point rather than connecting
-    // to an access point, set apMode to true. Obviously in this case there will
-    // be no access to services such as network time.
+
+  // Called after setup of the actual thing is complete
   void postSetup();
-    // Called after setup of the actual thing is complete
+
+  // Called by the loop method of the actual thing
   void loop();
-    // Called by the loop methods of the actual thing
 
   // ----- Public Utility Functions
   // --- Power-related

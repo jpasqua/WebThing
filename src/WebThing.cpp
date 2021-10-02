@@ -35,8 +35,9 @@
 #include "WebThing.h"
 #include "DataBroker.h"
 #include "WebUI.h"
-#include "TimeDB.h"
 #include "GenericESP.h"
+#include "WTButton.h"
+#include "clients/TimeDB.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -59,6 +60,7 @@ namespace WebThing {
   bool apMode;
   WebThingSettings  settings;
   String versionToDisplay = Version;
+  WTButtonMgr buttonMgr;
 
   namespace Internal {
     /*------------------------------------------------------------------------------
@@ -224,6 +226,7 @@ namespace WebThing {
     static uint32_t lastActionTime = 0;
 
     WebUI::handleClient();
+    buttonMgr.process();
 
 #if defined(ESP8266)
     if (Protected::mDNSStarted) { MDNS.update(); }
