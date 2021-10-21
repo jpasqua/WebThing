@@ -31,6 +31,10 @@ namespace WeatherUtils {
       ds18b20->includeReadingTypes(DS18B20_READINGS);
       mgr.addSensor(ds18b20);
     #endif  // DS18B20_READINGS
+
+    #if !defined(BME280_READINGS) && !defined(DHT22_READINGS) && !defined(DS18B20_READINGS)
+      (void)mgr;  // avoid compiler warning
+    #endif
   }
 }
 #endif // WeatherUtils_h

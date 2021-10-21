@@ -29,17 +29,9 @@ namespace WebUI {
       "<a class='w3-bar-item w3-button' href='/dev'>"
       "<i class='fa fa-gears'></i> Developer</a>");
 
-    constexpr Action DefaultActions[] {
-      {"View Settings", "/dev/settings", nullptr, nullptr},
-      {"View WebThing Settings", "/dev/settings?wt=on", nullptr, nullptr},
-      {"Request Reboot", "/dev/reboot", "w3-pale-red", "Request reboot?"}
-    };
-    uint8_t NumDefaultActions = ARRAY_SIZE(DefaultActions);
-
     bool* _showDevMenu;
     BaseSettings* _deviceSpecificSettings;
-    const Action* appSpecificButtons = nullptr;
-    uint8_t nAppSpecificButtons = 0;
+    std::vector<ButtonDesc> buttonActions;
 
     void reboot() {
       if (!authenticationOK()) { return; }
@@ -87,15 +79,18 @@ namespace WebUI {
       val.concat(propName); val.concat(": \""); val.concat(propVal); val.concat('"');
     }
 
-    void concatDevButtons(String& val, const Action* actions, uint8_t nActions) {
-      for (int i = 0; i < nActions; i++) {
-        const Action& a = actions[i];
-        if (i) val.concat(',');
+    void concatDevButtons(String& val) {
+      bool first = true;
+      size_t nButtons = buttonActions.size();
+      for (int i = nButtons-1; i >= 0; i--) {
+        const ButtonDesc& b = buttonActions[i];
+        if (!first) val.concat(',');
+        else first = false;
         val.concat("{");
-          concatProperty(val, "label", a.label, false);
-          concatProperty(val, "endpoint", a.endpoint);
-          if (DefaultActions[i].color) concatProperty(val, "color", a.color); 
-          if (DefaultActions[i].confirm) concatProperty(val, "confirm", a.confirm);
+          concatProperty(val, "label", b.label, false);
+          concatProperty(val, "endpoint", b.endpoint);
+          if (b.color) concatProperty(val, "color", b.color); 
+          if (b.confirm) concatProperty(val, "confirm", b.confirm);
         val.concat("}");
       }
     }
@@ -104,13 +99,7 @@ namespace WebUI {
       auto mapper =[](const String &key, String& val) -> void {
         if (key == "SHOW_DEV_MENU") val = checkedOrNot[*_showDevMenu];
         else if (key.equals(F("HEAP"))) { DataBroker::map("$S.heap", val); }
-        else if (key == "BUTTONS") {
-          if (appSpecificButtons) {
-            concatDevButtons(val, appSpecificButtons, nAppSpecificButtons);
-            val.concat(',');
-          }
-          concatDevButtons(val, DefaultActions, NumDefaultActions);
-        }
+        else if (key == "BUTTONS") concatDevButtons(val);
       };
 
       WebUI::wrapWebPage("/displayDevPage", "/wt/DevPage.html", mapper);
@@ -123,6 +112,10 @@ namespace WebUI {
 
       addDevMenuItems(DEV_MENU_ITEMS);
 
+      addButton({"Request Reboot", "/dev/reboot", "w3-pale-red", "Request reboot?"});
+      addButton({"View WebThing Settings", "/dev/settings?wt=on", nullptr, nullptr});
+      addButton({"View Settings", "/dev/settings", nullptr, nullptr});
+
       registerHandler("/dev",                 displayDevPage);
       registerHandler("/dev/reboot",          reboot);
       registerHandler("/dev/settings",        yieldSettings);
@@ -130,9 +123,9 @@ namespace WebUI {
       registerHandler("/dev/data",            getDataBrokerValue);
     }
 
-    void addButtons(const Action* extraDevButtons, uint8_t nExtraDevButtons) {
-      appSpecificButtons = extraDevButtons;
-      nAppSpecificButtons = nExtraDevButtons;
+    void addButton(ButtonDesc&& buttonAction) {
+      buttonActions.push_back(buttonAction);
     }
+
   } // ----- END: WebUI::Dev
 } // ----- END: WebUI

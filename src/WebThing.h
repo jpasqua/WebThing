@@ -114,6 +114,13 @@ namespace WebThing {
   String  ipAddrAsString();
 
   // --- Time Helpers
+  struct TimeFormatOptions {
+    bool use24Hour;
+    bool zeroPadHours;
+    bool showAMPM;
+    bool includeSeconds;
+  };
+  String formattedTime(time_t theTime, TimeFormatOptions options);
   String formattedTime(time_t theTime, bool use24Hour = false, bool includeSeconds = false);
   String formattedTime(bool use24Hour = false, bool includeSeconds = false);
   String formattedInterval(int h, int m, int s, bool zeroPadHours = false, bool includeSeconds = true);

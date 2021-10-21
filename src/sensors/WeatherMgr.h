@@ -31,7 +31,7 @@
 class WeatherMgr {
 public:
   // ----- Types
-  enum HistoryRange {Range_1Hour, Range_1Day, Range_1Week, Range_Combined};
+  enum HistoryRange {Range_1Hour, Range_1Day, Range_1Week};
 
   // ----- Constants -----
   static constexpr uint32_t HistoryWriteInterval = minutesToTime_t(10) * 1000L;
@@ -41,10 +41,14 @@ public:
   WeatherMgr() = default;
 
   // ----- Methods -----
-  void init(float tempCorrection, float humidityCorrection, int32_t elevation) {
+  void init(
+      float tempCorrection, float humidityCorrection, int32_t elevation,
+      std::function<void(bool)> busyCallback = nullptr)
+  {
     _tempCorrection = tempCorrection;
     _humiCorrection = humidityCorrection;
     _elevation = elevation;
+    _busyCallback = busyCallback;
 
     buffers.setBuffer(0, {&readings_5min, "hour", minutesToTime_t(5)});
     buffers.setBuffer(1, {&readings_1hr, "day", hoursToTime_t(1)});
@@ -68,16 +72,18 @@ public:
 
   // --- Getting data in JSON form ---
   // Output the accumulated history of readings
-  // @param  range  Which range of data we're interested in. Using `Combined`
-  //                generates a composite JSON object that contains all ranges.
+  // @param  range  Which range of data we're interested in.
   // @param  s      The stream where the JSON data should be written
   void emitHistoryAsJson(HistoryRange r, Stream& s) {
     switch (r) {
       case Range_1Hour: readings_5min.store(s); break;
       case Range_1Day: readings_1hr.store(s); break;
       case Range_1Week: readings_6hr.store(s); break;
-      case Range_Combined: buffers.store(s); break;
     }
+  }
+
+  void emitHistoryAsJson(Stream& s) {
+    buffers.store(s);
   }
 
   void takeReadings(bool force = false) {
@@ -90,6 +96,8 @@ public:
     static uint32_t nextReading = 0;
     uint32_t curMillis = millis();
     if (!(force || curMillis > nextReading)) return;
+
+    if (_busyCallback) _busyCallback(true);
     for (WeatherSensor* sensor : _sensors) {
       sensor->takeReadings(lastReadings);
     }
@@ -110,6 +118,7 @@ public:
       nextWrite = curMillis + HistoryWriteInterval;
       historyBufferIsDirty = false;
     }
+    _busyCallback(false);
   }
 
   void setAttributes(float tempCorrection, float humidityCorrection, int32_t elevation) {
@@ -118,6 +127,15 @@ public:
     _elevation = elevation;
   }
 
+  size_t sizeOfRange(HistoryRange r) const { return buffers.sizeOfBuffer(r); }
+
+  uint16_t tempFromHistory(HistoryRange r, size_t index) const {
+    return static_cast<const SavedReadings&>(buffers.peekAt(r, index)).temp;
+  }
+
+  void getTimeRange(HistoryRange r, time_t& start, time_t&end) const {
+    buffers.getTimeRange(r, start, end);
+  }
 
 private:
   // ----- Types -----
@@ -147,6 +165,7 @@ private:
   float _tempCorrection;
   float _humiCorrection;
   int32_t _elevation;
+  std::function<void(bool)> _busyCallback;
   WeatherReadings lastReadings;
 
   uint32_t _readingInterval = 60 * 1000L;               // How often do we take a reading

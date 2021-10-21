@@ -135,7 +135,7 @@ namespace WebUI {
       const char* confirm;  // A confirmation string. If not nullptr, then the dev page
                             // will display a confirmation dialog with this message
                             // before invoking the endpoint
-    } Action;
+    } ButtonDesc;
 
     // Provide default support for a developer page. The associated HTML template is:
     //    /data/wt/DevPage.html
@@ -152,11 +152,13 @@ namespace WebUI {
     void init(
         bool* showDevMenu, BaseSettings* devSettings);
     
-    // You made add buttons with associated web actions to the developer page
-    // by providing an array of Action objects
-    // @param   The Actions that describe the buttons to be added to the Dev page
-    // @param   The number of elements in the array
-    void addButtons(const Action* extraDevButtons, uint8_t nExtraDevButtons);
+    // You may add html buttons with associated web actions to the developer page
+    // by calling addButton(). The buttons will display in reverse order that they are
+    // added. That is, the last button added will be shown closest to the top of the page.
+    // Core WebThing items are added first (displayed lowest on the page), then the buttons
+    // from WebThingAoo, then the app-specific buttons.
+    // @param   buttonAction The Action that describe the button to be added to the Dev page
+    void addButton(ButtonDesc&& buttonAction);
   }
 }
 

@@ -253,10 +253,21 @@ namespace WebThing {
     settings.write();
   }
 
+  String formattedTime(time_t theTime, TimeFormatOptions options) {
+    char buf[12]; // HH:MM:SS AM
+
+    int h = options.use24Hour ? hour(theTime) : hourFormat12(theTime);
+    const char* amPM = options.showAMPM ? (isAM(theTime) ? " AM" : " PM") : "";
+    if (options.includeSeconds) sprintf(buf, "%02d:%02d:%02d%s", h, minute(theTime), second(theTime), amPM);
+    else sprintf(buf, "%02d:%02d%s", h, minute(theTime), amPM);
+
+    return String(buf);
+  }
+
   String formattedTime(time_t theTime, bool use24Hour, bool includeSeconds) {
     return formattedInterval(
         use24Hour ? hour(theTime) : hourFormat12(theTime),
-        minute(theTime), second(theTime), includeSeconds);
+        minute(theTime), second(theTime), false, includeSeconds);
   }
 
   String formattedTime(bool use24Hour, bool includeSeconds) {

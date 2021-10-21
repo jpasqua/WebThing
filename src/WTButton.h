@@ -7,6 +7,7 @@
 #ifndef WTButton_h
 #define WTButton_h
 
+#include <ArduinoLog.h>
 
 enum class PressType {None = -1, Normal, Long, VeryLong};
 
@@ -37,7 +38,7 @@ public:
   //         then the button was not pressed.
   PressType wasPressed() {
     PressType pressType = PressType::None;
-    bool pressed = digitalRead(pin);
+    bool pressed = !digitalRead(pin);
 
     if (pressed) {
       if (startOfPress == 0) {
@@ -87,7 +88,7 @@ public:
 
   // ----- Member Functions
   void addButton(WTButton& pb) { buttons.push_back(pb); }
-  void addButton(WTButton&& pb) {  buttons.push_back(pb); }
+  void addButton(WTButton&& pb) { buttons.push_back(pb); }
 
   void setDispatcher(Dispatcher d) { dispatcher = d; }
 
