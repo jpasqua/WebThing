@@ -31,6 +31,18 @@ class AQIMgr {
 public:
   // ----- Types
   enum HistoryRange {Range_1Hour, Range_1Day, Range_1Week};
+  class SavedReadings : public Serializable {
+  public:
+    SavedReadings() = default;
+    SavedReadings(ParticleReadings& pr, uint16_t quality, time_t ts)
+        : Serializable(ts), env(pr), aqi(quality) { }
+
+    virtual void internalize(const JsonObjectConst &obj);
+    virtual void externalize(Stream& writeStream) const;
+
+    ParticleReadings env;
+    uint16_t aqi;
+  };
 
   // ----- Constants -----
 
@@ -70,11 +82,6 @@ public:
   // @return A 24bit RGB color specification
   uint32_t colorForQuality(uint16_t quality);
 
-  size_t sizeOfRange(HistoryRange r) const;
-  uint16_t aqiFromHistory(HistoryRange r, size_t index) const;
-  void getTimeRange(HistoryRange r, time_t& start, time_t&end) const;
-
-
   // --- Getting data in JSON form ---
   // Output the accumulated history of readings
   // @param  range  Which range of data we're interested in.
@@ -113,21 +120,10 @@ public:
   MovingAverage pm25env_1hr;
   MovingAverage pm25env_6hr;
 
+  HistoryBuffers<SavedReadings, 3> buffers;
 
 private:
   // ----- Types -----
-  class SavedReadings : public Serializable {
-  public:
-    SavedReadings() = default;
-    SavedReadings(ParticleReadings& pr, uint16_t quality, time_t ts)
-        : Serializable(ts), env(pr), aqi(quality) { }
-
-    virtual void internalize(const JsonObjectConst &obj);
-    virtual void externalize(Stream& writeStream) const;
-
-    ParticleReadings env;
-    uint16_t aqi;
-  };
 
   enum State {awake, retrying, waking, asleep};
 
@@ -154,10 +150,6 @@ private:
   Indicator* _indicator;
   AQIReadings data;
 
-  HistoryBuffer<SavedReadings, 12> readings_5min; // The last hour's worth of readings at 5 minute intervals
-  HistoryBuffer<SavedReadings, 24> readings_1hr;  // The last day's worth of readings at 1 hour intervals
-  HistoryBuffer<SavedReadings, 28> readings_6hr;  // The last week's worth of readings at 6 hour intervals
-  HistoryBuffers<3> buffers;
   bool historyBufferIsDirty = false;
 };
 

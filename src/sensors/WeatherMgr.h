@@ -32,6 +32,25 @@ class WeatherMgr {
 public:
   // ----- Types
   enum HistoryRange {Range_1Hour, Range_1Day, Range_1Week};
+  class SavedReadings : public Serializable {
+  public:
+    SavedReadings() = default;
+    SavedReadings(float t, uint32_t ts) : Serializable(ts), temp(t) { }
+
+    virtual void externalize(Stream& writeStream) const {
+      StaticJsonDocument<32> doc; // Size provided by https://arduinojson.org/v6/assistant
+      doc["ts"] = timestamp;
+      doc["t"] = ((float)((int)(temp * 10))) / 10;  // Limit to 1 decimal place
+      serializeJson(doc, writeStream);
+    }
+
+    void internalize(const JsonObjectConst &obj) {
+      timestamp = obj["ts"];
+      temp = obj["t"];
+    }
+
+    float temp;
+  };
 
   // ----- Constants -----
   static constexpr uint32_t HistoryWriteInterval = minutesToTime_t(10) * 1000L;
@@ -50,9 +69,9 @@ public:
     _elevation = elevation;
     _busyCallback = busyCallback;
 
-    buffers.setBuffer(0, {&readings_5min, "hour", minutesToTime_t(5)});
-    buffers.setBuffer(1, {&readings_1hr, "day", hoursToTime_t(1)});
-    buffers.setBuffer(2, {&readings_6hr, "week", hoursToTime_t(6)});
+    buffers.describe({12, "hour", minutesToTime_t(5)});
+    buffers.describe({24, "day", hoursToTime_t(1)});
+    buffers.describe({28, "week", hoursToTime_t(6)});
     buffers.load(HistoryFilePath);
   }
 
@@ -71,17 +90,16 @@ public:
 
 
   // --- Getting data in JSON form ---
-  // Output the accumulated history of readings
+  // Output the accumulated history of readings for a particular range
   // @param  range  Which range of data we're interested in.
   // @param  s      The stream where the JSON data should be written
   void emitHistoryAsJson(HistoryRange r, Stream& s) {
-    switch (r) {
-      case Range_1Hour: readings_5min.store(s); break;
-      case Range_1Day: readings_1hr.store(s); break;
-      case Range_1Week: readings_6hr.store(s); break;
-    }
+    buffers[r].store(s);
   }
 
+  // Output the accumulated history of readings for all ranges
+  // @param  range  Which range of data we're interested in.
+  // @param  s      The stream where the JSON data should be written
   void emitHistoryAsJson(Stream& s) {
     buffers.store(s);
   }
@@ -127,37 +145,12 @@ public:
     _elevation = elevation;
   }
 
-  size_t sizeOfRange(HistoryRange r) const { return buffers.sizeOfBuffer(r); }
+  size_t sizeOfRange(HistoryRange r) const { return buffers[r].size(); }
 
-  uint16_t tempFromHistory(HistoryRange r, size_t index) const {
-    return static_cast<const SavedReadings&>(buffers.peekAt(r, index)).temp;
-  }
-
-  void getTimeRange(HistoryRange r, time_t& start, time_t&end) const {
-    buffers.getTimeRange(r, start, end);
-  }
+  HistoryBuffers<SavedReadings, 3> buffers;
 
 private:
   // ----- Types -----
-  class SavedReadings : public Serializable {
-  public:
-    SavedReadings() = default;
-    SavedReadings(float t, uint32_t ts) : Serializable(ts), temp(t) { }
-
-    virtual void externalize(Stream& writeStream) const {
-      StaticJsonDocument<32> doc; // Size provided by https://arduinojson.org/v6/assistant
-      doc["ts"] = timestamp;
-      doc["t"] = ((float)((int)(temp * 10))) / 10;  // Limit to 1 decimal place
-      serializeJson(doc, writeStream);
-    }
-
-    void internalize(const JsonObjectConst &obj) {
-      timestamp = obj["ts"];
-      temp = obj["t"];
-    }
-
-    float temp;
-  };
 
 
   // ----- Data Members -----
@@ -169,11 +162,6 @@ private:
   WeatherReadings lastReadings;
 
   uint32_t _readingInterval = 60 * 1000L;               // How often do we take a reading
-
-  HistoryBuffer<SavedReadings, 12> readings_5min; // The last hour's worth of readings at 5 minute intervals
-  HistoryBuffer<SavedReadings, 24> readings_1hr;  // The last day's worth of readings at 1 hour intervals
-  HistoryBuffer<SavedReadings, 28> readings_6hr;  // The last week's worth of readings at 6 hour intervals
-  HistoryBuffers<3> buffers;
   bool historyBufferIsDirty = false;
 };
 #endif // WeatherMgr_h

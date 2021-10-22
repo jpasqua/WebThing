@@ -47,9 +47,9 @@ static const char* HistoryFilePath = "/aqihist.json";
 AQIMgr::AQIMgr() {
   aqi = new PMS5003();
 
-  buffers.setBuffer(0, {&readings_5min, "hour", minutesToTime_t(5)});
-  buffers.setBuffer(1, {&readings_1hr, "day", hoursToTime_t(1)});
-  buffers.setBuffer(2, {&readings_6hr, "week", hoursToTime_t(6)});
+  buffers.describe({12, "hour", minutesToTime_t(5)});
+  buffers.describe({24, "day", hoursToTime_t(1)});
+  buffers.describe({28, "week", hoursToTime_t(6)});
 
   pm25env_10min.setSamplesToConsider(2);         // (2) 5-minute periods
   pm25env_30min.setSamplesToConsider(6);         // (6) 5-minute periods
@@ -162,30 +162,12 @@ void AQIMgr::takeNoteOfNewData(AQIReadings& newSample) {
 }
 
 void AQIMgr::emitHistoryAsJson(HistoryRange r, Stream& s) {
-  switch (r) {
-    case Range_1Hour: readings_5min.store(s); break;
-    case Range_1Day: readings_1hr.store(s); break;
-    case Range_1Week: readings_6hr.store(s); break;
-  }
+  buffers[r].store(s);
 }
 
 void AQIMgr::emitHistoryAsJson(Stream& s) {
   buffers.store(s);
 }
-
-
-size_t AQIMgr::sizeOfRange(HistoryRange r) const {
-  return buffers.sizeOfBuffer(r);
-}
-
-void AQIMgr::getTimeRange(HistoryRange r, time_t& start, time_t&end) const {
-  buffers.getTimeRange(r, start, end);
-}
-
-uint16_t AQIMgr::aqiFromHistory(HistoryRange r, size_t index) const {
-  return static_cast<const SavedReadings&>(buffers.peekAt(r, index)).aqi;
-}
-
 
 void AQIMgr::logData(AQIReadings& data) {
   time_t wallClockOfReading = Basics::wallClockFromMillis(data.timestamp);
