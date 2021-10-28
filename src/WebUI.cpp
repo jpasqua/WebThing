@@ -439,14 +439,16 @@ namespace WebUI {
     server->client().stop();
   }
 
-  void sendJSONContent(DynamicJsonDocument *doc) {
+  const String OKReponse = "200 OK";
+
+  void sendJSONContent(DynamicJsonDocument *doc, const String& code) {
     auto cp = [doc](Stream &s) { serializeJsonPretty(*doc, s); };
-    sendArbitraryContent("application/json", measureJsonPretty(*doc), cp);
+    sendArbitraryContent("application/json", measureJsonPretty(*doc), cp, code);
   }
 
-  void sendArbitraryContent(String type, int32_t length, ContentProvider cp) {
+  void sendArbitraryContent(String type, int32_t length, ContentProvider cp, const String& code) {
     auto client = server->client();
-    client.println(F("HTTP/1.0 200 OK"));
+    client.print("HTTP/1.0 "); client.println(code);
     client.print(F("Content-Type: ")); client.println(type);
     client.println(F("Connection: close"));
     if (length > 0) {
@@ -459,10 +461,10 @@ namespace WebUI {
     client.stop();  // Disconnect
   }
 
-  void sendStringContent(String type, String payload) {
+  void sendStringContent(String type, String payload, const String& code) {
     int length = payload.length();
     auto cp = [length, &payload](Stream &s) { s.write(payload.c_str(), length); };
-    sendArbitraryContent(type, length, cp);
+    sendArbitraryContent(type, length, cp, code);
   }
 }
 // ----- END: WebUI

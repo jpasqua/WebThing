@@ -119,10 +119,11 @@ namespace WebUI {
   bool hasHeader(const String& name);       // check if header exists
 
   // ----- Sending Arbitrary Data
+  extern const String OKReponse;
   using ContentProvider = std::function<void(Stream&)>;
-  void sendArbitraryContent(String type, int32_t length, ContentProvider cp);
-  void sendStringContent(String type, String payload);
-  void sendJSONContent(DynamicJsonDocument *doc);
+  void sendArbitraryContent(String type, int32_t length, ContentProvider cp, const String& code = OKReponse);
+  void sendStringContent(String type, String payload, const String& code = OKReponse);
+  void sendJSONContent(DynamicJsonDocument *doc, const String& code = OKReponse);
 
   // Deprecated as prep for supporitng both ESP8266 and ESP32
   WebServer* getUnderlyingServer();
