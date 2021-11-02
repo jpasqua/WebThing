@@ -30,7 +30,7 @@
     buttonContainer.className +='w3-container'
     let btn = document.createElement("button");
     btn.innerHTML = bd.label;
-    btn.className += 'w3-button w3-quarter w3-block w3-round-large w3-padding w3-margin-top ';
+    btn.className += 'w3-button w3-third w3-block w3-round-large w3-padding w3-margin-top ';
     if (bd.color === undefined) btn.className += 'w3-pale-green';
     else btn.className += bd.color;
     btn.onclick = function() { handleClick(bd); }
