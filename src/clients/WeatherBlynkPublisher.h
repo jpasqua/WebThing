@@ -26,25 +26,25 @@ public:
 
     if (!isnan(readings.temp)) {
       Log.verbose("Temp: %F, converted: %F", readings.temp, Output::temp(readings.temp));
-      Blynk.virtualWrite(TempPin, Output::temp(readings.temp));
-      Blynk.virtualWrite(HeatIndexPin, Output::temp(readings.heatIndex));
-      Blynk.virtualWrite(DewPointPin, Output::temp(readings.dewPointTemp));
-      Blynk.virtualWrite(DewSpreadPin, Output::tempSpread(readings.dewPointSpread));
+      BlynkClient.virtualWrite(TempPin, Output::temp(readings.temp));
+      BlynkClient.virtualWrite(HeatIndexPin, Output::temp(readings.heatIndex));
+      BlynkClient.virtualWrite(DewPointPin, Output::temp(readings.dewPointTemp));
+      BlynkClient.virtualWrite(DewSpreadPin, Output::tempSpread(readings.dewPointSpread));
     }
 
     if (!isnan(readings.humidity)) {
-      Blynk.virtualWrite(HumidityPin, readings.humidity);
+      BlynkClient.virtualWrite(HumidityPin, readings.humidity);
     }
 
     if (!isnan(readings.pressure)) {
-      Blynk.virtualWrite(PressurePin,    Output::baro(readings.pressure));
-      Blynk.virtualWrite(RelPressurePin, Output::baro(readings.relPressure));
+      BlynkClient.virtualWrite(PressurePin,    Output::baro(readings.pressure));
+      BlynkClient.virtualWrite(RelPressurePin, Output::baro(readings.relPressure));
     }
 
     if (timeStatus() == timeSet) {
       String dateTime = Output::formattedTime(Basics::wallClockFromMillis(readings.timestamp));
       Log.verbose("Timestamp sent to Blynk: %s", dateTime.c_str());
-      Blynk.virtualWrite(TimestampPin, dateTime);
+      BlynkClient.virtualWrite(TimestampPin, dateTime);
     }
 
     _timestampOfLastData = readings.timestamp;

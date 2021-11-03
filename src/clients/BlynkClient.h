@@ -1,16 +1,15 @@
 #ifndef BlynkClient_h
 #define BlynkClient_h
 
-#define NO_GLOBAL_INSTANCES
-#define NO_GLOBAL_BLYNK
+class BlynkWrapper {
+public:
+  void virtualWrite(int pin, String value);
+  void virtualWrite(int pin, float value);
+  void virtualWrite(int pin, bool value);
+  void virtualWrite(int pin, uint8_t value);
+  void virtualWrite(int pin, uint16_t value);
+};
 
-#if defined(ESP8266)
-  #include <BlynkSimpleEsp8266.h>
-#elif defined(ESP32)
-  #include <BlynkSimpleEsp32.h>
-#endif
-
-#undef NO_GLOBAL_INSTANCES
-#undef NO_GLOBAL_BLYNK
+extern BlynkWrapper BlynkClient;
 
 #endif	// BlynkClient_h

@@ -15,6 +15,7 @@
 #endif
 //                                  Local Includes
 #include "BlynkMgr.h"
+#include "BlynkClient.h"
 //--------------- End:    Includes ---------------------------------------------
 
 namespace BlynkMgr {
@@ -78,3 +79,11 @@ namespace BlynkMgr {
     }
   }
 }
+
+void BlynkWrapper::virtualWrite(int pin, String value) { Blynk.virtualWrite(pin, value); }
+void BlynkWrapper::virtualWrite(int pin, float value) { Blynk.virtualWrite(pin, value); }
+void BlynkWrapper::virtualWrite(int pin, bool value) { Blynk.virtualWrite(pin, value); }
+void BlynkWrapper::virtualWrite(int pin, uint8_t value) { Blynk.virtualWrite(pin, value); }
+void BlynkWrapper::virtualWrite(int pin, uint16_t value) { Blynk.virtualWrite(pin, value); }
+
+BlynkWrapper BlynkClient;

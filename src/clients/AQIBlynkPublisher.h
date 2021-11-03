@@ -22,16 +22,16 @@ public:
     if (_aqiMgr->lastReadingTime() == _timestampOfLastData) return false;
 
     const AQIReadings& readings = _aqiMgr->getLastReadings();
-    Blynk.virtualWrite(Env010Pin, readings.env.pm10);
-    Blynk.virtualWrite(Env025Pin, readings.env.pm25);
-    Blynk.virtualWrite(Env100Pin, readings.env.pm100);
-    Blynk.virtualWrite(MA30Pin, _aqiMgr->pm25env_30min.getAverage());
-    Blynk.virtualWrite(AQIPin, _aqiMgr->derivedAQI(readings.env.pm25));
+    BlynkClient.virtualWrite(Env010Pin, readings.env.pm10);
+    BlynkClient.virtualWrite(Env025Pin, readings.env.pm25);
+    BlynkClient.virtualWrite(Env100Pin, readings.env.pm100);
+    BlynkClient.virtualWrite(MA30Pin, _aqiMgr->pm25env_30min.getAverage());
+    BlynkClient.virtualWrite(AQIPin, _aqiMgr->derivedAQI(readings.env.pm25));
 
     if (timeStatus() == timeSet) {
       String dateTime = Output::formattedTime(Basics::wallClockFromMillis(readings.timestamp));
       Log.verbose("Timestamp sent to Blynk: %s", dateTime.c_str());
-      Blynk.virtualWrite(TimestampPin, dateTime);
+      BlynkClient.virtualWrite(TimestampPin, dateTime);
     }
 
     _timestampOfLastData = readings.timestamp;
