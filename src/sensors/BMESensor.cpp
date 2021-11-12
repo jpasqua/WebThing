@@ -25,14 +25,28 @@ void BMESensor::begin(int addr) {
 }
 
 void BMESensor::takeReadings(WeatherReadings& readings) {
-  readings.timestamp = millis();
+  static uint32_t lastTimeStamp = 0;
+  static float lastTemp = -1024.0;
+
+  uint32_t curTime = millis();
   if (mock) {
+    readings.timestamp = curTime;
     mockReadings(readings);
     return;
   }
 
   bme.takeForcedMeasurement();
-  readings.temp = bme.readTemperature();
+  auto newTemp = bme.readTemperature();
+  if ((lastTemp != -1024.0) && abs(newTemp - lastTemp) > ((curTime-lastTimeStamp)/1000)) {
+    // If the temperature changed more than 1 degree per second, it's bad - ignore it
+    Log.warning(
+      "new temp: %f, last temp: %f - Too much variation in %d seconds",
+      newTemp, lastTemp, (curTime-lastTimeStamp)/1000);
+    return;
+  }
+
+  readings.timestamp = lastTimeStamp = curTime;
+  readings.temp = newTemp;
   readings.humidity = bme.readHumidity();
   readings.pressure = bme.readPressure() / 100.0F;
 
