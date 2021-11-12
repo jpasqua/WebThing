@@ -127,14 +127,14 @@ bool PMS5003::read(AQIReadings *data) {
 }
 
 void PMS5003::fabricateData(AQIReadings* data) {
-  data->standard.pm10 = random(15, 250);
+  data->standard.pm10 = random(15, 75);
   data->standard.pm25 = data->standard.pm10 + 5 - random(0, 10);
   data->standard.pm100 = data->standard.pm25 + 5 - random(0, 10);
   data->env.pm10 = data->standard.pm10 + 5 - random(0, 10);
   data->env.pm25 = data->env.pm10  + 5 - random(0, 10);
   data->env.pm100 = data->env.pm25  + 5 - random(0, 10);
   
-  data->particles_03um = random(0, 300);
+  data->particles_03um = random(0, 32);
   data->particles_05um = data->particles_03um/2;
   data->particles_10um = data->particles_05um/2;
   data->particles_25um = data->particles_10um/2;
