@@ -280,6 +280,9 @@ namespace WebUI {
     registerHandler("/configPwr",      Pages::displayPowerConfig);
     registerHandler("/configLogLevel", Pages::displayLogLevel);
     server->serveStatic("/favicon.ico", *ESP_FS::getFS(), "/wt/favicon.ico");
+    server->serveStatic("/favicon-16x16.png", *ESP_FS::getFS(), "/wt/favicon-16x16.png");
+    server->serveStatic("/favicon-32x32.png", *ESP_FS::getFS(), "/wt/favicon-32x32.png");
+    server->serveStatic("/apple-touch-icon.png", *ESP_FS::getFS(), "/wt/favicon.ico");
 
     registerHandler("/updateconfig",   Endpoints::updateConfig);
     registerHandler("/updatePwrConfig",Endpoints::updatePwrConfig);
