@@ -127,17 +127,31 @@ bool PMS5003::read(AQIReadings *data) {
 }
 
 void PMS5003::fabricateData(AQIReadings* data) {
-  data->standard.pm10 = random(15, 75);
-  data->standard.pm25 = data->standard.pm10 + 5 - random(0, 10);
-  data->standard.pm100 = data->standard.pm25 + 5 - random(0, 10);
-  data->env.pm10 = data->standard.pm10 + 5 - random(0, 10);
-  data->env.pm25 = data->env.pm10  + 5 - random(0, 10);
-  data->env.pm100 = data->env.pm25  + 5 - random(0, 10);
+  static AQIReadings mockReadings;
+  static bool initialized = false;
+
+  if (!initialized) {
+    mockReadings.standard.pm10 = random(10, 60);
+    mockReadings.particles_03um = random(10, 42);
+    initialized = true;
+  } else {
+    int low = std::max(-3, -((int)mockReadings.standard.pm10));
+    mockReadings.standard.pm10 += random(low, 4);
+    low = std::max(-3, -((int)mockReadings.particles_03um));
+    mockReadings.particles_03um += random(low, 4);
+  }
+
+  mockReadings.standard.pm25 = mockReadings.standard.pm10 + 5 - random(0, 10);
+  mockReadings.standard.pm100 = mockReadings.standard.pm25 + 5 - random(0, 10);
+  mockReadings.env.pm10 = mockReadings.standard.pm10 + 5 - random(0, 10);
+  mockReadings.env.pm25 = mockReadings.env.pm10  + 5 - random(0, 10);
+  mockReadings.env.pm100 = mockReadings.env.pm25  + 5 - random(0, 10);
   
-  data->particles_03um = random(0, 32);
-  data->particles_05um = data->particles_03um/2;
-  data->particles_10um = data->particles_05um/2;
-  data->particles_25um = data->particles_10um/2;
-  data->particles_50um = data->particles_25um/2;
-  data->particles_100um = data->particles_50um/2;
+  mockReadings.particles_05um = mockReadings.particles_03um/2;
+  mockReadings.particles_10um = mockReadings.particles_05um/2;
+  mockReadings.particles_25um = mockReadings.particles_10um/2;
+  mockReadings.particles_50um = mockReadings.particles_25um/2;
+  mockReadings.particles_100um = mockReadings.particles_50um/2;
+
+  *data = mockReadings;
 }
