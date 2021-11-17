@@ -10,7 +10,7 @@
 #include <sensors/WeatherReadings.h>
 #include <sensors/WeatherMgr.h>
 //                                  Local Includes
-#include "BlynkClient.h"
+#include "BlynkWrapper.h"
 //--------------- End:    Includes ---------------------------------------------
 
 

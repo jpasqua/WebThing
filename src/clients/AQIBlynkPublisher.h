@@ -7,9 +7,9 @@
 #include <ArduinoLog.h>
 #include <Output.h>
 //                                  WebThing Includes
-#include <clients/BlynkClient.h>
 #include <sensors/AQIMgr.h>
 //                                  Local Includes
+#include "BlynkWrapper.h"
 //--------------- End:    Includes ---------------------------------------------
 
 

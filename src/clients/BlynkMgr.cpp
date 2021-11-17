@@ -15,7 +15,7 @@
 #endif
 //                                  Local Includes
 #include "BlynkMgr.h"
-#include "BlynkClient.h"
+#include "BlynkWrapper.h"
 //--------------- End:    Includes ---------------------------------------------
 
 namespace BlynkMgr {
