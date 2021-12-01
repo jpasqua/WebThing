@@ -17,6 +17,7 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
+#include <math.h>
 //                                  Third Party Libraries
 #include <BPABasics.h>
 #include <HistoryBuffers.h>
@@ -34,22 +35,50 @@ public:
   enum HistoryRange {Range_1Hour, Range_1Day, Range_1Week};
   class SavedReadings : public Serializable {
   public:
-    SavedReadings() = default;
-    SavedReadings(float t, uint32_t ts) : Serializable(ts), temp(t) { }
+    SavedReadings(time_t ts) : timestamp(ts), temp(0.0), humidity(0), _availableReadings(0) {}
+    SavedReadings() : SavedReadings(0) {}
+
+    void setTemp(float t) {
+      temp = t;
+      _availableReadings |= WeatherSensor::ReadingType::Temperature;
+    }
+
+    void setHumi(uint8_t h) {
+      humidity = h;
+      _availableReadings |= WeatherSensor::ReadingType::Humidity;
+    }
 
     virtual void externalize(Stream& writeStream) const {
-      StaticJsonDocument<32> doc; // Size provided by https://arduinojson.org/v6/assistant
+      StaticJsonDocument<96> doc; // Size provided by https://arduinojson.org/v6/assistant
       doc["ts"] = timestamp;
-      doc["t"] = ((float)((int)(temp * 10))) / 10;  // Limit to 1 decimal place
+      if (_availableReadings & WeatherSensor::ReadingType::Temperature) {
+        doc["t"] = ((float)((int)(temp * 10))) / 10;  // Limit to 1 decimal place
+      }
+      if (_availableReadings & WeatherSensor::ReadingType::Humidity) {
+        doc["h"] = humidity;
+      }
       serializeJson(doc, writeStream);
     }
 
     void internalize(const JsonObjectConst &obj) {
       timestamp = obj["ts"];
-      temp = obj["t"];
+      _availableReadings = 0;
+      if (obj.containsKey("t")) {
+        temp = obj["t"];
+        _availableReadings |= WeatherSensor::ReadingType::Temperature;
+      }
+      if (obj.containsKey("h")) {
+        humidity = obj["h"];
+        _availableReadings |= WeatherSensor::ReadingType::Humidity;
+      }
     }
 
+    time_t timestamp;
     float temp;
+    uint8_t humidity;
+
+  private:
+    uint8_t _availableReadings;
   };
 
   // ----- Constants -----
@@ -77,7 +106,10 @@ public:
 
   void addSensor(WeatherSensor* sensor) {
     _sensors.push_back(sensor);
+    _availableReadings |= sensor->availableReadingTypes();
   }
+
+  uint8_t availableReadingTypes() { return _availableReadings; }
 
   // --- Getting and using sensor readings ---
   // Returns the timestamp of the last reading
@@ -125,8 +157,9 @@ public:
     nextReading = curMillis + _readingInterval;
 
     // 2. Push the reading into the appropriate set of history buffers (if any)
-    time_t gmtTimestamp = Basics::wallClockFromMillis(lastReadings.timestamp) - WebThing::getGMTOffset();
-    SavedReadings readings(lastReadings.temp, gmtTimestamp);
+    SavedReadings readings(Basics::wallClockFromMillis(lastReadings.timestamp) - WebThing::getGMTOffset());
+    if (_availableReadings & WeatherSensor::ReadingType::Temperature) readings.setTemp(lastReadings.temp);
+    if (_availableReadings & WeatherSensor::ReadingType::Humidity) readings.setHumi(lastReadings.humidity);
     historyBufferIsDirty |= buffers.conditionalPushAll(readings);
 
     // 3. If it is time, write the history out to the file system
@@ -163,5 +196,6 @@ private:
 
   uint32_t _readingInterval = 60 * 1000L;               // How often do we take a reading
   bool historyBufferIsDirty = false;
+  uint8_t _availableReadings = 0;
 };
 #endif // WeatherMgr_h
