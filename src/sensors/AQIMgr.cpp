@@ -139,7 +139,6 @@ void AQIMgr::takeNoteOfNewData(AQIReadings& newSample) {
   // 1. Add this reading to the appropriate set of history buffers
   SavedReadings readings;
   readings.timestamp =  Basics::wallClockFromMillis(newSample.timestamp) - WebThing::getGMTOffset();
-  readings.env = newSample.env;
   readings.aqi = derivedAQI(newSample.env.pm25);
   historyBufferIsDirty |= buffers.conditionalPushAll(readings);
 
@@ -271,11 +270,6 @@ uint32_t AQIMgr::colorForQuality(uint16_t quality) {
 void AQIMgr::SavedReadings::internalize(const JsonObjectConst &obj) {
   timestamp = obj["ts"];
   aqi = obj["aqi"];
-
-  JsonObjectConst jsonEnv = obj["env"];
-  env.pm10 = jsonEnv["pm10"];
-  env.pm25 = jsonEnv["pm25"];
-  env.pm100 = jsonEnv["pm100"];
 }
 
 void AQIMgr::SavedReadings::externalize(Stream& writeStream) const {
@@ -283,11 +277,6 @@ void AQIMgr::SavedReadings::externalize(Stream& writeStream) const {
 
   doc["ts"] = timestamp;
   doc["aqi"] = aqi;
-
-  JsonObject jsonEnv = doc.createNestedObject("env");
-  jsonEnv["pm10"] = env.pm10;
-  jsonEnv["pm25"] = env.pm25;
-  jsonEnv["pm100"] = env.pm100;
 
   serializeJson(doc, writeStream);
 }

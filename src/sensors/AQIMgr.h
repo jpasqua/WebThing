@@ -34,13 +34,12 @@ public:
   class SavedReadings : public Serializable {
   public:
     SavedReadings() = default;
-    SavedReadings(ParticleReadings& pr, uint16_t quality, time_t ts)
-        : Serializable(ts), env(pr), aqi(quality) { }
+    SavedReadings(uint16_t quality, time_t ts)
+        : Serializable(ts), aqi(quality) { }
 
     virtual void internalize(const JsonObjectConst &obj);
     virtual void externalize(Stream& writeStream) const;
 
-    ParticleReadings env;
     uint16_t aqi;
   };
 
