@@ -47,6 +47,11 @@ namespace WebUI {
   // @param handler   The function to be called when the path is requested
   void registerHandler(const String& path, std::function<void(void)> handler);
 
+  // Declare that static content (a file) is available at a given URI.
+  // @param uri      The URI to respond to
+  // @param filePath The file to be served in response to the URI
+  void registerStatic(const char* uri, const char* filePath);
+
   // If you'd like to know when WebThing starts and finishes processing a web request,
   // register a function here.
   // @param handler   The function to call when a web request starts/ends. When called,

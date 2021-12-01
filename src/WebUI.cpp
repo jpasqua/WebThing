@@ -202,7 +202,39 @@ namespace WebUI {
       wrapWebAction("updateConfig", action, true);
     }
 
-  }
+    void handleFileUpload() {
+      static File fsUploadFile;
+
+      HTTPUpload& upload = server->upload();
+
+      if (upload.status == UPLOAD_FILE_START) {
+        // We're just getting started. Get the file name and open/create the file
+        String filename = upload.filename;
+        if (!filename.startsWith("/")) filename = "/"+filename;
+        Log.trace("handleFileUpload Name: %s", filename.c_str());
+        fsUploadFile = ESP_FS::open(filename, "w");
+        filename = String();
+      } else if (upload.status == UPLOAD_FILE_WRITE) {
+        // There is data available, write it
+        if (fsUploadFile)
+          fsUploadFile.write(upload.buf, upload.currentSize);
+      } else if (upload.status == UPLOAD_FILE_END) {
+        // We're done. Close the file and send a response
+        if (fsUploadFile) {
+          fsUploadFile.close();
+          Log.trace("Upload succeeded, file size: %d", upload.totalSize);
+          server->sendHeader("Location", "/");  // Redirect the client to the home page
+          server->send(303, "text/plain", "Redirecting...");
+          server->client().stop();
+        } else {
+          server->send(500, "text/plain", "500: couldn't create file");
+        }
+      }
+    }
+
+  } // ----- END: WebUI::Endpoints
+
+
 
   // ----- BEGIN: WebUI::Pages
   namespace Pages {
@@ -292,6 +324,9 @@ namespace WebUI {
     
     server->onNotFound(Internal::handleNotFound);
 
+    server->on( // Handle file uploads
+      "/upload", HTTP_POST, []() { server->send(200, "text/plain", ""); }, Endpoints::handleFileUpload );
+
     server->begin();
     if (WebThing::Protected::mDNSStarted) {
       MDNS.addService("http", "tcp", WebThing::settings.webServerPort); // Advertise the web service
@@ -330,6 +365,10 @@ namespace WebUI {
       Log.verbose("Replacing URL handler for %s", path.c_str());
     }
     handlers[path] = handler;
+  }
+
+  void registerStatic(const char* uri, const char* filePath) {
+    server->serveStatic(uri, *ESP_FS::getFS(), filePath);
   }
 
   void registerBusyCallback(std::function<void(bool)> bc) {
@@ -419,6 +458,8 @@ namespace WebUI {
       server->sendContent(chunk);
     }
   }
+
+
 
   void redirectHome() {
     // Send them back to the Root Directory
