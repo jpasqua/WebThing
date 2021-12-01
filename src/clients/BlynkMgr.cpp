@@ -20,7 +20,7 @@
 
 namespace BlynkMgr {
   namespace Internal {
-    constexpr const uint8_t MaxPublishers = 4;
+    constexpr uint8_t MaxPublishers = 4;
 
     std::array<BlynkPublisher*, MaxPublishers> publishers;
     uint8_t nPublishers = 0;
