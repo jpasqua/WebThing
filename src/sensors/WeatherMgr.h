@@ -35,7 +35,7 @@ public:
   enum HistoryRange {Range_1Hour, Range_1Day, Range_1Week};
   class SavedReadings : public Serializable {
   public:
-    SavedReadings(time_t ts) : timestamp(ts), temp(0.0), humidity(0), _availableReadings(0) {}
+    SavedReadings(time_t ts) : Serializable(ts), temp(0.0), humidity(0), _availableReadings(0) {}
     SavedReadings() : SavedReadings(0) {}
 
     void setTemp(float t) {
@@ -73,7 +73,6 @@ public:
       }
     }
 
-    time_t timestamp;
     float temp;
     uint8_t humidity;
 
@@ -110,6 +109,9 @@ public:
   }
 
   uint8_t availableReadingTypes() { return _availableReadings; }
+  bool hasTemp() { return _availableReadings & WeatherSensor::ReadingType::Temperature; }
+  bool hasHumi() { return _availableReadings & WeatherSensor::ReadingType::Humidity; }
+  bool hasBaro() { return _availableReadings & WeatherSensor::ReadingType::Pressure; }
 
   // --- Getting and using sensor readings ---
   // Returns the timestamp of the last reading
