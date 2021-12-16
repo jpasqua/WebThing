@@ -4,7 +4,9 @@
 void BMESensor::begin(int addr) {
   bool status;
 
-  mock = false;
+  if (addr == 0) { mock = true; return; }
+  else mock = false;
+  
   status = bme.begin(addr);
   if (status == 0) {
     Log.error("Could not find a valid BME280 sensor, check wiring!");
