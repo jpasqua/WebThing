@@ -171,11 +171,10 @@ void AQIMgr::emitHistoryAsJson(Stream& s) {
 void AQIMgr::logData(AQIReadings& data) {
   time_t wallClockOfReading = Basics::wallClockFromMillis(data.timestamp);
   Log.verbose("-- %s --", WebThing::formattedTime(wallClockOfReading, true, true).c_str());
-  Log.verbose(F("---------------------------------------"));
-  Log.verbose(F("Concentration Units (standard)"));
-  Log.verbose(F("---------------------------------------"));
+  Log.verbose(F("----- Concentration Units (Std) -------"));
   Log.verbose(F("PM 1.0: %d\t\tPM 2.5: %d\t\tPM 10: %d"), data.standard.pm10 ,data.standard.pm25, data.standard.pm100);
   Log.verbose(F("---------------------------------------"));
+  Log.verbose(F("----- Concentration Units (Env) -------"));
   Log.verbose(F("PM 1.0: %d\t\tPM 2.5: %d\t\tPM 10: %d"), data.env.pm10 ,data.env.pm25, data.env.pm100);
   Log.verbose(F("---------------------------------------"));
   Log.verbose(F("Particles > 0.3um / 0.1L air: %d"), data.particles_03um);
