@@ -19,9 +19,9 @@ public:
       : _aqiMgr(aqiMgr) { }
 
   bool publish() override {
-    if (_aqiMgr->lastReadingTime() == _timestampOfLastData) return false;
-
     const AQIReadings& readings = _aqiMgr->getLastReadings();
+    if (readings.timestamp == _timestampOfLastData) return false;
+
     BlynkClient.virtualWrite(Env010Pin, readings.env.pm10);
     BlynkClient.virtualWrite(Env025Pin, readings.env.pm25);
     BlynkClient.virtualWrite(Env100Pin, readings.env.pm100);
