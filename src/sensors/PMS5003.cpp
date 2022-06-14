@@ -18,45 +18,49 @@
 
 PMS5003::PMS5003() {}
 
-void PMS5003::sleep() {
+void PMS5003::sendCommand(uint8_t command, uint8_t data) {
   if (mock) return;
-  uint8_t command[] = { 0x42, 0x4D, 0xE4, 0x00, 0x00, 0x01, 0x73 };
-  _serial_dev->write(command, sizeof(command));
+  uint8_t buf[7];
+  uint16_t checksum = StartByteValue + SecondByteValue + command + data;
+  buf[0] = StartByteValue;
+  buf[1] = SecondByteValue;
+  buf[2] = command;
+  buf[3] = 0;
+  buf[4] = data;
+  buf[5] = checksum >> 8;
+  buf[6] = checksum & 0xff;
+  _serialDevice->write(buf, sizeof(buf));
 }
 
-void PMS5003::wakeUp() {
-  if (mock) return;
-  uint8_t command[] = { 0x42, 0x4D, 0xE4, 0x00, 0x01, 0x01, 0x74 };
-  _serial_dev->write(command, sizeof(command));
-}
+void PMS5003::sleep() { sendCommand(CMD_SetAwakeAsleep, GotoSleep); }
+
+void PMS5003::wakeUp() { sendCommand(CMD_SetAwakeAsleep, Wakeup); }
 
 void PMS5003::activeMode() {
-  if (mock) return;
-  uint8_t command[] = { 0x42, 0x4D, 0xE1, 0x00, 0x01, 0x01, 0x71 };
-  _serial_dev->write(command, sizeof(command));
+  sendCommand(CMD_ChangeMode, Mode_Active);
   _mode = MODE_ACTIVE;
 }
 
 void PMS5003::passiveMode() {
-  if (mock) return;
-  uint8_t command[] = { 0x42, 0x4D, 0xE1, 0x00, 0x00, 0x01, 0x70 };
-  _serial_dev->write(command, sizeof(command));
+  sendCommand(CMD_ChangeMode, Mode_Passive);
   _mode = MODE_PASSIVE;
 }
 
 void PMS5003::requestRead() {
-  if (mock) return;
-  if (_mode == MODE_PASSIVE)
-  {
-    uint8_t command[] = { 0x42, 0x4D, 0xE2, 0x00, 0x00, 0x01, 0x71 };
-    _serial_dev->write(command, sizeof(command));
-  }
+  if (_mode == MODE_PASSIVE) sendCommand(CMD_Read, 0);
 }
 
 bool PMS5003::begin(Stream *theSerial) {
-  _serial_dev = theSerial;
+  _serialDevice = theSerial;
   mock = (theSerial == nullptr);
   return true;
+}
+
+uint16_t PMS5003::fieldFromPacket(uint8_t* buffer, uint8_t fieldIndex) {
+  uint16_t field;
+  field  = (buffer[fieldIndex * 2 + 1]);    // Low byte comes second
+  field += (buffer[fieldIndex * 2] << 8);   // High byte comes first
+  return field;
 }
 
 bool PMS5003::read(AQIReadings *data) {
@@ -65,60 +69,58 @@ bool PMS5003::read(AQIReadings *data) {
     return true;
   }
 
-  uint8_t buffer[32];
+  uint8_t buffer[PacketSize];
   uint16_t sum = 0;
 
-  if (!data) {
-    return false;
-  }
+  if (!data) return false;
+  if (!_serialDevice->available()) return false;
 
-  if (!_serial_dev->available()) {
-    return false;
-  }
-  if (_serial_dev->peek() != 0x42) {
+  if (_serialDevice->peek() != StartByteValue) {
     int p;
-    while ( ((p = _serial_dev->peek()) != -1) && (p != 0x42) ) { _serial_dev->read(); }
+    while ( ((p = _serialDevice->peek()) != -1) && (p != StartByteValue) ) { _serialDevice->read(); }
     if (p == -1) return false;
   }
-  // Now read all 32 bytes
-  if (_serial_dev->available() < 32) {
-    return false;
-  }
-  _serial_dev->readBytes(buffer, 32);
 
+  // Assuming all of the data is there, read it in...
+  if (_serialDevice->available() < PacketSize) return false;
+  _serialDevice->readBytes(buffer, PacketSize);
 
-  // Check that start byte is correct!
-  if (buffer[0] != 0x42) {
-    return false;
-  }
-
-  // get checksum ready
-// Serial.print("Raw buffer: ");
-  for (uint8_t i = 0; i < 30; i++) {
+  // Calculate checksum over all fields (except the checksum itself)
+  for (uint8_t i = 0; i < PacketSize-FieldSize; i++) {
     sum += buffer[i];
-// if (i) Serial.print(", ");
-// Serial.print(buffer[i], HEX); 
-  }
-// Serial.println();
-
-  // The data comes in endian'd, this solves it so it works on all platforms
-  uint16_t buffer_u16[15];
-  for (uint8_t i = 0; i < 15; i++) {
-    buffer_u16[i] = buffer[2 + i * 2 + 1];
-    buffer_u16[i] += (buffer[2 + i * 2] << 8);
   }
 
-  uint16_t checksum;
-  memcpy(&checksum, (void *)&buffer_u16[14], 2);
+  // Serial.print("Raw buffer: ");
+  // for (uint8_t i = 0; i < PacketSize-FieldSize; i++) {
+  //   if (i) Serial.print(", ");
+  //   Serial.print(buffer[i], HEX); 
+  // }
+  // Serial.println();
+
+  // The data on the wire is big endian. Make sure it works for this platform.
+  data->standard.pm10 = fieldFromPacket(buffer, PM01StdFieldIndex); 
+  data->standard.pm25 = fieldFromPacket(buffer, PM25StdFieldIndex); 
+  data->standard.pm100 = fieldFromPacket(buffer, PM100StdFieldIndex); 
+  data->env.pm10 = fieldFromPacket(buffer, PM01EnvFieldIndex); 
+  data->env.pm25 = fieldFromPacket(buffer, PM25EnvFieldIndex); 
+  data->env.pm100 = fieldFromPacket(buffer, PM100EnvFieldIndex); 
+  data->particles_03um = fieldFromPacket(buffer, PM03FieldIndex); 
+  data->particles_05um = fieldFromPacket(buffer, PM05FieldIndex); 
+  data->particles_10um = fieldFromPacket(buffer, PM10FieldIndex); 
+  data->particles_25um = fieldFromPacket(buffer, PM25FieldIndex); 
+  data->particles_50um = fieldFromPacket(buffer, PM50FieldIndex); 
+  data->particles_100um = fieldFromPacket(buffer, PM100FieldIndex); 
+
+  uint16_t checksum = fieldFromPacket(buffer, ChecksumFieldIndex);
   if (sum != checksum) {
+    // Serial.println("PMS5003 Checksum did not match!");
     return false;
   }
 
-  // put it into a nice struct :)
-  memcpy((void *)&(data->standard.pm10), (void *)&buffer_u16[1], 24);
-
+  // Sanity check on the data
   if (data->particles_03um + data->particles_05um + data->particles_10um + 
       data->particles_25um + data->particles_50um + data->particles_100um == 0) {
+    // Serial.println("PMS5003 Sanity Check: All particle level fields are Zero!");
     return false;
   }
 
