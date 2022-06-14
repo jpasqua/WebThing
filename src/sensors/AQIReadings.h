@@ -9,8 +9,7 @@ struct ParticleReadings {
 
 typedef struct {
   uint32_t timestamp;
-  // The following field sizes and order are defined to match the raw
-  // output from the sensor. Do not reorganize them!
+  // The following fields come directly from the sensor
   ParticleReadings standard;
   ParticleReadings env;
   uint16_t particles_03um;  // 0.3um Particle Count
