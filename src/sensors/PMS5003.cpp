@@ -113,14 +113,14 @@ bool PMS5003::read(AQIReadings *data) {
 
   uint16_t checksum = fieldFromPacket(buffer, ChecksumFieldIndex);
   if (sum != checksum) {
-    // Serial.println("PMS5003 Checksum did not match!");
+    Serial.println("PMS5003 Checksum did not match!");
     return false;
   }
 
   // Sanity check on the data
   if (data->particles_03um + data->particles_05um + data->particles_10um + 
       data->particles_25um + data->particles_50um + data->particles_100um == 0) {
-    // Serial.println("PMS5003 Sanity Check: All particle level fields are Zero!");
+    Serial.println("PMS5003 Sanity Check: All particle level fields are Zero!");
     return false;
   }
 
