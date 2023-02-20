@@ -86,7 +86,7 @@ namespace WebThing {
       }
     }
 
-    void flushSerial(Print *p) { p->print(CR); Serial.flush(); }
+    void flushSerial(Print *p, int) { p->print(CR); Serial.flush(); }
 
     void configModeCallback (WiFiManager *myWiFiManager) {
       String ip = WiFi.softAPIP().toString();
