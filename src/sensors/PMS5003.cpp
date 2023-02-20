@@ -124,7 +124,7 @@ bool PMS5003::read(AQIReadings *data) {
     return false;
   }
 
-  // success!
+  Serial.println("PMS5003 successfully took a reading");
   return true;
 }
 
