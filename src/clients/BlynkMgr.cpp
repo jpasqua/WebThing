@@ -11,6 +11,7 @@
 #if defined(ESP8266)
   #include <BlynkSimpleEsp8266.h>
 #elif defined(ESP32)
+  #include <array>
   #include <BlynkSimpleEsp32.h>
 #endif
 //                                  Local Includes

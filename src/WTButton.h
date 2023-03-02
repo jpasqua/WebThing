@@ -8,6 +8,9 @@
 #define WTButton_h
 
 #include <ArduinoLog.h>
+#if defined(ESP32)
+  #include <vector>
+#endif
 
 enum class PressType {None = -1, Normal, Long, VeryLong};
 
