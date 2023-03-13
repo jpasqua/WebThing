@@ -15,11 +15,9 @@ void WeatherSensor::calculateDerivedValues(WeatherReadings& readings, int elevat
     double b = 237.7;
     double tempcalc = (a * readings.temp) / (b + readings.temp) + log(readings.humidity*0.01);
     readings.dewPointTemp = (b * tempcalc) / (a - tempcalc);
-    Log.verbose("Dewpoint: %F°C", readings.dewPointTemp);
 
     // Calculate dewpoint spread (difference between actual temp and dewpoint -> the smaller the number: rain or fog
     readings.dewPointSpread = readings.temp - readings.dewPointTemp;
-    Log.verbose("Dewpoint Spread: %F°C", readings.dewPointSpread);
 
     // Calculate Heat Index (readings.heatIndex in °C) --> Valid for temps above 26.7 °C
     if (readings.temp > 26.7) {
@@ -31,10 +29,8 @@ void WeatherSensor::calculateDerivedValues(WeatherReadings& readings, int elevat
       double B = ((c7 * T) + c4) * T + c3;
       double C = ((c9 * T) + c8) * T + c6;
       readings.heatIndex = (C * R + B) * R + A;
-      Log.verbose("Heat Index: %F°C", readings.heatIndex);
     } else {
       readings.heatIndex = readings.temp;
-      Log.verbose("Not warm enough (less than 26.7 °C) for heat index");
     }
   }
 }
