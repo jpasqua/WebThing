@@ -108,7 +108,7 @@ public:
     _availableReadings |= sensor->availableReadingTypes();
   }
 
-  uint8_t availableReadingTypes() { return _availableReadings; }
+  uint8_t availableReadingTypes() const { return _availableReadings; }
   bool hasTemp() { return _availableReadings & WeatherSensor::ReadingType::Temperature; }
   bool hasHumi() { return _availableReadings & WeatherSensor::ReadingType::Humidity; }
   bool hasBaro() { return _availableReadings & WeatherSensor::ReadingType::Pressure; }
