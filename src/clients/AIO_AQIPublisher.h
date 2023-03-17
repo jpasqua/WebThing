@@ -20,7 +20,9 @@ public:
 
   bool publish() override {
     const AQIReadings& readings = _aqiMgr->getLastReadings();
-    if (readings.timestamp == _timestampOfLastData) return false;
+    // Only publish if we have a new reading, & it's time
+    if (readings.timestamp == _timestampOfLastData ||
+        millis() < _timestampOfNextPublish) return false;
 
     AIOMgr::aio->set("env010", readings.env.pm10);
     AIOMgr::aio->set("env025", readings.env.pm25);
@@ -33,13 +35,17 @@ public:
     }
 
     _timestampOfLastData = readings.timestamp;
-    Log.verbose("AIO_AQIPublisher: published readings to AIO");
+    _timestampOfNextPublish = millis() + TimeBetweenUpdates;
+    Log.verbose("AIO_AQIPublisher: published at %s",
+        Output::formattedDateTime(Basics::wallClockFromMillis(millis())).c_str());
     return true;
   }
 
 private:
+  static constexpr uint32_t TimeBetweenUpdates = Basics::minutesToMS(5);
   AQIMgr* _aqiMgr;
   uint32_t _timestampOfLastData = 0;
+  uint32_t _timestampOfNextPublish = 0;
 };
 
 #endif	// AIO_AQIPublisher_h

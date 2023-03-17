@@ -22,11 +22,11 @@ public:
 
   bool publish() override {
     const WeatherReadings& readings = _weatherMgr->getLastReadings();
-    if (readings.timestamp == _timestampOfLastData) return false;
+    // Only publish if we have a new reading, & it's time
+    if (readings.timestamp == _timestampOfLastData ||
+        millis() < _timestampOfNextPublish) return false;
 
     if (!isnan(readings.temp)) {
-      Log.verbose("Temp: %F, converted: %F", readings.temp, Output::temp(readings.temp));
-
       AIOMgr::aio->set("temp", Output::temp(readings.temp), 2);
     }
 
@@ -44,14 +44,20 @@ public:
     }
 
     _timestampOfLastData = readings.timestamp;
-    Log.verbose("AIO_WeatherPublisher: published readings to AIO");
+    _timestampOfNextPublish = millis() + TimeBetweenUpdates;
+
+    Log.verbose("AIO_WeatherPublisher: published at %s",
+        Output::formattedDateTime(Basics::wallClockFromMillis(millis())).c_str());
     return true;
   }
 
 
 private:
+  static constexpr uint32_t TimeBetweenUpdates = Basics::minutesToMS(5);
+
   WeatherMgr* _weatherMgr;
   uint32_t _timestampOfLastData = 0;
+  uint32_t _timestampOfNextPublish = 0;
 };
 
 
