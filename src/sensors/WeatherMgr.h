@@ -3,13 +3,6 @@
  *     Provide a uniform interface to one or more weather sensing devices
  *     such as a BME280, a DHT22, and/or a DS18B20
  *
- * NOTES:
- * o At the moment we only manage a BME280. The itnerface will need to be generalized
- *   to support other devices.
- * o There may be times when multiple devices can take the same reading. For example,
- *   you may have a BME280 and a DS18B20, and use the Humidity and pressure values
- *   from the BME280, but prefer the temp value from the DS18B20.
- *
  */
 
 #ifndef WeatherMgr_h
