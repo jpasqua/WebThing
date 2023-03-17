@@ -6,7 +6,6 @@ void WeatherSensor::calculateDerivedValues(WeatherReadings& readings, int elevat
     // Relative Pressure
     float SLpressure_hPa = (((readings.pressure * 100.0)/pow((1-((float)(elevation))/44330), 5.255))/100.0);
     readings.relPressure=(int)(SLpressure_hPa+.5);
-    Log.verbose("Relative Pressure: %d hPa", readings.relPressure);
   }
 
   if (!isnan(readings.temp) && !isnan(readings.humidity)) {
