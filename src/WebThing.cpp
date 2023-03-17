@@ -303,10 +303,13 @@ namespace WebThing {
 
   float measureVoltage() {
     if (!settings.hasVoltageSensing) return -1;
-    // voltage divider R1 = 220k+100k+220k =540k and R2=100k
+    // NOTE: For a Wemos D1 Mini, there is a builtin voltage divider that scales
+    // a 3.3V input on A0 down to the 1V range. It consists of a 220K:100K resistors
+    // To get the range to be 0-5V, add an additional 220K resistor before A0 to 
+    // yield a divider of 440K:100K
     unsigned long raw = analogRead(A0);
     float measuredVoltage = (raw * settings.voltageCalibFactor)/1024.0; 
-    Log.verbose(F("measuredVoltage: %FV"), measuredVoltage);
+    // Log.verbose(F("measuredVoltage: %FV"), measuredVoltage);
     return measuredVoltage;
   }
 
