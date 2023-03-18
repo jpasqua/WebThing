@@ -95,7 +95,10 @@ namespace WebThing {
   // ----- Public Utility Functions
   // --- Power-related
   float   measureVoltage(); // Returns -1 if voltage sensing is not enabled
-  void    enterDeepSleep(); // Put the device into low power mode for 'processingInterval' minutes
+  void    enterDeepSleep();
+    // Put the device into low power mode for 'processingInterval' minutes
+    // Note that to be automatically awakened after 'processingInterval' minutes
+    // you must have GPIO16 connected to the RST pin to trigger the reset
   bool    lowPowerModeActive();     // Is low power mode selected in settings?
   bool    isSleepOverrideEnabled(); // Is the HW override of sleep mode engaged?
   void    displayPowerOptions(bool enabled);  // Will the power options page be a menu option?
