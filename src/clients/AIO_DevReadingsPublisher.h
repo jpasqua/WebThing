@@ -29,7 +29,7 @@ public:
     // Publish other readings if they become interesting
     _timestampOfLastPublishedReading = _drMgr->latestReadings.timestamp;
     _timestampOfNextPublish = millis() + TimeBetweenUpdates;
-    Log.verbose("AIO_VoltagePublisher: published at %s",
+    Log.verbose("AIO_DevReadingsPublisher: published at %s",
         Output::formattedDateTime(Basics::wallClockFromMillis(millis())).c_str());
     return true;
   }
