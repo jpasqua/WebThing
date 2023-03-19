@@ -39,12 +39,14 @@ void BMESensor::takeReadings(WeatherReadings& readings) {
 
   bme.takeForcedMeasurement();
   auto newTemp = bme.readTemperature();
-  if ((lastTemp != -1024.0) && abs(newTemp - lastTemp) > ((curTime-lastTimeStamp)/1000)) {
-    // If the temperature changed more than 1 degree per second, it's bad - ignore it
+  if ((lastTemp != -1024.0) && abs(newTemp - lastTemp) > 1) {
     Log.warning(
-      "new temp: %f, last temp: %f - Too much variation in %d seconds",
-      newTemp, lastTemp, (curTime-lastTimeStamp)/1000);
-    return;
+      "new temp: %f, last temp: %f - Too much variation, re-reading",
+      newTemp, lastTemp);
+    // This may be due to a dip in voltage caused by other activity, try again
+    bme.takeForcedMeasurement();
+    lastTemp = newTemp;
+    newTemp = bme.readTemperature();
   }
 
   readings.timestamp = lastTimeStamp = curTime;
