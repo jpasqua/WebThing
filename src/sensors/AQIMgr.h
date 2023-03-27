@@ -1,7 +1,7 @@
 /*
  * AQIMgr
  *    Read data realited to the Air Quality Index from an underlying device and
- *    store historical information and averages.
+ *    store historical information.
  *
  */
 
@@ -13,7 +13,6 @@
 //                                  Third Party Libraries
 #include <TimeLib.h>
 #include <Indicators.h>
-#include <MovingAverage.h>
 #include <Indicators.h>
 #include <Serializable.h>
 #include <HistoryBuffer.h>
@@ -113,12 +112,6 @@ public:
 
   
   // ----- Data Members -----
-  // --- Moving averages of the env.pm25 for a various time ranges ---
-  MovingAverage pm25env_10min;
-  MovingAverage pm25env_30min;
-  MovingAverage pm25env_1hr;
-  MovingAverage pm25env_6hr;
-
   HistoryBuffers<SavedReadings, 3> buffers;
 
 private:
