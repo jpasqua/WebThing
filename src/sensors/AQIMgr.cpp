@@ -1,7 +1,7 @@
 /*
  * AQIMgr
  *    Read data realited to the Air Quality Index from an underlying device and
- *    store historical information and averages.
+ *    store historical information.
  *
  */
 
@@ -50,11 +50,6 @@ AQIMgr::AQIMgr() {
   buffers.describe({12, "hour", minutesToTime_t(5)});
   buffers.describe({24, "day", hoursToTime_t(1)});
   buffers.describe({28, "week", hoursToTime_t(6)});
-
-  pm25env_10min.setSamplesToConsider(2);         // (2) 5-minute periods
-  pm25env_30min.setSamplesToConsider(6);         // (6) 5-minute periods
-  pm25env_1hr.setSamplesToConsider(12);          // (12) 5-minute periods
-  pm25env_6hr.setSamplesToConsider(6 * 12);      // (6) 1-hour periods
 }
 
 bool AQIMgr::init(Stream* streamToSensor, Indicator* indicator) {
@@ -63,7 +58,7 @@ bool AQIMgr::init(Stream* streamToSensor, Indicator* indicator) {
     _indicator->setColor(255, 0, 0);
     return false;
   }
-  Log.verbose("About to load AQIMgr history buffers");
+  Log.verbose("AQIMgr: About to load history buffers");
   buffers.load(HistoryFilePath);
 
   enterState(waking);
@@ -90,11 +85,11 @@ void AQIMgr::loop() {
     case waking:
       if (elapsed > 30*1000L) {
         enterState(awake);
-        Log.verbose("Ok, OK, I'm awake");
+        Log.verbose("AQIMgr: Device is now awake");
       }
       return;
     case retrying:
-      if (elapsed < 500L) return;
+      if (elapsed < 250L) return;
       enterState(awake);
       // NOTE: No break or return. Fall through!!!
     case awake:
@@ -107,7 +102,7 @@ void AQIMgr::loop() {
     logData(data);
   } else {
     enterState(retrying);
-Serial.print('.');
+    Log.verbose("AQIMgr: Retrying");
     return;
   }
 
@@ -121,19 +116,18 @@ void AQIMgr::enterState(State newState) {
   enteredStateAt = millis();
   _indicator->setColor(ColorForState[state]);
   if (state == waking) {
-    Log.verbose("Hey, wake up!");
+    Log.verbose("AQIMgr: Waking device");
     aqi->wakeUp();
   } else if (state == asleep) {
-    Log.verbose("\nGood night...");
+    Log.verbose("AQIMgr: Putting device to sleep");
     aqi->sleep();
   }
 }
 
 void AQIMgr::takeNoteOfNewData(AQIReadings& newSample) {
-  // We want to do (3) things here:
+  // We want to do (2) things here:
   // 1. Add this reading to the appropriate set of history buffers
   // 2. If it has been an appropriate period of time, save the history to a file
-  // 3. Update the moving averages and log them
 
 
   // 1. Add this reading to the appropriate set of history buffers
@@ -150,14 +144,6 @@ void AQIMgr::takeNoteOfNewData(AQIReadings& newSample) {
     lastWrite = millis();
     historyBufferIsDirty = false;
   }
-
-  // 3. Update the moving averages and log them
-  pm25env_10min.addSample(newSample.env.pm25);
-  pm25env_30min.addSample(newSample.env.pm25);
-  pm25env_1hr.addSample(newSample.env.pm25);
-  pm25env_6hr.addSample(newSample.env.pm25);
-
-  logAvgs();
 }
 
 void AQIMgr::emitHistoryAsJson(HistoryRange r, Stream& s) {
@@ -170,10 +156,9 @@ void AQIMgr::emitHistoryAsJson(Stream& s) {
 
 void AQIMgr::logData(AQIReadings& data) {
   time_t wallClockOfReading = Basics::wallClockFromMillis(data.timestamp);
-  Log.verbose("-- %s --", WebThing::formattedTime(wallClockOfReading, true, true).c_str());
+  Log.verbose("AQIMgr: Readings at %s --", WebThing::formattedTime(wallClockOfReading, true, true).c_str());
   Log.verbose(F("----- Concentration Units (Std) -------"));
   Log.verbose(F("PM 1.0: %d\t\tPM 2.5: %d\t\tPM 10: %d"), data.standard.pm10 ,data.standard.pm25, data.standard.pm100);
-  Log.verbose(F("---------------------------------------"));
   Log.verbose(F("----- Concentration Units (Env) -------"));
   Log.verbose(F("PM 1.0: %d\t\tPM 2.5: %d\t\tPM 10: %d"), data.env.pm10 ,data.env.pm25, data.env.pm100);
   Log.verbose(F("---------------------------------------"));
@@ -185,15 +170,6 @@ void AQIMgr::logData(AQIReadings& data) {
   Log.verbose(F("Particles > 50 um / 0.1L air: %d"), data.particles_100um);
   Log.verbose(F("---------------------------------------"));
 }
-
-void AQIMgr::logAvgs() {
-  time_t wallClockOfReading = Basics::wallClockFromMillis(data.timestamp);
-  Log.verbose("-- %s --", WebThing::formattedTime(wallClockOfReading, true, true).c_str());
-  Log.verbose(F("Last 30 Minutes: %F"), pm25env_30min.getAverage());
-  Log.verbose(F("Last 1 hour: %F"), pm25env_1hr.getAverage());
-  Log.verbose(F("Last 6 hours: %F"), pm25env_6hr.getAverage());
-}
-
 
 static const struct {
   uint16_t max;
