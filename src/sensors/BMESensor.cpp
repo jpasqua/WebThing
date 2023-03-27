@@ -17,10 +17,10 @@ void BMESensor::begin(int addr) {
     return;
   }
 
-  Log.verbose("forced mode, 1x temperature / 1x humidity / 1x pressure oversampling, filter off");
+  Log.verbose("BMESensor: forced mode, oversampling: 16x temp / 1x humi / 1x baro, filter off");
   bme.setSampling(
     Adafruit_BME280::MODE_FORCED,
-    Adafruit_BME280::SAMPLING_X1, // temperature
+    Adafruit_BME280::SAMPLING_X16, // temperature
     Adafruit_BME280::SAMPLING_X1, // pressure
     Adafruit_BME280::SAMPLING_X1, // humidity
     Adafruit_BME280::FILTER_OFF   );
@@ -45,9 +45,9 @@ void BMESensor::takeReadings(WeatherReadings& readings) {
       newTemp, lastTemp);
     // This may be due to a dip in voltage caused by other activity, try again
     bme.takeForcedMeasurement();
-    lastTemp = newTemp;
     newTemp = bme.readTemperature();
   }
+  lastTemp = newTemp;
 
   readings.timestamp = lastTimeStamp = curTime;
   readings.temp = newTemp;
