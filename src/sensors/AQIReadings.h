@@ -8,16 +8,16 @@ struct ParticleReadings {
 };
 
 typedef struct {
-  uint32_t timestamp;
+  uint32_t timestamp  = 0;
   // The following fields come directly from the sensor
-  ParticleReadings standard;
-  ParticleReadings env;
-  uint16_t particles_03um;  // 0.3um Particle Count
-  uint16_t particles_05um;  // 0.5um Particle Count
-  uint16_t particles_10um;  // 1.0um Particle Count
-  uint16_t particles_25um;  // 2.5um Particle Count
-  uint16_t particles_50um;  // 5.0um Particle Count
-  uint16_t particles_100um; // 10.0um Particle Count
+  ParticleReadings standard = {0, 0, 0};
+  ParticleReadings env = {0, 0, 0};
+  uint16_t particles_03um = 0;  // 0.3um Particle Count
+  uint16_t particles_05um = 0;  // 0.5um Particle Count
+  uint16_t particles_10um = 0;  // 1.0um Particle Count
+  uint16_t particles_25um = 0;  // 2.5um Particle Count
+  uint16_t particles_50um = 0;  // 5.0um Particle Count
+  uint16_t particles_100um = 0; // 10.0um Particle Count
 } AQIReadings;
 
 #endif  // AQIReadings_h
