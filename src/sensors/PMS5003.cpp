@@ -70,7 +70,6 @@ bool PMS5003::read(AQIReadings *data) {
   }
 
   uint8_t buffer[PacketSize];
-  uint16_t sum = 0;
 
   if (!data) return false;
   if (!_serialDevice->available()) return false;
@@ -86,16 +85,21 @@ bool PMS5003::read(AQIReadings *data) {
   _serialDevice->readBytes(buffer, PacketSize);
 
   // Calculate checksum over all fields (except the checksum itself)
-  for (uint8_t i = 0; i < PacketSize-FieldSize; i++) {
-    sum += buffer[i];
-  }
+  uint16_t computedChecksum = 0;
+  for (uint8_t i = 0; i < PacketSize-FieldSize; i++) { computedChecksum += buffer[i]; }
 
-  // Serial.print("Raw buffer: ");
-  // for (uint8_t i = 0; i < PacketSize-FieldSize; i++) {
-  //   if (i) Serial.print(", ");
-  //   Serial.print(buffer[i], HEX); 
-  // }
-  // Serial.println();
+  // Debugging output
+  Serial.print("Buffer: ");
+  for (uint8_t i = 0; i < PacketSize; ) {
+    if (i) Serial.print(" | ");
+    Serial.print(buffer[i++], HEX); Serial.print(' '); Serial.print(buffer[i++], HEX);
+  }
+  Serial.print(" ["); Serial.print(computedChecksum, HEX); Serial.println(']');
+  uint16_t checksum = fieldFromPacket(buffer, ChecksumFieldIndex);
+  if (computedChecksum != checksum) {
+    Serial.println("PMS5003 Checksum did not match!");
+    return false;
+  }
 
   // The data on the wire is big endian. Make sure it works for this platform.
   data->standard.pm10 = fieldFromPacket(buffer, PM01StdFieldIndex); 
@@ -110,12 +114,6 @@ bool PMS5003::read(AQIReadings *data) {
   data->particles_25um = fieldFromPacket(buffer, PM25FieldIndex); 
   data->particles_50um = fieldFromPacket(buffer, PM50FieldIndex); 
   data->particles_100um = fieldFromPacket(buffer, PM100FieldIndex); 
-
-  uint16_t checksum = fieldFromPacket(buffer, ChecksumFieldIndex);
-  if (sum != checksum) {
-    Serial.println("PMS5003 Checksum did not match!");
-    return false;
-  }
 
   // Sanity check on the data
   if (data->particles_03um + data->particles_05um + data->particles_10um + 
