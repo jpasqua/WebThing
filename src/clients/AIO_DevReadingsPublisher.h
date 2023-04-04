@@ -25,8 +25,11 @@ public:
     if (_drMgr->latestReadings.timestamp == _timestampOfLastPublishedReading ||
         millis() < _timestampOfNextPublish) return false;
 
+    AIOMgr::busy(true);
     AIOMgr::aio->set("voltage", _drMgr->latestReadings.voltage, 2);
     // Publish other readings if they become interesting
+    AIOMgr::busy(false);
+
     _timestampOfLastPublishedReading = _drMgr->latestReadings.timestamp;
     _timestampOfNextPublish = millis() + TimeBetweenUpdates;
     Log.verbose("AIO_DevReadingsPublisher: published at %s",

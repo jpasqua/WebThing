@@ -9,6 +9,7 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
+#include <functional>
 //                                  Third Party Libraries
 //                                  Local Includes
 #include "AIOClient.h"
@@ -41,6 +42,14 @@ namespace AIOMgr {
 
   // Must be called to flush any pending data to the AIO service.
   extern void flush();
+
+  // Provide a callback which can be invoked when AIOMgr (or publishers)
+  // are going to be busy for a human-perceptible period of time
+  extern void setBusyCB(std::function<void(bool)> busyCB);
+
+  // Publishers may call this to indicate that they will be busy for a while, or have
+  // stopped being busy after previously indicating that they were
+  extern void busy(bool isBusy);
 }
 
 #endif // AIOMgr_h

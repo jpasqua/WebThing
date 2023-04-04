@@ -26,6 +26,7 @@ public:
     if (readings.timestamp == _timestampOfLastData ||
         millis() < _timestampOfNextPublish) return false;
 
+    AIOMgr::busy(true);
     if (!isnan(readings.temp)) {
       AIOMgr::aio->set("temp", Output::temp(readings.temp), 2);
     }
@@ -42,6 +43,7 @@ public:
       String dateTime = Output::formattedDateTime(Basics::wallClockFromMillis(readings.timestamp));
       AIOMgr::aio->set("wthrtime", dateTime);
     }
+    AIOMgr::busy(false);
 
     _timestampOfLastData = readings.timestamp;
     _timestampOfNextPublish = millis() + TimeBetweenUpdates;

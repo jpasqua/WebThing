@@ -24,6 +24,7 @@ public:
     if (readings.timestamp == _timestampOfLastData ||
         millis() < _timestampOfNextPublish) return false;
 
+    AIOMgr::busy(true);
     AIOMgr::aio->set("env010", readings.env.pm10);
     AIOMgr::aio->set("env025", readings.env.pm25);
     AIOMgr::aio->set("env100", readings.env.pm100);
@@ -33,6 +34,7 @@ public:
       String dateTime = Output::formattedDateTime(Basics::wallClockFromMillis(readings.timestamp));
       AIOMgr::aio->set("aqitime", dateTime);
     }
+    AIOMgr::busy(false);
 
     _timestampOfLastData = readings.timestamp;
     _timestampOfNextPublish = millis() + TimeBetweenUpdates;

@@ -19,6 +19,7 @@ namespace AIOMgr {
     bool    initialized = false;
     uint8_t nPublishers = 0;
     std::array<AIOPublisher*, MaxPublishers> publishers;
+    std::function<void(bool)> busyCallback = nullptr;
   } // ----- END: AIOMgr::Internal namespace
 
   AIOClient* aio = NULL;
@@ -44,6 +45,10 @@ namespace AIOMgr {
     }
   }
 
+  void setBusyCB(std::function<void(bool)> busyCB) {
+    Internal::busyCallback = busyCB;
+  }
+
   bool publish() {
     if (!Internal::initialized) return false;
 
@@ -56,6 +61,9 @@ namespace AIOMgr {
 
   void flush() { }
 
+  void busy(bool isBusy) {
+    if (Internal::busyCallback) Internal::busyCallback(isBusy);
+  }
 }
 
 
