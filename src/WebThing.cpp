@@ -15,6 +15,7 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
+#include <Wire.h>
 #if defined(ESP8266)
   #include <ESP8266WiFi.h>
   #include <ESP8266mDNS.h>
@@ -25,12 +26,12 @@
 #else
   #error "Must be an ESP8266 or ESP32"
 #endif
-#include <ESP_FS.h>
 //                                  Third Party Libraries
+#include <BPABasics.h>
+#include <ESP_FS.h>
 #include <ArduinoLog.h>
 #include <WiFiManager.h>
 #include <TimeLib.h>
-#include <BPABasics.h>
 //                                  Local Includes
 #include "WebThing.h"
 #include "DataBroker.h"
@@ -80,9 +81,12 @@ namespace WebThing {
      *
      *----------------------------------------------------------------------------*/
 
-    void prepPins() {
-      if (settings.sleepOverridePin != WebThingSettings::NoPinAssigned) {
+    void prepPins(Basics::Pin SDA, Basics::Pin SCL) {
+      if (settings.sleepOverridePin != Basics::UnusedPin) {
         pinMode(settings.sleepOverridePin, INPUT_PULLUP);
+      }
+      if (SCL != Basics::UnusedPin && SDA != Basics::UnusedPin) {
+        Wire.begin(SDA, SCL);
       }
     }
 
@@ -189,14 +193,14 @@ namespace WebThing {
    *
    *----------------------------------------------------------------------------*/            
 
-  void preSetup() {
+  void preSetup(int SDA, int SCL) {
     Internal::prepLogging();
     Log.verbose(F("WebThing:: preSetup()"));
     Internal::prepFileSystem();       // Get the filesystem ready to go
     settings.init(SettingsFileName);  // Path to the settings file
     settings.read();                  // Read settings from the filesystem
     Log.setLevel(settings.logLevel);  // Update based on the settings we just read
-    Internal::prepPins();             // Set up any pins used by WebThing
+    Internal::prepPins(SDA, SCL);             // Set up any pins used by WebThing
     DataBroker::begin();              // Get the data exchange mechanism running
   }
 
@@ -353,7 +357,7 @@ namespace WebThing {
   }
 
   bool isSleepOverrideEnabled() {
-    if (settings.sleepOverridePin == WebThingSettings::NoPinAssigned) return false;
+    if (settings.sleepOverridePin == Basics::UnusedPin) return false;
     return (digitalRead(settings.sleepOverridePin) == 0);
   }
 

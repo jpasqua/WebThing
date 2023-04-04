@@ -27,7 +27,6 @@
 class WebThingSettings: public BaseSettings {
 public:
   // ----- Constants
-  static constexpr int8_t   NoPinAssigned = -1;
 
   // ----- Constructors and methods
   WebThingSettings();

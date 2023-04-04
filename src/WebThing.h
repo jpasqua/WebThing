@@ -60,6 +60,7 @@
 #include <Arduino.h>
 //                                  Third Party Libraries
 //                                  Local Includes
+#include "BPABasics.h"
 #include "clients/TimeDB.h"
 #include "WebThingSettings.h"
 #include "WTButton.h"
@@ -78,7 +79,7 @@ namespace WebThing {
   // ----- setup() and loop() functions
   // Called before any setup is done by the actual thing. This does very
   // very basic things like establishing logging support.
-  void preSetup();
+  void preSetup(Basics::Pin SDA = Basics::UnusedPin, Basics::Pin SCL = Basics::UnusedPin);
 
   // Called during setup of the actual thing
   // If you want this thing to be it's own access point rather than connecting
