@@ -11,6 +11,7 @@
 #if defined(ESP32)
   #include <vector>
 #endif
+#include <BPABasics.h>
 
 enum class PressType {None = -1, Normal, Long, VeryLong};
 
@@ -21,7 +22,7 @@ enum class PressType {None = -1, Normal, Long, VeryLong};
 class WTButton {
 public:
   // ----- Types
-  using Mapping = struct { uint8_t pin; uint8_t id; };
+  using Mapping = struct { Basics::Pin pin; uint8_t id; };
     // Just a convenience definition for clients who often map pins to some other ID.
 
   // ----- Constants
@@ -29,7 +30,7 @@ public:
   static constexpr uint32_t VeryLongInterval = 1000;
 
   // ----- Constructors
-  WTButton(uint8_t pinNum): pin(pinNum)  {
+  WTButton(Basics::Pin pinNum): pin(pinNum)  {
     pinMode(pin, INPUT_PULLUP);
   }
 
@@ -68,7 +69,7 @@ public:
   }
 
   // ----- Data Members
-  uint8_t  pin;   // The physical pin associated with this button
+  Basics::Pin  pin;   // The physical pin associated with this button
 
 private:
   // ----- Constants
@@ -84,7 +85,7 @@ private:
 class WTButtonMgr  {
 public:
   // ----- Types
-  using Dispatcher = std::function<void(uint8_t, PressType)>;
+  using Dispatcher = std::function<void(Basics::Pin, PressType)>;
 
   // ----- Constructors
   WTButtonMgr() = default;
