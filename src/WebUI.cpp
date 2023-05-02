@@ -210,14 +210,15 @@ namespace WebUI {
       if (upload.status == UPLOAD_FILE_START) {
         // We're just getting started. Get the file name and open/create the file
         String filename = upload.filename;
-        if (!filename.startsWith("/")) filename = "/"+filename;
+        if (!filename.startsWith("/")) { filename = "/"+filename; }
         Log.trace("handleFileUpload Name: %s", filename.c_str());
         fsUploadFile = ESP_FS::open(filename, "w");
-        filename = String();
       } else if (upload.status == UPLOAD_FILE_WRITE) {
         // There is data available, write it
-        if (fsUploadFile)
+        if (fsUploadFile) {
           fsUploadFile.write(upload.buf, upload.currentSize);
+          Log.trace("Upload a chunk of %d bytes", upload.currentSize);
+        }
       } else if (upload.status == UPLOAD_FILE_END) {
         // We're done. Close the file and send a response
         if (fsUploadFile) {
@@ -311,10 +312,10 @@ namespace WebUI {
     registerHandler("/config",         Pages::displayConfig);
     registerHandler("/configPwr",      Pages::displayPowerConfig);
     registerHandler("/configLogLevel", Pages::displayLogLevel);
-    server->serveStatic("/favicon.ico", *ESP_FS::getFS(), "/wt/favicon.ico");
-    server->serveStatic("/favicon-16x16.png", *ESP_FS::getFS(), "/wt/favicon-16x16.png");
-    server->serveStatic("/favicon-32x32.png", *ESP_FS::getFS(), "/wt/favicon-32x32.png");
-    server->serveStatic("/apple-touch-icon.png", *ESP_FS::getFS(), "/wt/favicon.ico");
+    registerStatic("/favicon.ico", "/wt/favicon.ico");
+    registerStatic("/favicon-16x16.png", "/wt/favicon-16x16.png");
+    registerStatic("/favicon-32x32.png", "/wt/favicon-32x32.png");
+    registerStatic("/apple-touch-icon.png", "/wt/favicon.ico");
 
     registerHandler("/updateconfig",   Endpoints::updateConfig);
     registerHandler("/updatePwrConfig",Endpoints::updatePwrConfig);
