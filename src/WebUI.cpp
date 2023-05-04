@@ -56,6 +56,7 @@ namespace WebUI {
   // ----- BEGIN: WebUI::Internal
   namespace Internal {
     String EmptyString = "";
+    String uploadPath = "";
 
     std::function<void(bool)> busyCallback = nullptr; 
 
@@ -202,22 +203,34 @@ namespace WebUI {
       wrapWebAction("updateConfig", action, true);
     }
 
-    void handleFileUpload() {
-      static File fsUploadFile;
+    void completeUpload() {
+      String dest = server->arg("targetName");
+      // Log.verbose("completeUpload: target: %s", dest.c_str());
+      if (ESP_FS::move(Internal::uploadPath.c_str(), dest.c_str())) {
+        Log.verbose("%s was moved to %s", Internal::uploadPath.c_str(), dest.c_str());
+      } else {
+        Log.verbose("Failed moving %s to %s", Internal::uploadPath.c_str(), dest.c_str());
+      }
+      Internal::uploadPath.clear();
+      redirectHome();
+    }
 
+    void handleUpload() {
+      static File fsUploadFile;
       HTTPUpload& upload = server->upload();
 
       if (upload.status == UPLOAD_FILE_START) {
         // We're just getting started. Get the file name and open/create the file
-        String filename = upload.filename;
-        if (!filename.startsWith("/")) { filename = "/"+filename; }
-        Log.trace("handleFileUpload Name: %s", filename.c_str());
-        fsUploadFile = ESP_FS::open(filename, "w");
+        Internal::uploadPath = upload.filename;
+        if (Internal::uploadPath.startsWith("/")) { Internal::uploadPath = "/tmp"+Internal::uploadPath; }
+        else { Internal::uploadPath = "/tmp/"+Internal::uploadPath; }
+        Log.trace("handleUpload: Final uploadTarget = %s", Internal::uploadPath.c_str());
+        fsUploadFile = ESP_FS::open(Internal::uploadPath, "w");
       } else if (upload.status == UPLOAD_FILE_WRITE) {
         // There is data available, write it
         if (fsUploadFile) {
           fsUploadFile.write(upload.buf, upload.currentSize);
-          Log.trace("Upload a chunk of %d bytes", upload.currentSize);
+          Log.trace("handleUpload: Received %d bytes", upload.currentSize);
         }
       } else if (upload.status == UPLOAD_FILE_END) {
         // We're done. Close the file and send a response
@@ -226,11 +239,77 @@ namespace WebUI {
           Log.trace("Upload succeeded, file size: %d", upload.totalSize);
           server->sendHeader("Location", "/");  // Redirect the client to the home page
           server->send(303, "text/plain", "Redirecting...");
-          server->client().stop();
         } else {
           server->send(500, "text/plain", "500: couldn't create file");
         }
+        server->client().stop();
       }
+    }
+
+    void displayFileContent() {
+      auto action = []() {
+
+        String filename = server->arg("file");
+        if (filename.isEmpty()) {
+          server->send(404, "text/plain", "404: Requested filename is empty");
+          server->client().stop();
+        }
+
+        File f = ESP_FS::open(filename, "r");
+        if (!f) {
+          server->send(404, "text/plain", "404: Requested file does not exist");
+          server->client().stop();
+        }
+
+        String contentType = mime::getContentType(filename);
+        if (server->streamFile(f, contentType) != f.size()) {
+          Log.warning("Sent less data than expected!");
+        }
+        server->client().stop();
+        f.close();
+      };
+
+      wrapWebAction("fileList", action, true);
+    }
+    
+
+    void handleFileList() {
+      auto action = []() {
+
+        ESP_FS::DirEnumerator* de = ESP_FS::newEnumerator();
+        if (!de->begin("/")) {
+          Log.warning("Unable to enumerate /");
+          delete de;
+          server->send(404, "text/plain", "404: Unable to enumerate /");
+          server->client().stop();
+          return;
+        }
+
+        startPage();
+
+        String path;
+        String content(128);
+        server->sendContent("<h1>File System Listing</h1><ul style='list-style-type:none;'>");
+        while (de->next(path)) {
+          content.clear();
+          // Log.verbose("Found file: %s", path.c_str());
+          String content = "<li><a href='uploadPage?targetName=";
+          content += path;
+          content += "'><i class='fa fa-upload'></i></a>&nbsp;<a href='/content?file=";
+          content += path;
+          content += "'>";
+          content += path;
+          content += "</a></li>";
+          server->sendContent(content);
+        }
+        delete de;
+
+        server->sendContent("</ul>");
+
+        finishPage();
+      };
+
+      wrapWebAction("fileList", action, true);
     }
 
   } // ----- END: WebUI::Endpoints
@@ -248,6 +327,26 @@ namespace WebUI {
       };
 
       wrapWebAction("/", action, true);
+    }
+
+    void displayUploadPage() {
+      String target = server->arg("targetName");
+Log.verbose("displayUploadPage: targetName: %s", target.c_str());
+      String accept = "";
+      int dotIndex = target.lastIndexOf('.');
+      if (dotIndex != -1 && dotIndex != target.length()-1) {
+        // We have a file extension
+        accept = "accept='";
+        accept += target.substring(dotIndex);
+        accept += "'";
+      }
+
+      auto mapper =[&target, &accept](const String &key, String& val) -> void {
+        if (key == "TARGET_NAME") val = target;
+        if (key == "ACCEPT") val = accept;
+      };
+
+      wrapWebPage("/uploadPage", "/wt/UploadPage.html", mapper);
     }
 
     void displayLogLevel() {
@@ -312,6 +411,8 @@ namespace WebUI {
     registerHandler("/config",         Pages::displayConfig);
     registerHandler("/configPwr",      Pages::displayPowerConfig);
     registerHandler("/configLogLevel", Pages::displayLogLevel);
+    registerHandler("/uploadPage",     Pages::displayUploadPage);
+
     registerStatic("/favicon.ico", "/wt/favicon.ico");
     registerStatic("/favicon-16x16.png", "/wt/favicon-16x16.png");
     registerStatic("/favicon-32x32.png", "/wt/favicon-32x32.png");
@@ -322,11 +423,13 @@ namespace WebUI {
     registerHandler("/setLogLevel",    Endpoints::setLogLevel);
     registerHandler("/systemreset",    Endpoints::handleSystemReset);
     registerHandler("/forgetwifi",     Endpoints::handleWifiReset);
+    registerHandler("/fslist",         Endpoints::handleFileList);
+    registerHandler("/content",        Endpoints::displayFileContent);
     
     server->onNotFound(Internal::handleNotFound);
 
     server->on( // Handle file uploads
-      "/upload", HTTP_POST, []() { server->send(200, "text/plain", ""); }, Endpoints::handleFileUpload );
+      "/upload", HTTP_POST, Endpoints::completeUpload, Endpoints::handleUpload );
 
     server->begin();
     if (WebThing::Protected::mDNSStarted) {

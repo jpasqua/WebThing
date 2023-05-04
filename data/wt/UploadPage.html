@@ -1,0 +1,9 @@
+<div>
+  <strong>Upload a File</strong>
+  <p>Upload a new version of %TARGET_NAME%</p>
+  <form method='post' enctype='multipart/form-data' action='/upload'>
+      <input type='file' id='fileChooser' name='name' %ACCEPT%>
+      <input type="hidden" name='targetName' value='%TARGET_NAME%'>
+      <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit' value='Upload'>Upload</button>
+  </form>
+</div>
