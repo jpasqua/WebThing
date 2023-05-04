@@ -115,6 +115,7 @@ namespace WebUI {
       addButton({"Request Reboot", "/dev/reboot", "w3-pale-red", "Request reboot?"});
       addButton({"View WebThing Settings", "/dev/settings?wt=on", nullptr, nullptr});
       addButton({"View Settings", "/dev/settings", nullptr, nullptr});
+      addButton({"File System", "/fslist", nullptr, nullptr});
 
       registerHandler("/dev",                 displayDevPage);
       registerHandler("/dev/reboot",          reboot);
