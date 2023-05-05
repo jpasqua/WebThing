@@ -26,6 +26,7 @@
   #include <WiFi.h>
   #include <WebServer.h>
   #include <ESPmDNS.h>
+  #include <detail/mimetable.h>
 #else
   #error "Must be an ESP8266 or ESP32"
 #endif
@@ -246,6 +247,17 @@ namespace WebUI {
       }
     }
 
+#if defined(ESP32)
+    String getContentType(String& filename) {
+      for (mime::Entry e : mime::mimeTable) {
+        if (filename.endsWith(e.endsWith)) { return e.mimeType; }
+      }
+      return mime::mimeTable[mime::maxType-1].mimeType;
+    } 
+#elif defined(ESP8266)
+    String getContentType(String& filename) { return mime::getContentType(filename); } 
+#endif
+
     void displayFileContent() {
       auto action = []() {
 
@@ -261,7 +273,7 @@ namespace WebUI {
           server->client().stop();
         }
 
-        String contentType = mime::getContentType(filename);
+        String contentType = getContentType(filename);
         if (server->streamFile(f, contentType) != f.size()) {
           Log.warning("Sent less data than expected!");
         }
