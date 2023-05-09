@@ -147,16 +147,9 @@ namespace WebUI {
     //    /data/wt/DevPage.html
     // The page allows the user (a developer in this case) to:
     // * Reboot the device
-    // * Request the JSON corresponding to the device specific settings
-    // * Request the JSON corresponding to the WebThing settings
-    // * Enable or disable the developer menu
-    //
-    // @param showDevMenu   A pointer to a bool that always contains an indication of
-    //                      whether the dev menu should be displayed.
-    // @param devSettings   A pointer to the settings object of the underlying device.
-    //                      Only used so the settings can be externalized upon request
-    void init(
-        bool* showDevMenu, BaseSettings* devSettings);
+    // * Request a file system list
+    // * Enable or disable the developer menu item
+    void init();
     
     // You may add html buttons with associated web actions to the developer page
     // by calling addButton(). The buttons will display in reverse order that they are

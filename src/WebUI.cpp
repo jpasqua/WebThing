@@ -343,7 +343,6 @@ namespace WebUI {
 
     void displayUploadPage() {
       String target = server->arg("targetName");
-Log.verbose("displayUploadPage: targetName: %s", target.c_str());
       String accept = "";
       int dotIndex = target.lastIndexOf('.');
       if (dotIndex != -1 && dotIndex != target.length()-1) {
@@ -443,6 +442,8 @@ Log.verbose("displayUploadPage: targetName: %s", target.c_str());
     server->on( // Handle file uploads
       "/upload", HTTP_POST, Endpoints::completeUpload, Endpoints::handleUpload );
 
+    Dev::init();
+    
     server->begin();
     if (WebThing::Protected::mDNSStarted) {
       MDNS.addService("http", "tcp", WebThing::settings.webServerPort); // Advertise the web service

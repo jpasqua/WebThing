@@ -29,8 +29,6 @@ namespace WebUI {
       "<a class='w3-bar-item w3-button' href='/dev'>"
       "<i class='fa fa-gears'></i> Developer</a>");
 
-    bool* _showDevMenu;
-    BaseSettings* _deviceSpecificSettings;
     std::vector<ButtonDesc> buttonActions;
 
     void reboot() {
@@ -53,22 +51,9 @@ namespace WebUI {
 
     void updateSettings() {
       auto action = []() {
-        *_showDevMenu = hasArg("showDevMenu");
-        addDevMenuItems(*_showDevMenu ? DEV_MENU_ITEMS : nullptr);
-        _deviceSpecificSettings->write();
+        WebThing::settings.showDevMenu = hasArg("showDevMenu");
+        addDevMenuItems(WebThing::settings.showDevMenu ? DEV_MENU_ITEMS : nullptr);
         redirectHome();
-      };
-      wrapWebAction("/updateSettings", action, false);
-    }
-
-    void yieldSettings() {
-      auto action = []() {
-        DynamicJsonDocument *doc = (hasArg("wt")) ?
-            WebThing::settings.asJSON() : _deviceSpecificSettings->asJSON();
-
-        sendJSONContent(doc);
-        doc->clear();   // TO DO: Is this needed?
-        delete doc;
       };
       wrapWebAction("/updateSettings", action, false);
     }
@@ -97,7 +82,7 @@ namespace WebUI {
 
     void displayDevPage() {
       auto mapper =[](const String &key, String& val) -> void {
-        if (key == "SHOW_DEV_MENU") val = checkedOrNot[*_showDevMenu];
+        if (key == "SHOW_DEV_MENU") val = checkedOrNot[WebThing::settings.showDevMenu];
         else if (key.equals(F("HEAP"))) { DataBroker::map("$S.heap", val); }
         else if (key == "BUTTONS") concatDevButtons(val);
       };
@@ -105,21 +90,15 @@ namespace WebUI {
       WebUI::wrapWebPage("/displayDevPage", "/wt/DevPage.html", mapper);
     }
 
-    void init(bool* showDevMenu, BaseSettings* deviceSpecificSettings)
-    {
-      _showDevMenu = showDevMenu;
-      _deviceSpecificSettings = deviceSpecificSettings;
+    void init() {
+      addDevMenuItems(WebThing::settings.showDevMenu ? DEV_MENU_ITEMS : nullptr);
 
-      addDevMenuItems(DEV_MENU_ITEMS);
-
+      // These show up in the reverse order listed below
       addButton({"Request Reboot", "/dev/reboot", "w3-pale-red", "Request reboot?"});
-      addButton({"View WebThing Settings", "/dev/settings?wt=on", nullptr, nullptr});
-      addButton({"View Settings", "/dev/settings", nullptr, nullptr});
       addButton({"File System", "/fslist", nullptr, nullptr});
 
       registerHandler("/dev",                 displayDevPage);
       registerHandler("/dev/reboot",          reboot);
-      registerHandler("/dev/settings",        yieldSettings);
       registerHandler("/dev/updateSettings",  updateSettings);
       registerHandler("/dev/data",            getDataBrokerValue);
     }

@@ -64,6 +64,7 @@ public:
 
   // ----- Developer Settings
   int logLevel = 6;                     // 6 is LOG_LEVEL_VERBOSE
+  bool showDevMenu;
 
 
 private:

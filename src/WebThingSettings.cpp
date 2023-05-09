@@ -24,6 +24,7 @@
 WebThingSettings::WebThingSettings() {
   version = WebThingSettings::CurrentVersion;
   maxFileSize = 1024;
+  showDevMenu = false;
 }
 
 void WebThingSettings::fromJSON(const JsonDocument &doc) {
@@ -50,6 +51,7 @@ void WebThingSettings::fromJSON(const JsonDocument &doc) {
   themeColor = doc[F("themeColor")].as<String>();
 
   logLevel = doc[F("logLevel")];
+  showDevMenu = doc[F("showDevMenu")];
 
   logSettings();
 }
@@ -77,6 +79,7 @@ void WebThingSettings::toJSON(JsonDocument &doc) {
   doc[F("displayPowerOptions")] = displayPowerOptions;
 
   doc[F("logLevel")] = logLevel;
+  doc[F("showDevMenu")] = showDevMenu;
 }
 
 void WebThingSettings::logSettings() {
@@ -101,7 +104,8 @@ void WebThingSettings::logSettings() {
   Log.verbose(F("  webUsername = %s"), webUsername.c_str());
   Log.verbose(F("  webPassword = %s"), webPassword.c_str());
   Log.verbose(F("  themeColor = %s"), themeColor.c_str());
-  Log.verbose(F("Other Settings"));
+  Log.verbose(F("Developer Settings"));
   Log.verbose(F("  logLevel = %d"), logLevel);
+  Log.verbose(F("  show dev menu: %T"), showDevMenu);
 }
 
