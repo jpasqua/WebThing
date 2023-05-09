@@ -145,20 +145,7 @@ namespace WebUI {
       }
     }
 
-    void setLogLevel() {
-      auto action = []() {
-        WebThing::settings.logLevel = server->arg("logLevel").toInt();
-        Log.setLevel(WebThing::settings.logLevel);
-        Log.verbose(F("New Log Level: %d"), WebThing::settings.logLevel);
-        WebThing::settings.write();
-        WebThing::Protected::configChanged();
-        WebUI::redirectHome();
-      };
-
-      wrapWebAction("Set Log Level", action, true);
-    }
-
-    void updatePwrConfig() {
+    void updateAdvSettings() {
       auto action = []() {
         // ----- Power Settings
         WebThing::settings.useLowPowerMode = server->hasArg("useLowPowerMode");
@@ -360,16 +347,7 @@ namespace WebUI {
       wrapWebPage("/uploadPage", "/wt/UploadPage.html", mapper);
     }
 
-    void displayLogLevel() {
-      String llTarget = "SL" + String(WebThing::settings.logLevel);
-      auto mapper =[&llTarget](const String &key, String& val) -> void {
-        if (key == llTarget) val = "selected";
-      };
-
-      wrapWebPage("/displayLogLevel", "/wt/LogLevel.html", mapper);
-    }
-
-    void displayPowerConfig() {
+    void displayAdvSettings() {
       String piTarget     = "SI" + String(WebThing::settings.processingInterval);
       String sopPinTarget = "SP" + String(WebThing::settings.sleepOverridePin);
 
@@ -379,10 +357,11 @@ namespace WebUI {
         else if (key.equals(F("ULPM"))) val = checkedOrNot[WebThing::settings.useLowPowerMode];
         else if (key.equals(F("VSENSE"))) val = checkedOrNot[WebThing::settings.hasVoltageSensing];
         else if (key.equals(F("VCF"))) val = WebThing::settings.vcfAsString();
+        else if (key.equals(F("PWR_VSBL"))) val = WebThing::settings.displayPowerOptions ? "inline" : "none";
       };
 
       if (Internal::busyCallback) Internal::busyCallback(false);
-      wrapWebPage("/displayPowerConfig", "/wt/PowerForm.html", mapper);
+      wrapWebPage("/displayPowerConfig", "/wt/AdvSettings.html", mapper);
     }
 
     void displayConfig() {
@@ -420,8 +399,7 @@ namespace WebUI {
 
     registerHandler("/",               Pages::displayHomePage);
     registerHandler("/config",         Pages::displayConfig);
-    registerHandler("/configPwr",      Pages::displayPowerConfig);
-    registerHandler("/configLogLevel", Pages::displayLogLevel);
+    registerHandler("/advSettings",    Pages::displayAdvSettings);
     registerHandler("/uploadPage",     Pages::displayUploadPage);
 
     registerStatic("/favicon.ico", "/wt/favicon.ico");
@@ -430,8 +408,7 @@ namespace WebUI {
     registerStatic("/apple-touch-icon.png", "/wt/favicon.ico");
 
     registerHandler("/updateconfig",   Endpoints::updateConfig);
-    registerHandler("/updatePwrConfig",Endpoints::updatePwrConfig);
-    registerHandler("/setLogLevel",    Endpoints::setLogLevel);
+    registerHandler("/updatePwrConfig",Endpoints::updateAdvSettings);
     registerHandler("/systemreset",    Endpoints::handleSystemReset);
     registerHandler("/forgetwifi",     Endpoints::handleWifiReset);
     registerHandler("/fslist",         Endpoints::handleFileList);
@@ -443,7 +420,7 @@ namespace WebUI {
       "/upload", HTTP_POST, Endpoints::completeUpload, Endpoints::handleUpload );
 
     Dev::init();
-    
+
     server->begin();
     if (WebThing::Protected::mDNSStarted) {
       MDNS.addService("http", "tcp", WebThing::settings.webServerPort); // Advertise the web service

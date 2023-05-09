@@ -53,6 +53,12 @@ namespace WebUI {
       auto action = []() {
         WebThing::settings.showDevMenu = hasArg("showDevMenu");
         addDevMenuItems(WebThing::settings.showDevMenu ? DEV_MENU_ITEMS : nullptr);
+
+        WebThing::settings.logLevel = arg("logLevel").toInt();
+        Log.setLevel(WebThing::settings.logLevel);
+        Log.verbose(F("New Log Level: %d"), WebThing::settings.logLevel);
+        WebThing::settings.write();
+
         redirectHome();
       };
       wrapWebAction("/updateSettings", action, false);
@@ -81,10 +87,13 @@ namespace WebUI {
     }
 
     void displayDevPage() {
-      auto mapper =[](const String &key, String& val) -> void {
+      String llTarget = "SL" + String(WebThing::settings.logLevel);
+
+      auto mapper =[&llTarget](const String &key, String& val) -> void {
         if (key == "SHOW_DEV_MENU") val = checkedOrNot[WebThing::settings.showDevMenu];
         else if (key.equals(F("HEAP"))) { DataBroker::map("$S.heap", val); }
         else if (key == "BUTTONS") concatDevButtons(val);
+        else if (key == llTarget) val = "selected";
       };
 
       WebUI::wrapWebPage("/displayDevPage", "/wt/DevPage.html", mapper);

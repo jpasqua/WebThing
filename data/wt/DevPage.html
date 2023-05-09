@@ -5,6 +5,16 @@
       <div class='w3-row'>
         <input name='showDevMenu' class='w3-check' type='checkbox' %SHOW_DEV_MENU%>Show Developer Menu
       </div>
+      <div class='w3-row'>
+  Log Level <select class='w3-option w3-padding' name='logLevel'>
+      <option value='0' %SL0%>(0) SILENT</option>
+      <option value='1' %SL1%>(1) FATAL</option>
+      <option value='2' %SL2%>(2) ERROR</option>
+      <option value='3' %SL3%>(3) WARNING</option>
+      <option value='4' %SL4%>(4) NOTICE</option>
+      <option value='5' %SL5%>(5) TRACE</option>
+      <option value='6' %SL6%>(6) VERBOSE</option>
+    </select></div>
       <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
     </form>
   </div>
