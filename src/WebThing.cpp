@@ -139,6 +139,7 @@ namespace WebThing {
       } else {
         WiFiManager wifiManager;
         wifiManager.setAPCallback(configModeCallback);
+        wifiManager.setConnectRetries(4);
         
         // Don't let the config portal sit waiting forever. Timeout after 5 minutes
         // If your home experienced a power failure and has now recovered, your WebThing
