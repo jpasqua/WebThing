@@ -331,12 +331,15 @@ namespace WebUI {
     void displayUploadPage() {
       String target = server->arg("targetName");
       String accept = "";
-      int dotIndex = target.lastIndexOf('.');
-      if (dotIndex != -1 && dotIndex != target.length()-1) {
-        // We have a file extension
-        accept = "accept='";
-        accept += target.substring(dotIndex);
-        accept += "'";
+      int length = target.length();
+      if (length) {
+        int dotIndex = target.lastIndexOf('.');
+        if (dotIndex != -1 && dotIndex != length-1) {
+          // We have a file extension
+          accept = "accept='";
+          accept += target.substring(dotIndex);
+          accept += "'";
+        }
       }
 
       auto mapper =[&target, &accept](const String &key, String& val) -> void {
