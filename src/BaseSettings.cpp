@@ -69,6 +69,27 @@ bool BaseSettings::read() {
   return true;
 }
 
+void BaseSettings::toJSON(Stream& s) {
+  DynamicJsonDocument doc(maxFileSize);
+  toJSON(doc);
+  serializeJson(doc, s);
+}
+
+void BaseSettings::toJSON(String& serialString) {
+  DynamicJsonDocument doc(maxFileSize);
+  toJSON(doc);
+  serializeJson(doc, serialString);
+}
+
+void BaseSettings::fromJSON(const String& json) {
+  DynamicJsonDocument doc(maxFileSize);
+  auto error = deserializeJson(doc, json);
+  if (error) {
+    Log.warning(F("Error (%s) while parsing: %s"), error.c_str(), json.c_str());
+  }
+  fromJSON(doc);
+}
+
 DynamicJsonDocument *BaseSettings::asJSON() {
   DynamicJsonDocument *doc = new DynamicJsonDocument(maxFileSize);
 

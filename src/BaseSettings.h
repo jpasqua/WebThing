@@ -30,15 +30,21 @@ public:
    */
   DynamicJsonDocument *asJSON();
   
-  virtual void logSettings() { }
+  // Must be implemented by subclasses
+  virtual void fromJSON(const JsonDocument &doc) = 0;
+  virtual void toJSON(JsonDocument &doc) = 0;
+
+  // May be implemented by subclasses
+  virtual void logSettings() { };
+
+  // Implemented in terms of functions given above
+  void fromJSON(const String& json);
+  void toJSON(Stream& s);
+  void toJSON(String& s);
 
 protected:
   static const uint32_t InvalidVersion = 0x0000;
   uint16_t maxFileSize;
-  virtual void fromJSON(const JsonDocument &doc) = 0;
-  virtual void toJSON(JsonDocument &doc) = 0;
-      // NOTE: The document is modified in this function. That's the whole
-      // point. The settings are serialized into the document.
 
 protected:
   // ----- State
