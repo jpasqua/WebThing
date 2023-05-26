@@ -34,7 +34,9 @@ bool BaseSettings::clear() {
 bool BaseSettings::read() {
   File settingsFile = ESP_FS::open(filePath, "r");
   if (!settingsFile) {
-    Log.notice(F("No settings file exists. Creating one with default values."));
+    Log.notice(
+      F("No settings file (%s) exists. Creating one with default values."),
+      filePath.c_str());
     return write();
   }
 
