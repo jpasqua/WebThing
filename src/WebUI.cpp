@@ -19,12 +19,14 @@
   #include <FS.h>                   // Required by ESP8266WiFi.h!
   #include <ESP8266WiFi.h>
   #include <ESP8266WebServer.h>
+  #include <ESP8266HTTPClient.h>
   using WebServer = ESP8266WebServer;
   #include <ESP8266mDNS.h>
 #elif defined(ESP32)
   #include <map>
   #include <WiFi.h>
   #include <WebServer.h>
+  #include <HTTPClient.h>
   #include <ESPmDNS.h>
   #include <detail/mimetable.h>
 #else
@@ -32,6 +34,7 @@
 #endif
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
+#include <BPABasics.h>
 #include <WiFiManager.h>
 #include <ESP_FS.h>
 #include <BPABasics.h>
@@ -271,6 +274,81 @@ namespace WebUI {
       wrapWebAction("fileList", action, true);
     }
     
+    struct {
+      const char* typeName;
+      const char* header;
+    } typeMap[] = {
+      {"json",   "application/json; charset=utf-8"},
+      {"html",   "text/html; charset=utf-8"},
+      {"text",   "text/plain; charset=utf-8"},
+      {"binary", "application/octet-stream"}      // Default type must be last
+    };
+
+    // Map an abbreviated mime-type into an HTTP response header
+    // E.g. json -> application/json; charset=utf-8
+    const char* mapType(const char* type) {
+      for (int i = 0; i < countof(typeMap); i++) {
+        if (strcmp(type, typeMap[i].typeName) == 0) return typeMap[i].header;
+      }
+      return typeMap[countof(typeMap)-1].header;
+    }
+
+    //
+    // Perform a GET on the "srcURL" arg and stream back the results.
+    // Set the Content-Type header to a vlue corresponding to the "type" arg
+    // Sample invocation:
+    //   pass?srcURL=http://newsapi.org/v2/top-headlines?sources=abc-news%26apiKey=KEY&type=json
+    //
+    void pass() { 
+      String srcURL = server->arg("srcURL");
+      const char* type = mapType(server->arg("type").c_str());
+
+      WiFiClient client;
+      HTTPClient httpSrc;  // Must be declared after client for correct destruction
+
+      httpSrc.begin(client, srcURL);
+      int httpCode = httpSrc.GET();
+
+      if (httpCode <= 0) {
+        Log.warning("[HTTP] GET... failed, error: %s\n", httpSrc.errorToString(httpCode).c_str());
+        httpSrc.end();
+        return;
+      }
+
+      // HTTP header has been sent and source server response header has been handled
+      // Log.trace("[HTTP] GET... code: %d\n", httpCode);
+
+      if (httpCode == HTTP_CODE_OK) {
+        int len = httpSrc.getSize(); // -1 when source server sends no Content-Length header
+        uint8_t buffer[512];
+
+        WiFiClient* src = &client;
+        auto dest = server->client();
+
+        // Send headers
+        dest.write("HTTP/1.1 200 OK\r\n");
+        dest.write("Content-Type: "); dest.write(type);
+        dest.write("Content-Type: "); dest.write(type);
+        dest.write("Cache-Control: max-age=3600");
+        dest.write("\r\n\r\n");
+
+        // Read from the source and write to the dest
+        while (httpSrc.connected() && (len > 0 || len == -1)) {
+          int bytesRead = src->readBytes(buffer, std::min((size_t)len, sizeof(buffer)));
+          // Log.verbose("bytesRead: %d", bytesRead);
+          if (!bytesRead) {
+            Log.warning("Timeout while reading from %s", srcURL.c_str());
+            break;
+          }
+          else dest.write(buffer, bytesRead);
+          if (len > 0) { len -= bytesRead; }
+        }
+        dest.stop();
+        Log.trace("Finished passing through %s", srcURL.c_str());
+      }
+
+      httpSrc.end();
+    }
 
     void handleFileList() {
       auto action = []() {
@@ -416,6 +494,7 @@ namespace WebUI {
     registerHandler("/forgetwifi",     Endpoints::handleWifiReset);
     registerHandler("/fslist",         Endpoints::handleFileList);
     registerHandler("/content",        Endpoints::displayFileContent);
+    registerHandler("/pass",           Endpoints::pass);
     
     server->onNotFound(Internal::handleNotFound);
 
