@@ -203,7 +203,6 @@ namespace WebUI {
         Log.verbose("Failed moving %s to %s", Internal::uploadPath.c_str(), dest.c_str());
       }
       Internal::uploadPath.clear();
-      redirectHome();
     }
 
     void handleUpload() {
@@ -228,7 +227,7 @@ namespace WebUI {
         if (fsUploadFile) {
           fsUploadFile.close();
           Log.trace("Upload succeeded, file size: %d", upload.totalSize);
-          server->sendHeader("Location", "/");  // Redirect the client to the home page
+          server->sendHeader("Location", "/fslist");  // Go back to file system page
           server->send(303, "text/plain", "Redirecting...");
         } else {
           server->send(500, "text/plain", "500: couldn't create file");
@@ -499,7 +498,7 @@ namespace WebUI {
     server->onNotFound(Internal::handleNotFound);
 
     server->on( // Handle file uploads
-      "/upload", HTTP_POST, Endpoints::completeUpload, Endpoints::handleUpload );
+      "/upload", HTTP_POST, Endpoints::completeUpload, Endpoints::handleUpload);
 
     Dev::init();
 
@@ -635,10 +634,7 @@ namespace WebUI {
     }
   }
 
-
-
   void redirectHome() {
-    // Send them back to the Root Directory
     server->sendHeader("Location", String("/"), true);
     server->sendHeader("Cache-Control", "no-cache, no-store");
     server->sendHeader("Pragma", "no-cache");
