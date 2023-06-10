@@ -286,7 +286,7 @@ namespace WebUI {
     // Map an abbreviated mime-type into an HTTP response header
     // E.g. json -> application/json; charset=utf-8
     const char* mapType(const char* type) {
-      for (int i = 0; i < countof(typeMap); i++) {
+      for (uint8_t i = 0; i < countof(typeMap); i++) {
         if (strcmp(type, typeMap[i].typeName) == 0) return typeMap[i].header;
       }
       return typeMap[countof(typeMap)-1].header;
