@@ -2,9 +2,9 @@
 #define DHT22Sensor_h
 
 #include <DHT.h>
-#include "Readings.h"
+#include "WeatherReadings.h"
 
-class DHT22Sensor {
+class DHT22Sensor : public WeatherSensor {
 public:
   DHT22Sensor() = default;
 
@@ -19,8 +19,8 @@ public:
 
   void takeReadings(WeatherReadings& readings) override {
     readings.timestamp = millis();
-    readings.temp = _dht->readTemperature();
-    readings.humidity = _dht->readHumidity();
+    if (_includeTypes & WeatherSensor::ReadingType::Temperature) readings.temp = _dht->readTemperature();
+    if (_includeTypes & WeatherSensor::ReadingType::Humidity) readings.humidity = _dht->readHumidity();
 
     Log.verbose("DHT22 Temp: %F°C, Humidity: %F%%", readings.temp, readings.humidity);
   }
