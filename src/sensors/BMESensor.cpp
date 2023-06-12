@@ -34,6 +34,9 @@ void BMESensor::takeReadings(WeatherReadings& readings) {
   if (mock) {
     readings.timestamp = curTime;
     mockReadings(readings);
+    Log.verbose(
+        "BME.Mock::Temp: %F°C, Humidity: %F%%, Pressure: %F hPa",
+        readings.temp, readings.humidity, readings.pressure);    
     return;
   }
 
@@ -50,13 +53,13 @@ void BMESensor::takeReadings(WeatherReadings& readings) {
   lastTemp = newTemp;
 
   readings.timestamp = lastTimeStamp = curTime;
-  readings.temp = newTemp;
-  readings.humidity = bme.readHumidity();
-  readings.pressure = bme.readPressure() / 100.0F;
+  if (_includeTypes & WeatherSensor::ReadingType::Temperature) readings.temp = newTemp;
+  if (_includeTypes & WeatherSensor::ReadingType::Humidity) readings.humidity = bme.readHumidity();;
+  if (_includeTypes & WeatherSensor::ReadingType::Pressure) readings.pressure = bme.readPressure() / 100.0F;;
 
   Log.verbose(
       "BME::Temp: %F°C, Humidity: %F%%, Pressure: %F hPa",
-      readings.temp, readings.humidity, readings.pressure);    
+      readings.temp, readings.humidity, readings.pressure);
 }
 
 
