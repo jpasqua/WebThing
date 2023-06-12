@@ -20,6 +20,36 @@
 //--------------- End:    Includes ---------------------------------------------
 
 
+//
+// ----- BaseSerializer Implamentation
+//
+
+void BaseSerializer::toJSON(Stream& s) {
+  DynamicJsonDocument doc(maxFileSize);
+  toJSON(doc);
+  serializeJson(doc, s);
+}
+
+void BaseSerializer::toJSON(String& serialString) {
+  DynamicJsonDocument doc(maxFileSize);
+  toJSON(doc);
+  serializeJson(doc, serialString);
+}
+
+void BaseSerializer::fromJSON(const String& json) {
+  DynamicJsonDocument doc(maxFileSize);
+  auto error = deserializeJson(doc, json);
+  if (error) {
+    Log.warning(F("Error (%s) while parsing: %s"), error.c_str(), json.c_str());
+  }
+  fromJSON(doc);
+}
+
+
+//
+// ----- BaseSerializer Implamentation
+//
+
 BaseSettings::BaseSettings() { }
 
 void BaseSettings::init(const String& _filePath) {
@@ -69,27 +99,6 @@ bool BaseSettings::read() {
 
   Log.trace(F("Settings successfully read"));
   return true;
-}
-
-void BaseSettings::toJSON(Stream& s) {
-  DynamicJsonDocument doc(maxFileSize);
-  toJSON(doc);
-  serializeJson(doc, s);
-}
-
-void BaseSettings::toJSON(String& serialString) {
-  DynamicJsonDocument doc(maxFileSize);
-  toJSON(doc);
-  serializeJson(doc, serialString);
-}
-
-void BaseSettings::fromJSON(const String& json) {
-  DynamicJsonDocument doc(maxFileSize);
-  auto error = deserializeJson(doc, json);
-  if (error) {
-    Log.warning(F("Error (%s) while parsing: %s"), error.c_str(), json.c_str());
-  }
-  fromJSON(doc);
 }
 
 DynamicJsonDocument *BaseSettings::asJSON() {
