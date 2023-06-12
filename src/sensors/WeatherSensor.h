@@ -25,7 +25,7 @@ public:
   static void calculateDerivedValues(WeatherReadings& readings, int elevation);
   static void applyCorrections(WeatherReadings& readings, float t, float h);
 
-private:
+protected:
   uint8_t _includeTypes = Temperature | Humidity | Pressure;
 };
 
