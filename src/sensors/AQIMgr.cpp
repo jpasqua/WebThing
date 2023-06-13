@@ -72,7 +72,7 @@ uint16_t AQIMgr::derivedAQI(uint16_t reading) {
   }
   i--;
   float aqi = ((reading -  AQITable[i].pMin)*(AQITable[i].aqRange))/AQITable[i].pRange + AQITable[i].aqMin;
-  return (uint16_t)aqi;
+  return (uint16_t)(aqi+0.5);
 }
 
 void AQIMgr::loop() {
