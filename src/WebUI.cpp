@@ -42,6 +42,7 @@
 //                                  Local Includes
 #include "WebThing.h"
 #include "WebUI.h"
+#include "ESPTarWriter.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -270,7 +271,7 @@ namespace WebUI {
         f.close();
       };
 
-      wrapWebAction("fileList", action, true);
+      wrapWebAction("displayFileContent", action, true);
     }
     
     struct {
@@ -388,6 +389,40 @@ namespace WebUI {
       wrapWebAction("fileList", action, true);
     }
 
+    class ServerStream : public Print {
+    public:
+      ServerStream(ESP8266WebServer* theServer) { server = theServer; }
+
+      size_t write(uint8_t data) {
+        server->sendContent(reinterpret_cast<const char*>(&data), 1);
+      }
+
+      size_t write(const uint8_t *buffer, size_t size) {
+        server->sendContent(reinterpret_cast<const char*>(buffer), size);
+        return size;
+      }
+    private:
+      ESP8266WebServer* server;
+    };
+
+    void handleTar() {
+      auto action = []() {
+        server->sendHeader("Cache-Control", "no-cache, no-store");
+        server->sendHeader("Pragma", "no-cache");
+        server->sendHeader("Expires", "-1");
+        server->sendHeader("content-disposition", "attachment; filename=\"ESP_FS.tar\"");
+        server->setContentLength(CONTENT_LENGTH_UNKNOWN);
+        server->send(200, "application/x-tar", "");
+
+        ServerStream serverStream(server);
+        TarWriter tw(serverStream);
+        String rootDir = "/";
+        tw.streamTarFile(rootDir);
+        server->sendContent("");  // End the response
+      };
+      wrapWebAction("handleTar", action, true);
+    }
+
   } // ----- END: WebUI::Endpoints
 
 
@@ -492,6 +527,7 @@ namespace WebUI {
     registerHandler("/systemreset",    Endpoints::handleSystemReset);
     registerHandler("/forgetwifi",     Endpoints::handleWifiReset);
     registerHandler("/fslist",         Endpoints::handleFileList);
+    registerHandler("/tar",            Endpoints::handleTar);
     registerHandler("/content",        Endpoints::displayFileContent);
     registerHandler("/pass",           Endpoints::pass);
     
