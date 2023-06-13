@@ -104,7 +104,8 @@ namespace WebUI {
 
       // These show up in the reverse order listed below
       addButton({"Request Reboot", "/dev/reboot", "w3-pale-red", "Request reboot?"});
-      addButton({"File System", "/fslist", nullptr, nullptr});
+      addButton({"View File System", "/fslist", nullptr, nullptr});
+      addButton({"Download File System", "/tar", "w3-pale-yellow", nullptr});
 
       registerHandler("/dev",                 displayDevPage);
       registerHandler("/dev/reboot",          reboot);
