@@ -69,16 +69,16 @@ private:
     header.checksum[sizeof(header.checksum)-1] = ' ';
   }
 
-  void addFile(String& filename, std::function< void(Print&) > const& writer, size_t size) {
+  void addFile(String& filename, std::function< void(void) > const& writeFileContent, size_t size) {
     TarHeader header;
     fillHeader(header, filename, size);
 
     _out.write(&header.name[0], sizeof(header));
 
-    writer(_out);
+    writeFileContent();
 
-    size_t padding = (512 - (size % 512)) % 512;
-    for (int i = 0; i < padding; i++) _out.write(0);
+    uint16_t padding = (512 - (size % 512)) % 512;
+    for (uint16_t i = 0; i < padding; i++) _out.write(0);
   }
 
   inline unsigned long computeChecksum(TarHeader& header){
@@ -86,7 +86,7 @@ private:
 
     // Pretend the checksum field was full of spaces
     unsigned sum = sizeof(header.checksum) * ((unsigned)' ');
-    for (int i = 0; i < sizeof(header); i++) sum += buffer[i];
+    for (uint16_t i = 0; i < sizeof(header); i++) sum += buffer[i];
     return sum;
   }
 
@@ -141,8 +141,8 @@ public:
 
       size_t size = inputFile.size();
       Log.trace("streamTarFile: Adding %s", filePath.c_str());
-      auto writeFunc = [this, &inputFile](Print& outputStream) { streamFileContent(inputFile); };
-      addFile(filePath, writeFunc, size);
+      auto writeFileContent = [this, &inputFile](void) { streamFileContent(inputFile); };
+      addFile(filePath, writeFileContent, size);
       inputFile.close();
     }
     delete de;
