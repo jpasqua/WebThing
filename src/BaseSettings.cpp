@@ -54,7 +54,6 @@ BaseSettings::BaseSettings() { }
 
 void BaseSettings::init(const String& _filePath) {
   filePath = _filePath;
-  Log.verbose(F("settings file path = %s"), filePath.c_str());
 }
 
 bool BaseSettings::clear() {
@@ -72,7 +71,8 @@ bool BaseSettings::read() {
 
   size_t size = settingsFile.size();
   if (size > maxFileSize) {
-    Log.error(F("Settings file size is too large (%d), using default values"), size);
+    Log.error(
+      F("%s: size is too large (%d), using default values"), filePath.c_str(), size);
     return false;
   }
 
@@ -83,21 +83,25 @@ bool BaseSettings::read() {
   DynamicJsonDocument doc(maxFileSize);
   auto error = deserializeJson(doc, buf.get());
   if (error) {
-    Log.warning(F("Failed to parse settings file, using default values: %s"), error.c_str());
+    Log.warning(
+      F("Failed to parse %s, using default values: %s"), filePath.c_str(), error.c_str());
     return false;
   }
 
   uint32_t versionFound = doc["version"];
   if (versionFound != version) {
-    Log.warning(F("Settings version mismatch. Expected %d, found %d"), version, versionFound);
+    Log.warning(
+      F("Settings version mismatch in %s. Expected %d, found %d"),
+      filePath.c_str(), version, versionFound);
     Log.warning(F("Writing default setting values"));
     write();
     return true;
   }
 
   fromJSON(doc);
-
-  Log.trace(F("Settings successfully read"));
+  doc.shrinkToFit();
+  
+  Log.trace(F("%s: Settings successfully read"), filePath.c_str());
   return true;
 }
 
