@@ -62,8 +62,22 @@ namespace WebUI {
   namespace Internal {
     String EmptyString = "";
     String uploadPath = "";
-
+    std::map<String, std::function<void(void)>> handlers;
     std::function<void(bool)> busyCallback = nullptr; 
+
+    void handleNotFound() {
+      Log.verbose("WebUI::handleNotFound: URI = %s", server->uri().c_str());
+      redirectHome();
+    }
+
+    void indirectHandler() {
+      auto handler = handlers.find(server->uri());
+      if (handler == handlers.end()) {
+        handleNotFound();
+        return;
+      }
+      handler->second();
+    }
 
     bool authentication() {
       if (WebThing::settings.useBasicAuth              &&
@@ -120,11 +134,6 @@ namespace WebUI {
       String target = "'" + String(selectedVal) + "'";  // e.g. '7'
       theOptions.replace(target, target + " selected");
       sendContent(theOptions);
-    }
-
-    void handleNotFound() {
-      Log.verbose("WebUI::handleNotFound: URI = %s", server->uri().c_str());
-      redirectHome();
     }
   }
   // ----- END: WebUI::Internal
@@ -395,6 +404,7 @@ namespace WebUI {
 
       size_t write(uint8_t data) {
         server->sendContent(reinterpret_cast<const char*>(&data), 1);
+        return 1;
       }
 
       size_t write(const uint8_t *buffer, size_t size) {
@@ -512,6 +522,9 @@ namespace WebUI {
     server = new WebServer(WebThing::settings.webServerPort);
     templateHandler = new ESPTemplateProcessor(server);
 
+    // server->onNotFound(Internal::handleNotFound);
+    server->onNotFound(Internal::indirectHandler);
+
     registerHandler("/",               Pages::displayHomePage);
     registerHandler("/config",         Pages::displayConfig);
     registerHandler("/advSettings",    Pages::displayAdvSettings);
@@ -531,7 +544,6 @@ namespace WebUI {
     registerHandler("/content",        Endpoints::displayFileContent);
     registerHandler("/pass",           Endpoints::pass);
     
-    server->onNotFound(Internal::handleNotFound);
 
     server->on( // Handle file uploads
       "/upload", HTTP_POST, Endpoints::completeUpload, Endpoints::handleUpload);
@@ -555,27 +567,11 @@ namespace WebUI {
   void addAppMenuItems(const __FlashStringHelper* app) { appMenuItems = app; }
   void addDevMenuItems(const __FlashStringHelper* dev) { devMenuItems = dev; }
 
-
-  std::map<String, std::function<void(void)>> handlers;
-
-  using Handler = std::function<void(void)>;
-
-  void indirectHandler() {
-    auto handler = handlers.find(server->uri());
-    if (handler == handlers.end()) {
-      Internal::handleNotFound();
-      return;
-    }
-    handler->second();
-  }
-
-  void registerHandler(const String& path, Handler handler) {
-    if (handlers.find(path) == handlers.end()) {
-      server->on(path, indirectHandler);
-    } else {
+  void registerHandler(const String& path, std::function<void(void)> handler) {
+    if (Internal::handlers.find(path) != Internal::handlers.end()) {
       Log.verbose("Replacing URL handler for %s", path.c_str());
     }
-    handlers[path] = handler;
+    Internal::handlers[path] = handler;
   }
 
   void registerStatic(const char* uri, const char* filePath) {
