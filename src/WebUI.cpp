@@ -400,7 +400,7 @@ namespace WebUI {
 
     class ServerStream : public Print {
     public:
-      ServerStream(ESP8266WebServer* theServer) { server = theServer; }
+      ServerStream(WebServer* theServer) { server = theServer; }
 
       size_t write(uint8_t data) {
         server->sendContent(reinterpret_cast<const char*>(&data), 1);
@@ -412,7 +412,7 @@ namespace WebUI {
         return size;
       }
     private:
-      ESP8266WebServer* server;
+      WebServer* server;
     };
 
     void handleTar() {
