@@ -78,7 +78,7 @@ private:
     writeFileContent();
 
     uint16_t padding = (512 - (size % 512)) % 512;
-    for (uint16_t i = 0; i < padding; i++) _out.write(0);
+    for (uint16_t i = 0; i < padding; i++) _out.write((uint8_t)0);
   }
 
   inline unsigned long computeChecksum(TarHeader& header){
@@ -117,7 +117,11 @@ private:
 public:
   TarWriter(Print& outputStream): _out(outputStream) {}
 
-  ~TarWriter() { _out.flush(); }
+  ~TarWriter() {
+  #if !defined(ESP32)
+    _out.flush(); // TO DO: Check if newer versions added flush for backwards compatibility
+  #endif
+  }
 
   void streamTarFile(const String& directoryPath) {
     Log.verbose("streamTarFile: Creating tar stream of %s", directoryPath.c_str());
@@ -146,7 +150,9 @@ public:
       inputFile.close();
     }
     delete de;
-    _out.flush();
+    #if !defined(ESP32)
+      _out.flush(); // TO DO: Check if newer versions added flush for backwards compatibility
+    #endif
   }
 
 
