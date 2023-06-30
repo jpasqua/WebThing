@@ -18,15 +18,15 @@ namespace WeatherUtils {
 
 
     #if defined(DHT22_READINGS)
-      DHT22Sensor* dht22 = new DHT22();
+      DHT22Sensor* dht22 = new DHT22Sensor();
       dht22->begin(DHT22_PIN);
-      dht->includeReadingTypes(DHT22_READINGS);
+      dht22->includeReadingTypes(DHT22_READINGS);
       mgr.addSensor(dht22);
     #endif  // DHT22_READINGS
 
 
     #if defined(DS18B20_READINGS)
-      DS18B20Sensor* ds18b20 = new DS18B20();
+      DS18B20Sensor* ds18b20 = new DS18B20Sensor();
       ds18b20->begin(DS18B20_PIN);
       ds18b20->includeReadingTypes(DS18B20_READINGS);
       mgr.addSensor(ds18b20);
