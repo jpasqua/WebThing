@@ -121,6 +121,7 @@ private:
 
 
   // ----- Constants -----
+  static constexpr uint32_t MaxReadRetries = 50;
   static const uint32_t ColorForState[];
 
   // ----- Constructors & Destructor -----
@@ -139,6 +140,7 @@ private:
   PMS5003* aqi;
   State state;
   uint32_t enteredStateAt;
+  uint32_t nRetries;
   Indicator* _indicator;
   AQIReadings data;
 

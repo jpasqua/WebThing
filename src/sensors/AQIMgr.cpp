@@ -118,9 +118,16 @@ void AQIMgr::enterState(State newState) {
   if (state == waking) {
     Log.verbose("AQIMgr: Waking device");
     aqi->wakeUp();
+    nRetries = 0;
   } else if (state == asleep) {
     Log.verbose("AQIMgr: Putting device to sleep");
     aqi->sleep();
+  } else if (state == retrying) {
+    nRetries++;
+    if (nRetries > MaxReadRetries) {
+      Log.warning("AQIMgr: Giving up after %d retries", MaxReadRetries);
+      enterState(asleep);
+    }
   }
 }
 
